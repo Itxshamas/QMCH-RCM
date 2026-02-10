@@ -1,0 +1,35 @@
+@page "/admin/roles/list"
+@page "/admin/roles/list/create"
+@inject IUserService UserService
+@rendermode InteractiveServer
+
+<PageTitle>Roles - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left"><h1>Roles & Privileges</h1><p>Manage system roles and permissions</p></div>
+    <div class="page-header-actions"><button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Add Role</button></div>
+</div>
+
+<DataGrid TItem="RoleItem" Items="roles" Title="Roles" IsLoading="isLoading">
+    <HeaderTemplate><th>Role Name</th><th>Users</th><th>Status</th><th style="width: 100px;">Actions</th></HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><strong>@item.Name</strong></td>
+        <td>@item.UserCount</td>
+        <td><span class="badge badge-success">Active</span></td>
+        <td><button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i class="fa fa-trash"></i></button></td>
+    </RowTemplate>
+</DataGrid>
+
+<ModalDialog @bind-IsVisible="showModal" Title="Add Role">
+    <div class="form-group"><label class="form-label">Role Name *</label><input type="text" class="form-control" @bind="newRoleName" /></div>
+    <button class="btn btn-primary" @onclick="Save"><i class="fa fa-save"></i> Save</button>
+</ModalDialog>
+
+@code {
+    private List<RoleItem> roles = new(); private bool isLoading = true; private bool showModal; private string newRoleName = "";
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData() { isLoading = true; roles = await UserService.GetRolesAsync(); isLoading = false; }
+    private async Task Save() { if (!string.IsNullOrWhiteSpace(newRoleName)) { await UserService.CreateRoleAsync(newRoleName); newRoleName = ""; showModal = false; await LoadData(); } }
+    private async Task Delete(string id) { await UserService.DeleteRoleAsync(id); await LoadData(); }
+    public class RoleItem { public string Id { get; set; } = ""; public string Name { get; set; } = ""; public int UserCount { get; set; } }
+}

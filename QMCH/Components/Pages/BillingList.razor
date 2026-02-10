@@ -1,0 +1,64 @@
+@page "/timesheet/billing/list"
+@inject ITimesheetService TimesheetService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Billing - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Billing</h1>
+        <p>Client billing and invoices</p>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-primary"
+            @onclick='() => Navigation.NavigateTo("/timesheet/billing/list/create")'><i class="fa fa-plus"></i> Create
+            Billing</button></div>
+</div>
+
+<DataGrid TItem="TimesheetBilling" Items="@items" Title="Billing Records" IsLoading="@isLoading">
+    <HeaderTemplate>
+        <th>Client</th>
+        <th>Invoice #</th>
+        <th>Period</th>
+        <th>Hours</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th style="width: 120px;">Actions</th>
+    </HeaderTemplate>
+    <RowTemplate Context="billingItem">
+        <td><strong>@billingItem.ClientName</strong></td>
+        <td>@billingItem.InvoiceNumber</td>
+        <td>@billingItem.PeriodStart.ToString("MMM dd") - @billingItem.PeriodEnd.ToString("MMM dd")</td>
+        <td>@billingItem.TotalHours.ToString("F1")</td>
+        <td><strong>@billingItem.TotalAmount.ToString("C")</strong></td>
+        <td><span class="badge @GetBadge(billingItem.Status)">@billingItem.Status</span></td>
+        <td>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-outline btn-sm"
+                    @onclick='() => Navigation.NavigateTo($"/timesheet/billing/list/create?id={billingItem.Id}")'><i
+                        class="fa fa-edit"></i></button>
+                <button class="btn btn-danger btn-sm" @onclick="() => Delete(billingItem.Id)"><i
+                        class="fa fa-trash"></i></button>
+            </div>
+        </td>
+    </RowTemplate>
+</DataGrid>
+
+@code {
+    private List<TimesheetBilling> items = new(); private bool isLoading = true;
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData()
+    {
+        isLoading = true; items = await TimesheetService.GetBillingsAsync(); isLoading = false;
+    }
+    private async Task Delete(int id) { await TimesheetService.DeleteBillingAsync(id); await LoadData(); }
+    private string GetBadge(string s) => s switch
+    {
+        "Paid" => "badge-success",
+        "Pending" => "badge-warning",
+        "Overdue" =>
+    "badge-danger",
+        "Submitted" => "badge-info",
+        _ => "badge-secondary"
+    };
+}

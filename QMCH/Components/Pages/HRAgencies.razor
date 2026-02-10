@@ -1,0 +1,51 @@
+@page "/hr/agency/list"
+@inject IHRService HRService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>HR Agencies - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>HR Agencies</h1>
+        <p>Staffing and recruitment agencies</p>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-primary"
+            @onclick='() => Navigation.NavigateTo("/hr/agency/list/create")'><i class="fa fa-plus"></i> Add
+            Agency</button></div>
+</div>
+
+<DataGrid TItem="HRAgency" Items="items" Title="HR Agencies" IsLoading="isLoading">
+    <HeaderTemplate>
+        <th>Name</th>
+        <th>Contact Person</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Status</th>
+        <th style="width: 120px;">Actions</th>
+    </HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><strong>@item.Name</strong></td>
+        <td>@item.ContactPerson</td>
+        <td>@item.Email</td>
+        <td>@item.Phone</td>
+        <td><span class="badge @(item.IsActive ? "badge-success" : "badge-secondary")">@(item.IsActive ? "Active" :
+                "Inactive")</span></td>
+        <td>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-outline btn-sm"
+                    @onclick='() => Navigation.NavigateTo($"/hr/agency/list/create?id={item.Id}")'><i
+                        class="fa fa-edit"></i></button>
+                <button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i
+                        class="fa fa-trash"></i></button>
+            </div>
+        </td>
+    </RowTemplate>
+</DataGrid>
+
+@code {
+    private List<HRAgency> items = new(); private bool isLoading = true;
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData() { isLoading = true; items = await HRService.GetAgenciesAsync(); isLoading = false; }
+    private async Task Delete(int id) { await HRService.DeleteAgencyAsync(id); await LoadData(); }
+}

@@ -1,0 +1,50 @@
+@page "/training/session/list"
+@inject IEmployeeService EmployeeService
+@rendermode InteractiveServer
+
+<PageTitle>Training Sessions - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left"><h1>Training Sessions</h1><p>Manage employee training and certification sessions</p></div>
+    <div class="page-header-actions"><button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Create Session</button></div>
+</div>
+
+<DataGrid TItem="TrainingSession" Items="items" Title="Training Sessions" IsLoading="isLoading">
+    <HeaderTemplate><th>Title</th><th>Trainer</th><th>Date</th><th>Duration</th><th>Attendees</th><th>Status</th><th style="width: 100px;">Actions</th></HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><strong>@item.Title</strong></td>
+        <td>@item.TrainerName</td>
+        <td>@item.SessionDate.ToString("MMM dd, yyyy")</td>
+        <td>@item.DurationHours hrs</td>
+        <td>@item.MaxAttendees</td>
+        <td><span class="badge @(item.Status == "Completed" ? "badge-success" : item.Status == "Scheduled" ? "badge-info" : "badge-warning")">@item.Status</span></td>
+        <td><button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i class="fa fa-trash"></i></button></td>
+    </RowTemplate>
+</DataGrid>
+
+<ModalDialog @bind-IsVisible="showModal" Title="Create Training Session" Size="lg">
+    <EditForm Model="newItem" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="form-group"><label class="form-label">Title *</label><InputText @bind-Value="newItem.Title" class="form-control" /></div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Trainer</label><InputText @bind-Value="newItem.TrainerName" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Location</label><InputText @bind-Value="newItem.Location" class="form-control" /></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Date</label><InputDate @bind-Value="newItem.SessionDate" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Duration (hrs)</label><InputNumber @bind-Value="newItem.DurationHours" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Max Attendees</label><InputNumber @bind-Value="newItem.MaxAttendees" class="form-control" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Description</label><InputTextArea @bind-Value="newItem.Description" class="form-control" rows="3" /></div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+    </EditForm>
+</ModalDialog>
+
+@code {
+    private List<TrainingSession> items = new(); private bool isLoading = true; private bool showModal;
+    private TrainingSession newItem = new() { SessionDate = DateTime.Today.AddDays(7), Status = "Scheduled", DurationHours = 2, MaxAttendees = 20 };
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData() { isLoading = true; items = await EmployeeService.GetTrainingSessionsAsync(); isLoading = false; }
+    private async Task Save() { await EmployeeService.CreateTrainingSessionAsync(newItem); newItem = new() { SessionDate = DateTime.Today.AddDays(7), Status = "Scheduled", DurationHours = 2, MaxAttendees = 20 }; showModal = false; await LoadData(); }
+    private async Task Delete(int id) { await EmployeeService.DeleteTrainingSessionAsync(id); await LoadData(); }
+}

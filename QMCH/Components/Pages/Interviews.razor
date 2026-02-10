@@ -1,0 +1,54 @@
+@page "/hr/aquisition/interview/schedule/list"
+@page "/hr/aquisition/interview/schedule/list/create"
+@inject IHRService HRService
+@rendermode InteractiveServer
+
+<PageTitle>Interviews - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left"><h1>Interview Schedule</h1><p>Manage interview appointments</p></div>
+    <div class="page-header-actions"><button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Schedule Interview</button></div>
+</div>
+
+<DataGrid TItem="Interview" Items="items" Title="Interviews" IsLoading="isLoading">
+    <HeaderTemplate><th>Applicant</th><th>Position</th><th>Interviewer</th><th>Date & Time</th><th>Type</th><th>Status</th><th style="width: 100px;">Actions</th></HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><strong>@item.ApplicantName</strong></td>
+        <td>@item.Position</td>
+        <td>@item.InterviewerName</td>
+        <td>@item.ScheduledDateTime.ToString("MMM dd, yyyy hh:mm tt")</td>
+        <td><span class="badge badge-info">@item.InterviewType</span></td>
+        <td><span class="badge @GetBadge(item.Status)">@item.Status</span></td>
+        <td><button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i class="fa fa-trash"></i></button></td>
+    </RowTemplate>
+</DataGrid>
+
+<ModalDialog @bind-IsVisible="showModal" Title="Schedule Interview" Size="lg">
+    <EditForm Model="newItem" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Applicant Name *</label><InputText @bind-Value="newItem.ApplicantName" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Position *</label><InputText @bind-Value="newItem.Position" class="form-control" /></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Interviewer</label><InputText @bind-Value="newItem.InterviewerName" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Date & Time</label><InputDate @bind-Value="newItem.ScheduledDateTime" class="form-control" /></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Type</label><InputSelect @bind-Value="newItem.InterviewType" class="form-control"><option>Phone Screen</option><option>In Person</option><option>Video</option><option>Panel</option></InputSelect></div>
+            <div class="form-group"><label class="form-label">Location</label><InputText @bind-Value="newItem.Location" class="form-control" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><InputTextArea @bind-Value="newItem.Notes" class="form-control" rows="2" /></div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+    </EditForm>
+</ModalDialog>
+
+@code {
+    private List<Interview> items = new(); private bool isLoading = true; private bool showModal;
+    private Interview newItem = new() { ScheduledDateTime = DateTime.Now.AddDays(1), InterviewType = "Phone Screen", Status = "Scheduled" };
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData() { isLoading = true; items = await HRService.GetInterviewsAsync(); isLoading = false; }
+    private async Task Save() { await HRService.CreateInterviewAsync(newItem); newItem = new() { ScheduledDateTime = DateTime.Now.AddDays(1), InterviewType = "Phone Screen", Status = "Scheduled" }; showModal = false; await LoadData(); }
+    private async Task Delete(int id) { await HRService.DeleteInterviewAsync(id); await LoadData(); }
+    private string GetBadge(string s) => s switch { "Completed" => "badge-success", "Cancelled" => "badge-danger", "Scheduled" => "badge-info", _ => "badge-secondary" };
+}

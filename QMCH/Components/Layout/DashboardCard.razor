@@ -1,0 +1,42 @@
+
+<div class="dash-card" @onclick="OnClick">
+
+    <div class="dash-card-icon @ColorClass">
+
+        @* If Image is provided, show image *@
+        @if (!string.IsNullOrEmpty(Image))
+        {
+            <img src="@Image" alt="@Label" class="dash-card-img" />
+        }
+        else
+        {
+            <i class="@Icon"></i>
+        }
+
+    </div>
+
+    <div class="dash-card-value">@Value</div>
+    <div class="dash-card-label">@Label</div>
+
+    @if (!string.IsNullOrEmpty(Trend))
+    {
+        <div class="dash-card-trend @TrendClass">
+            <i class="fa @TrendIcon"></i>
+            @Trend
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Icon { get; set; } = "fa fa-chart-bar";
+    [Parameter] public string? Image { get; set; }   
+    [Parameter] public string Value { get; set; } = "0";
+    [Parameter] public string Label { get; set; } = "Metric";
+    [Parameter] public string ColorClass { get; set; } = "blue";
+    [Parameter] public string? Trend { get; set; }
+    [Parameter] public bool TrendUp { get; set; } = true;
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    private string TrendClass => TrendUp ? "up" : "down";
+    private string TrendIcon => TrendUp ? "fa-arrow-up" : "fa-arrow-down";
+}

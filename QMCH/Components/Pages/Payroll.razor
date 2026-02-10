@@ -1,0 +1,64 @@
+@page "/timesheet/payroll/list"
+@inject ITimesheetService TimesheetService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Payroll - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Payroll Timesheets</h1>
+        <p>Employee payroll management</p>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-primary"
+            @onclick='() => Navigation.NavigateTo("/timesheet/payroll/list/create")'><i class="fa fa-plus"></i> Create
+            Payroll</button></div>
+</div>
+
+<DataGrid TItem="TimesheetPayroll" Items="items" Title="Payroll Records" IsLoading="isLoading">
+    <HeaderTemplate>
+        <th>Employee</th>
+        <th>Period</th>
+        <th>Hours</th>
+        <th>Rate</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th style="width: 120px;">Actions</th>
+    </HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><strong>@item.EmployeeName</strong></td>
+        <td>@item.PeriodStart.ToString("MMM dd") - @item.PeriodEnd.ToString("MMM dd, yyyy")</td>
+        <td>@item.TotalHours.ToString("F1")</td>
+        <td>@item.PayRate.ToString("C")</td>
+        <td><strong>@item.TotalAmount.ToString("C")</strong></td>
+        <td><span class="badge @GetBadge(item.Status)">@item.Status</span></td>
+        <td>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-outline btn-sm"
+                    @onclick='() => Navigation.NavigateTo($"/timesheet/payroll/list/create?id={item.Id}")'><i
+                        class="fa fa-edit"></i></button>
+                <button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i
+                        class="fa fa-trash"></i></button>
+            </div>
+        </td>
+    </RowTemplate>
+</DataGrid>
+
+@code {
+    private List<TimesheetPayroll> items = new(); private bool isLoading = true;
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData()
+    {
+        isLoading = true; items = await TimesheetService.GetPayrollsAsync(); isLoading = false;
+    }
+    private async Task Delete(int id) { await TimesheetService.DeletePayrollAsync(id); await LoadData(); }
+    private string GetBadge(string s) => s switch
+    {
+        "Approved" => "badge-success",
+        "Pending" => "badge-warning",
+        "Rejected"
+    => "badge-danger",
+        "Paid" => "badge-primary",
+        _ => "badge-secondary"
+    };
+}

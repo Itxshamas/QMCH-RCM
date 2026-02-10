@@ -1,0 +1,112 @@
+@page "/"
+@inject IClientService ClientService 
+@inject IEmployeeService EmployeeService 
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Dashboard - QHMC</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Dashboard</h1>
+        <p>Welcome back! Here's an overview of your healthcare operations.</p>
+    </div>
+    <div class="page-header-actions"> <span class="badge badge-info">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span> </div>
+</div>
+
+@* Dashboard Cards Grid *@
+<div class="dashboard-grid">
+
+    <DashboardCard Image="images/home/dashboard.jpg"
+                   Label="Dashboard"
+                   OnClick="@(() => Nav("/dashboard/analytic/view"))" />
+
+    <DashboardCard Image="images/home/client-list.jpg"
+                   Label="Clients"
+                   OnClick="@(() => Nav("/client/list"))" />
+
+    <DashboardCard Image="images/home/client-type.jpg"
+                   Label="Client Types"
+                   OnClick="@(() => Nav("/client/types/list"))" />
+
+    <DashboardCard Image="images/home/nurse-list.jpg"
+                   Label="Employees"
+                   OnClick="@(() => Nav("/caregiver/list"))" />
+
+    <DashboardCard Image="images/home/clasification.jpg"
+                   Label="Classifications"
+                   OnClick="@(() => Nav("/classification/list"))" />
+
+    <DashboardCard Image="images/home/service_type.jpg"
+                   Label="Service Types"
+                   OnClick="@(() => Nav("/service/type/list"))" />
+
+    <DashboardCard Image="images/home/job_order.jpg"
+                   Label="Job Orders"
+                   OnClick="@(() => Nav("/job/order/list"))" />
+
+    <DashboardCard Image="images/home/hr_agencies.jpg"
+                   Label="HR Agencies"
+                   OnClick="@(() => Nav("/hr/agency/list"))" />
+
+    <DashboardCard Image="images/home/applicant_list.jpg"
+                   Label="Applicant List"
+                   OnClick="@(() => Nav("/applicant/list"))" />
+
+    <DashboardCard Image="images/home/interview.jpg"
+                   Label="Interviews"
+                   OnClick="@(() => Nav("/interview/list"))" />
+
+    <DashboardCard Image="images/home/medical-appointment.jpg"
+                   Label="M.Appointment"
+                   OnClick="@(() => Nav("/appointment/list"))" />
+
+    <DashboardCard Image="images/home/leave_manager.jpg"
+                   Label="Leave Manager"
+                   OnClick="@(() => Nav("/leave/grid/list"))" />
+
+    <DashboardCard Image="images/home/nurse_search.jpg"
+                   Label="Nurse Search"
+                   OnClick="@(() => Nav("/caregiver/search/list"))" />
+
+    <DashboardCard Image="images/home/schedule.jpg"
+                   Label="Schedule"
+                   OnClick="@(() => Nav("/schedule/calendar"))" />
+
+    <DashboardCard Image="images/home/time_sheet.jpg"
+                   Label="Payroll Timesheet"
+                   OnClick="@(() => Nav("/timesheet/payroll/list"))" />
+
+    <DashboardCard Image="images/home/time_sheet-one.jpg"
+                   Label="Billing Timesheet"
+                   OnClick="@(() => Nav("/timesheet/billing/list"))" />
+
+    <DashboardCard Image="images/home/attendance.jpg"
+                   Label="Nurse Attendance"
+                   OnClick="@(() => Nav("/attendance/list"))" />
+
+    <DashboardCard Image="images/home/hr-report.jpg"
+                   Label="HR Reports"
+                   OnClick="@(() => Nav("/reports/hr/grid"))" />
+
+    <DashboardCard Image="images/home/operation_report.jpg"
+                   Label="Oper. Reports"
+                   OnClick="@(() => Nav("/reports/operations"))" />
+
+    <DashboardCard Image="images/home/gps.jpg"
+                   Label="GPS Location"
+                   OnClick="@(() => Nav("/gps/location"))" />
+
+    <DashboardCard Image="images/home/employee_login.jpg"
+                   Label="Employee Login"
+                   OnClick="@(() => Nav("/employee/login"))" />
+
+    <DashboardCard Image="images/home/tranining.jpg"
+                   Label="Training"
+                   OnClick="@(() => Nav("/training/session/list"))" />
+
+    <DashboardCard Image="images/home/employee_role.jpg"
+                   Label="Employee Roles"
+                   OnClick="@(() => Nav("/admin/roles/list"))" />
+
+</div>

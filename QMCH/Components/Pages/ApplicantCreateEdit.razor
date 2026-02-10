@@ -1,0 +1,101 @@
+@page "/hr/aquisition/applicants/list/create"
+@inject IHRService HRService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>@(isEdit ? "Edit" : "Add") Applicant - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>@(isEdit ? "Edit Applicant" : "Add New Applicant")</h1>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-outline"
+            @onclick='() => Navigation.NavigateTo("/hr/aquisition/applicants/list")'><i class="fa fa-arrow-left"></i>
+            Back</button></div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fa fa-user-plus" style="margin-right: 8px;"></i> Applicant Information</h3>
+    </div>
+    <div class="card-body">
+        <EditForm Model="@model" OnValidSubmit="@Save">
+            <DataAnnotationsValidator />
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">First Name *</label>
+                    <InputText @bind-Value="model.FirstName" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Last Name *</label>
+                    <InputText @bind-Value="model.LastName" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Email</label>
+                    <InputText @bind-Value="model.Email" class="form-control" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Phone</label>
+                    <InputText @bind-Value="model.Phone" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Position Applied *</label>
+                    <InputText @bind-Value="model.PositionApplied" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Applied Date</label>
+                    <InputDate @bind-Value="model.AppliedDate" class="form-control" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Source</label>
+                    <InputSelect @bind-Value="model.Source" class="form-control">
+                        <option value="">Select</option>
+                        <option>Job Board</option>
+                        <option>Referral</option>
+                        <option>Agency</option>
+                        <option>Website</option>
+                        <option>Walk-in</option>
+                    </InputSelect>
+                </div>
+                <div class="form-group"><label class="form-label">Status</label>
+                    <InputSelect @bind-Value="model.Status" class="form-control">
+                        <option>New</option>
+                        <option>Screening</option>
+                        <option>Interview</option>
+                        <option>Offer</option>
+                        <option>Hired</option>
+                        <option>Rejected</option>
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="form-group"><label class="form-label">Resume URL</label>
+                <InputText @bind-Value="model.ResumeUrl" class="form-control" />
+            </div>
+            <div class="form-group"><label class="form-label">Notes</label>
+                <InputTextArea @bind-Value="model.Notes" class="form-control" rows="3" />
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> @(isEdit ? "Update" :
+                    "Create")</button>
+                <button type="button" class="btn btn-outline"
+                    @onclick='() => Navigation.NavigateTo("/hr/aquisition/applicants/list")'>Cancel</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public int? Id { get; set; }
+    private Applicant model = new() { AppliedDate = DateTime.Today, Status = "New" }; private bool isEdit;
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            var e = await
+            HRService.GetApplicantByIdAsync(Id.Value); if (e != null) { model = e; isEdit = true; }
+        }
+    }
+    private async Task Save()
+    {
+        if (isEdit) await HRService.UpdateApplicantAsync(model);
+        else await
+        HRService.CreateApplicantAsync(model); Navigation.NavigateTo("/hr/aquisition/applicants/list");
+    }
+}

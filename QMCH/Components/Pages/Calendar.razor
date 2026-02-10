@@ -1,0 +1,107 @@
+@page "/schedule/calendar"
+@inject IScheduleService ScheduleService
+@rendermode InteractiveServer
+
+<PageTitle>Schedule Calendar - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left"><h1>Schedule Calendar</h1><p>Manage caregiver-client assignments and shifts</p></div>
+    <div class="page-header-actions">
+        <button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Add Schedule</button>
+    </div>
+</div>
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <div class="calendar-nav">
+            <button @onclick="PrevMonth"><i class="fa fa-chevron-left"></i></button>
+            <h3>@currentDate.ToString("MMMM yyyy")</h3>
+            <button @onclick="NextMonth"><i class="fa fa-chevron-right"></i></button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline btn-sm" @onclick="GoToToday">Today</button>
+        </div>
+    </div>
+
+    <div class="calendar-grid">
+        @foreach (var dayName in new[] { "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT" })
+        {
+            <div class="calendar-day-header">@dayName</div>
+        }
+
+        @foreach (var day in calendarDays)
+        {
+            <div class="calendar-day @(day.IsCurrentMonth ? "" : "other-month") @(day.Date == DateTime.Today ? "today" : "")"
+                 @onclick="() => SelectDay(day.Date)">
+                <div class="calendar-day-number">@day.Date.Day</div>
+                @foreach (var evt in GetEventsForDay(day.Date).Take(3))
+                {
+                    <div class="calendar-event @evt.ColorClass">@evt.Title</div>
+                }
+                @if (GetEventsForDay(day.Date).Count() > 3)
+                {
+                    <div style="font-size: 11px; color: var(--text-muted);">+@(GetEventsForDay(day.Date).Count() - 3) more</div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<ModalDialog @bind-IsVisible="showModal" Title="Add Schedule" Size="lg">
+    <EditForm Model="newItem" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Title *</label><InputText @bind-Value="newItem.Title" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Type</label><InputSelect @bind-Value="newItem.ScheduleType" class="form-control"><option>Shift</option><option>Visit</option><option>Meeting</option><option>Training</option></InputSelect></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Employee</label><InputText @bind-Value="newItem.EmployeeName" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Client</label><InputText @bind-Value="newItem.ClientName" class="form-control" /></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Start Date</label><InputDate @bind-Value="newItem.StartDate" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">End Date</label><InputDate @bind-Value="newItem.EndDate" class="form-control" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Location</label><InputText @bind-Value="newItem.Location" class="form-control" /></div>
+        <div class="form-group"><label class="form-label">Notes</label><InputTextArea @bind-Value="newItem.Notes" class="form-control" rows="2" /></div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+    </EditForm>
+</ModalDialog>
+
+@code {
+    private DateTime currentDate = DateTime.Today;
+    private List<CalendarDay> calendarDays = new();
+    private List<ScheduleItem> schedules = new();
+    private bool showModal;
+    private ScheduleItem newItem = new() { StartDate = DateTime.Today, EndDate = DateTime.Today, ScheduleType = "Shift", Status = "Scheduled" };
+
+    protected override async Task OnInitializedAsync() { await LoadSchedules(); GenerateCalendar(); }
+    private async Task LoadSchedules() { schedules = await ScheduleService.GetAllAsync(); }
+    private void PrevMonth() { currentDate = currentDate.AddMonths(-1); GenerateCalendar(); }
+    private void NextMonth() { currentDate = currentDate.AddMonths(1); GenerateCalendar(); }
+    private void GoToToday() { currentDate = DateTime.Today; GenerateCalendar(); }
+
+    private void GenerateCalendar()
+    {
+        calendarDays = new();
+        var firstDay = new DateTime(currentDate.Year, currentDate.Month, 1);
+        var startDate = firstDay.AddDays(-(int)firstDay.DayOfWeek);
+        for (int i = 0; i < 42; i++)
+        {
+            var d = startDate.AddDays(i);
+            calendarDays.Add(new CalendarDay { Date = d, IsCurrentMonth = d.Month == currentDate.Month });
+        }
+    }
+
+    private IEnumerable<(string Title, string ColorClass)> GetEventsForDay(DateTime date)
+    {
+        return schedules.Where(s => s.StartDate.Date <= date.Date && s.EndDate.Date >= date.Date)
+            .Select(s => (s.Title, ColorClass: s.ScheduleType switch { "Shift" => "blue", "Visit" => "green", "Meeting" => "orange", "Training" => "purple", _ => "blue" }));
+    }
+
+    private void SelectDay(DateTime date) { newItem.StartDate = date; newItem.EndDate = date; showModal = true; }
+
+    private async Task Save() { await ScheduleService.CreateAsync(newItem); newItem = new() { StartDate = DateTime.Today, EndDate = DateTime.Today, ScheduleType = "Shift", Status = "Scheduled" }; showModal = false; await LoadSchedules(); GenerateCalendar(); StateHasChanged(); }
+
+    private class CalendarDay { public DateTime Date { get; set; } public bool IsCurrentMonth { get; set; } }
+}

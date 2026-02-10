@@ -1,0 +1,55 @@
+@* ModalDialog.razor - Reusable modal dialog component *@
+
+@if (IsVisible)
+{
+    <div class="modal-overlay" @onclick="OnOverlayClick">
+        <div class="modal-dialog @SizeClass" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h3>@Title</h3>
+                <button class="modal-close" @onclick="Close">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                @ChildContent
+            </div>
+            @if (FooterContent != null)
+            {
+                <div class="modal-footer">
+                    @FooterContent
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public string Title { get; set; } = "Dialog";
+    [Parameter] public string Size { get; set; } = "default";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public bool CloseOnOverlay { get; set; } = true;
+
+    private string SizeClass => Size switch
+    {
+        "lg" => "modal-lg",
+        "xl" => "modal-xl",
+        _ => ""
+    };
+
+    private async Task Close()
+    {
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+        await OnClose.InvokeAsync();
+    }
+
+    private async Task OnOverlayClick()
+    {
+        if (CloseOnOverlay)
+            await Close();
+    }
+}

@@ -1,0 +1,53 @@
+@page "/caregiver/medical/schedule/list"
+@page "/caregiver/medical/schedule/list/create"
+@inject IEmployeeService EmployeeService
+@rendermode InteractiveServer
+
+<PageTitle>Medical Tracker - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left"><h1>Medical Tracker</h1><p>Employee medical exams & compliance tracking</p></div>
+    <div class="page-header-actions"><button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Add Medical Schedule</button></div>
+</div>
+
+<DataGrid TItem="MedicalSchedule" Items="items" Title="Medical Schedules" IsLoading="isLoading">
+    <HeaderTemplate><th>Employee</th><th>Exam Type</th><th>Provider</th><th>Scheduled</th><th>Status</th><th>Expiry</th><th style="width: 100px;">Actions</th></HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><strong>@item.EmployeeName</strong></td>
+        <td>@item.ExamType</td>
+        <td>@item.Provider</td>
+        <td>@(item.ScheduledDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
+        <td><span class="badge @GetStatusBadge(item.Status)">@item.Status</span></td>
+        <td>@(item.ExpirationDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
+        <td><button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i class="fa fa-trash"></i></button></td>
+    </RowTemplate>
+</DataGrid>
+
+<ModalDialog @bind-IsVisible="showModal" Title="Add Medical Schedule" Size="lg">
+    <EditForm Model="newItem" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Employee Name</label><InputText @bind-Value="newItem.EmployeeName" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Exam Type *</label><InputText @bind-Value="newItem.ExamType" class="form-control" /></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Provider</label><InputText @bind-Value="newItem.Provider" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Location</label><InputText @bind-Value="newItem.Location" class="form-control" /></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Scheduled Date</label><InputDate @bind-Value="newItem.ScheduledDate" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Expiration Date</label><InputDate @bind-Value="newItem.ExpirationDate" class="form-control" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><InputTextArea @bind-Value="newItem.Notes" class="form-control" rows="2" /></div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+    </EditForm>
+</ModalDialog>
+
+@code {
+    private List<MedicalSchedule> items = new(); private bool isLoading = true; private bool showModal; private MedicalSchedule newItem = new();
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData() { isLoading = true; items = await EmployeeService.GetMedicalSchedulesAsync(); isLoading = false; }
+    private async Task Save() { await EmployeeService.CreateMedicalScheduleAsync(newItem); newItem = new(); showModal = false; await LoadData(); }
+    private async Task Delete(int id) { await EmployeeService.DeleteMedicalScheduleAsync(id); await LoadData(); }
+    private string GetStatusBadge(string s) => s switch { "Completed" => "badge-success", "Expired" => "badge-danger", "Scheduled" => "badge-info", _ => "badge-secondary" };
+}

@@ -1,0 +1,43 @@
+@page "/caregiver/search/list"
+@inject IEmployeeService EmployeeService
+@rendermode InteractiveServer
+
+<PageTitle>Nurse Search - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left"><h1>Nurse Search</h1><p>Find qualified caregivers by skills, certifications, and availability</p></div>
+</div>
+
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Search</label><input type="text" class="form-control" placeholder="Name, skills, certifications..." @bind="searchTerm" @bind:event="oninput" /></div>
+            <div class="form-group"><label class="form-label">Classification</label>
+                <select class="form-control" @bind="classificationFilter">
+                    <option value="">All Classifications</option>
+                    @foreach (var c in classifications) { <option value="@c.Id">@c.Name</option> }
+                </select>
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;"><button class="btn btn-primary" @onclick="Search"><i class="fa fa-search"></i> Search</button></div>
+        </div>
+    </div>
+</div>
+
+<DataGrid TItem="Employee" Items="results" Title="Search Results" IsLoading="isLoading" ShowSearch="false">
+    <HeaderTemplate><th>Name</th><th>Email</th><th>Phone</th><th>Skills</th><th>Certifications</th><th>Status</th></HeaderTemplate>
+    <RowTemplate Context="emp">
+        <td><strong>@emp.FirstName @emp.LastName</strong></td>
+        <td>@emp.Email</td>
+        <td>@emp.Phone</td>
+        <td>@emp.Skills</td>
+        <td>@emp.Certifications</td>
+        <td><span class="badge badge-success">@emp.Status</span></td>
+    </RowTemplate>
+</DataGrid>
+
+@code {
+    private string searchTerm = ""; private int? classificationFilter; private bool isLoading;
+    private List<Employee> results = new(); private List<Classification> classifications = new();
+    protected override async Task OnInitializedAsync() { classifications = await EmployeeService.GetClassificationsAsync(); }
+    private async Task Search() { isLoading = true; results = await EmployeeService.SearchNursesAsync(searchTerm, classificationFilter); isLoading = false; }
+}

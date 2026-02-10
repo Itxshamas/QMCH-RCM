@@ -1,0 +1,38 @@
+@page "/hr/aquisition/applicants/list"
+@inject IHRService HRService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Applicants - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left"><h1>Applicants</h1><p>Manage job applicants and candidates</p></div>
+    <div class="page-header-actions"><button class="btn btn-primary" @onclick='() => Navigation.NavigateTo("/hr/aquisition/applicants/list/create")'><i class="fa fa-plus"></i> Add Applicant</button></div>
+</div>
+
+<DataGrid TItem="Applicant" Items="items" Title="Applicants" IsLoading="isLoading" OnSearchChanged="HandleSearch">
+    <HeaderTemplate><th>Name</th><th>Email</th><th>Phone</th><th>Position Applied</th><th>Status</th><th>Applied Date</th><th style="width: 120px;">Actions</th></HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><strong>@item.FirstName @item.LastName</strong></td>
+        <td>@item.Email</td>
+        <td>@item.Phone</td>
+        <td>@item.PositionApplied</td>
+        <td><span class="badge @GetStatusBadge(item.Status)">@item.Status</span></td>
+        <td>@item.AppliedDate.ToString("MMM dd, yyyy")</td>
+        <td>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-outline btn-sm" @onclick='() => Navigation.NavigateTo($"/hr/aquisition/applicants/list/create?id={item.Id}")'><i class="fa fa-edit"></i></button>
+                <button class="btn btn-danger btn-sm" @onclick='() => Delete(item.Id)'><i class="fa fa-trash"></i></button>
+            </div>
+        </td>
+    </RowTemplate>
+</DataGrid>
+
+@code {
+    private List<Applicant> allItems = new(); private IEnumerable<Applicant> items = Enumerable.Empty<Applicant>(); private bool isLoading = true;
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData() { isLoading = true; allItems = await HRService.GetApplicantsAsync(); items = allItems; isLoading = false; }
+    private async Task Delete(int id) { await HRService.DeleteApplicantAsync(id); await LoadData(); }
+    private Task HandleSearch(string t) { items = string.IsNullOrWhiteSpace(t) ? allItems : allItems.Where(x => $"{x.FirstName} {x.LastName}".Contains(t, StringComparison.OrdinalIgnoreCase)); return Task.CompletedTask; }
+    private string GetStatusBadge(string s) => s switch { "Hired" => "badge-success", "Rejected" => "badge-danger", "Interview" => "badge-warning", "Screening" => "badge-info", _ => "badge-secondary" };
+}

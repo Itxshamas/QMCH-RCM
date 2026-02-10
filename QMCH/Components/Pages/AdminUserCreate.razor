@@ -1,0 +1,88 @@
+@page "/admin/users/list/create"
+@inject IUserService UserService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Add User - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Add New User</h1>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-outline"
+            @onclick='() => Navigation.NavigateTo("/admin/users/list")'><i class="fa fa-arrow-left"></i> Back</button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fa fa-user-plus" style="margin-right: 8px;"></i> User Information</h3>
+    </div>
+    <div class="card-body">
+        <EditForm Model="model" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">First Name *</label>
+                    <InputText @bind-Value="model.FirstName" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Last Name *</label>
+                    <InputText @bind-Value="model.LastName" class="form-control" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Email *</label>
+                    <InputText @bind-Value="model.Email" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Password *</label>
+                    <InputText @bind-Value="model.Password" type="password" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group"><label class="form-label">Role</label>
+                <InputSelect @bind-Value="model.Role" class="form-control">
+                    <option>Admin</option>
+                    <option>Manager</option>
+                    <option>Supervisor</option>
+                    <option>Employee</option>
+                    <option>HR</option>
+                </InputSelect>
+            </div>
+            @if (errors.Any())
+            {
+                <div class="auth-error">@foreach (var e in errors)
+                    {
+                        <div>@e</div>
+                    }</div>
+            }
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Create User</button>
+                <button type="button" class="btn btn-outline"
+                    @onclick='() => Navigation.NavigateTo("/admin/users/list")'>Cancel</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private CreateUserModel model = new() { Role = "Employee" }; private List<string> errors = new();
+    private async Task Save()
+    {
+        errors = await UserService.CreateUserAsync(model.FirstName, model.LastName, model.Email,
+    model.Password, model.Role); if (!errors.Any()) Navigation.NavigateTo("/admin/users/list");
+    }
+    private class CreateUserModel
+    {
+        [System.ComponentModel.DataAnnotations.Required] public string FirstName { get; set; } = "";
+        [System.ComponentModel.DataAnnotations.Required] public string LastName { get; set; } = "";
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+        public string
+        Email
+        { get; set; } = "";
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MinLength(6)]
+        public string
+        Password
+        { get; set; } = "";
+        public string Role { get; set; } = "";
+    }
+}

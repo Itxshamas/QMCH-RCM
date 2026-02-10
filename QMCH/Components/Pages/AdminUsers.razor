@@ -1,0 +1,57 @@
+@page "/admin/users/list"
+@inject IUserService UserService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Users - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>User Management</h1>
+        <p>Manage system users and access</p>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-primary"
+            @onclick='() => Navigation.NavigateTo("/admin/users/list/create")'><i class="fa fa-plus"></i> Add
+            User</button></div>
+</div>
+
+<DataGrid TItem="UserListItem" Items="users" Title="Users" IsLoading="isLoading">
+    <HeaderTemplate>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Last Login</th>
+        <th>Status</th>
+        <th style="width: 120px;">Actions</th>
+    </HeaderTemplate>
+    <RowTemplate Context="user">
+        <td><strong>@user.FullName</strong></td>
+        <td>@user.Email</td>
+        <td><span class="badge badge-primary">@user.RoleName</span></td>
+        <td>@(user.LastLogin?.ToString("MMM dd, yyyy") ?? "Never")</td>
+        <td><span class="badge @(user.IsActive ? "badge-success" : "badge-secondary")">@(user.IsActive ? "Active" :
+                "Inactive")</span></td>
+        <td>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-outline btn-sm"><i class="fa fa-edit"></i></button>
+                <button class="btn btn-danger btn-sm" @onclick="() => Delete(user.Id)"><i
+                        class="fa fa-trash"></i></button>
+            </div>
+        </td>
+    </RowTemplate>
+</DataGrid>
+
+@code {
+    private List<UserListItem> users = new(); private bool isLoading = true;
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData() { isLoading = true; users = await UserService.GetUsersAsync(); isLoading = false; }
+    private async Task Delete(string id) { await UserService.DeleteUserAsync(id); await LoadData(); }
+
+    public class UserListItem
+    {
+        public string Id { get; set; } = ""; public string FullName { get; set; } = ""; public
+    string Email
+        { get; set; } = ""; public string RoleName { get; set; } = ""; public DateTime? LastLogin { get; set; }
+        public bool IsActive { get; set; }
+    }
+}

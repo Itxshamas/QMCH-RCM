@@ -1,0 +1,95 @@
+@page "/client/list"
+@inject IClientService ClientService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Clients - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Client List</h1>
+        <p>Manage all clients and their information</p>
+    </div>
+    <div class="page-header-actions">
+        <button class="btn btn-primary" @onclick="CreateNew">
+            <i class="fa fa-plus"></i> Add Client
+        </button>
+    </div>
+</div>
+
+<DataGrid TItem="Client" Items="clients" Title="Clients" IsLoading="isLoading"
+          EmptyMessage="No clients found. Click 'Add Client' to create one."
+          OnSearchChanged="HandleSearch">
+    <HeaderTemplate>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>City</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th style="width: 120px;">Actions</th>
+    </HeaderTemplate>
+    <RowTemplate Context="client">
+        <td><strong>@client.FirstName @client.LastName</strong></td>
+        <td>@client.Email</td>
+        <td>@client.Phone</td>
+        <td>@client.City</td>
+        <td>
+            <span class="badge @(client.Status == "Active" ? "badge-success" : "badge-secondary")">
+                @client.Status
+            </span>
+        </td>
+        <td>@client.CreatedAt.ToString("MMM dd, yyyy")</td>
+        <td>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-outline btn-sm" @onclick="() => Edit(client.Id)" title="Edit">
+                    <i class="fa fa-edit"></i>
+                </button>
+                <button class="btn btn-danger btn-sm" @onclick="() => Delete(client.Id)" title="Delete">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </div>
+        </td>
+    </RowTemplate>
+</DataGrid>
+
+@code {
+    private List<Client> allClients = new();
+    private IEnumerable<Client> clients = Enumerable.Empty<Client>();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        allClients = await ClientService.GetAllAsync();
+        clients = allClients;
+        isLoading = false;
+    }
+
+    private void CreateNew() => Navigation.NavigateTo("/client/list/create");
+
+    private void Edit(int id) => Navigation.NavigateTo($"/client/list/create?id={id}");
+
+    private async Task Delete(int id)
+    {
+        await ClientService.DeleteAsync(id);
+        await LoadData();
+    }
+
+    private Task HandleSearch(string term)
+    {
+        if (string.IsNullOrWhiteSpace(term))
+            clients = allClients;
+        else
+            clients = allClients.Where(c =>
+                c.FirstName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                c.LastName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
+                (c.Email ?? "").Contains(term, StringComparison.OrdinalIgnoreCase));
+        return Task.CompletedTask;
+    }
+}

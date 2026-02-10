@@ -1,0 +1,35 @@
+@page "/logout"
+@using Microsoft.AspNetCore.Identity
+@using QMCH.Models
+@inject SignInManager<User> SignInManager
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Signing Out...</PageTitle>
+
+<div class="auth-page">
+    <div class="auth-card" style="text-align: center;">
+        <div class="spinner-container">
+            <div class="spinner"></div>
+        </div>
+        <p style="margin-top: 16px; color: var(--text-secondary);">Signing you out...</p>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+
+    {
+
+        if (firstRender)
+
+        {
+
+            await SignInManager.SignOutAsync();
+
+            Navigation.NavigateTo("/signin", forceLoad: true);
+
+        }
+
+    }
+}

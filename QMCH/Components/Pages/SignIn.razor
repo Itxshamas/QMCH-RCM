@@ -1,0 +1,164 @@
+@page "/signin"
+@layout QMCH.Components.Layout.AuthLayout
+@using Microsoft.AspNetCore.Identity
+@using QMCH.Models
+@inject SignInManager<User> SignInManager
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Sign In - QHMCPro</PageTitle>
+
+<div class="auth-page">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <h2>QHMC<span>Pro</span></h2>
+            <p>Enterprise Healthcare ERP System</p>
+        </div>
+
+        @if (errors.Any())
+
+        {
+            <div class="auth-error">
+                @foreach (var error in errors)
+
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin" class="auth-form" FormName="login">
+            <DataAnnotationsValidator />
+
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <InputText @bind-Value="loginModel.Email" class="form-control" placeholder="admin@qhmcpro.com" />
+                <ValidationMessage For="() => loginModel.Email" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <InputText @bind-Value="loginModel.Password" type="password" class="form-control"
+                    placeholder="Enter your password" />
+                <ValidationMessage For="() => loginModel.Password" />
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; justify-content: space-between;">
+                <label
+                    style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary);">
+                    <InputCheckbox @bind-Value="loginModel.RememberMe" />
+                    Remember me
+                </label>
+                <a href="/forgot-password" style="font-size: 13px; color: var(--accent-dark); font-weight: 600;">Forgot
+                    Password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner" style="width: 18px; height: 18px; border-width: 2px;"></span>
+                }
+                else
+                {
+                    <i class="fa fa-sign-in-alt"></i>
+                    <span>Sign In</span>
+                }
+            </button>
+        </EditForm>
+
+        <div class="auth-footer">
+            <p>&copy; 2026 QHMCPro Healthcare ERP. All rights reserved.</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+
+    private LoginModel loginModel { get; set; } = new();
+
+
+
+    private List<string> errors = new();
+
+    private bool isLoading;
+
+
+
+    private async Task HandleLogin()
+
+    {
+
+        errors.Clear();
+
+        isLoading = true;
+
+
+
+        try
+
+        {
+
+            var result = await SignInManager.PasswordSignInAsync(loginModel.Email, loginModel.Password, loginModel.RememberMe,
+            lockoutOnFailure: false);
+
+            if (result.Succeeded)
+
+            {
+
+                Navigation.NavigateTo("/", forceLoad: true);
+
+            }
+
+            else
+
+            {
+
+                errors.Add("Invalid email or password. Please try again.");
+
+            }
+
+        }
+
+        catch (Exception ex)
+
+        {
+
+            errors.Add("An error occurred. Please try again.");
+
+        }
+
+        finally
+
+        {
+
+            isLoading = false;
+
+        }
+
+    }
+
+
+
+    public class LoginModel
+
+    {
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Email is required")]
+
+        [System.ComponentModel.DataAnnotations.EmailAddress]
+
+        public string Email { get; set; } = string.Empty;
+
+
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Password is required")]
+
+        public string Password { get; set; } = string.Empty;
+
+
+
+        public bool RememberMe { get; set; }
+
+    }
+}

@@ -1,0 +1,92 @@
+@page "/timesheet/payroll/list/create"
+@inject ITimesheetService TimesheetService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>@(isEdit ? "Edit" : "Create") Payroll - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>@(isEdit ? "Edit" : "Create") Payroll Record</h1>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-outline"
+            @onclick='() => Navigation.NavigateTo("/timesheet/payroll/list")'><i class="fa fa-arrow-left"></i>
+            Back</button></div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fa fa-money-bill-wave" style="margin-right: 8px;"></i> Payroll Details</h3>
+    </div>
+    <div class="card-body">
+        <EditForm Model="model" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Employee Name *</label>
+                    <InputText @bind-Value="model.EmployeeName" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Status</label>
+                    <InputSelect @bind-Value="model.Status" class="form-control">
+                        <option>Pending</option>
+                        <option>Approved</option>
+                        <option>Rejected</option>
+                        <option>Paid</option>
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Period Start</label>
+                    <InputDate @bind-Value="model.PeriodStart" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Period End</label>
+                    <InputDate @bind-Value="model.PeriodEnd" class="form-control" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Regular Hours</label>
+                    <InputNumber @bind-Value="model.RegularHours" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Overtime Hours</label>
+                    <InputNumber @bind-Value="model.OvertimeHours" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Pay Rate ($)</label>
+                    <InputNumber @bind-Value="model.PayRate" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group"><label class="form-label">Notes</label>
+                <InputTextArea @bind-Value="model.Notes" class="form-control" rows="2" />
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> @(isEdit ? "Update" :
+                    "Create")</button>
+                <button type="button" class="btn btn-outline"
+                    @onclick='() => Navigation.NavigateTo("/timesheet/payroll/list")'>Cancel</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public int? Id { get; set; }
+    private TimesheetPayroll model = new()
+        {
+            PeriodStart = DateTime.Today.AddDays(-14),
+            PeriodEnd = DateTime.Today,
+            Status =
+        "Pending"
+        }; private bool isEdit;
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            var e = await
+            TimesheetService.GetPayrollByIdAsync(Id.Value); if (e != null) { model = e; isEdit = true; }
+        }
+    }
+    private async Task Save()
+    {
+        if (isEdit) await TimesheetService.UpdatePayrollAsync(model);
+        else await
+        TimesheetService.CreatePayrollAsync(model); Navigation.NavigateTo("/timesheet/payroll/list");
+    }
+}

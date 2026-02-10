@@ -1,0 +1,184 @@
+@page "/client/list/create"
+@inject IClientService ClientService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>@(isEdit ? "Edit Client" : "Add Client") - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>@(isEdit ? "Edit Client" : "Add New Client")</h1>
+        <p>@(isEdit ? "Update client information" : "Enter client details to create a new record")</p>
+    </div>
+    <div class="page-header-actions">
+        <button class="btn btn-outline" @onclick="GoBack">
+            <i class="fa fa-arrow-left"></i> Back to List
+        </button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fa fa-user-tie" style="margin-right: 8px;"></i> Client Information</h3>
+    </div>
+    <div class="card-body">
+        <EditForm Model="model" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <h4 style="margin-bottom: 16px; color: var(--text-primary); font-weight: 600;">Personal Information</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">First Name <span class="required">*</span></label>
+                    <InputText @bind-Value="model.FirstName" class="form-control" placeholder="John" />
+                    <ValidationMessage For="() => model.FirstName" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name <span class="required">*</span></label>
+                    <InputText @bind-Value="model.LastName" class="form-control" placeholder="Doe" />
+                    <ValidationMessage For="() => model.LastName" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <InputText @bind-Value="model.Email" class="form-control" placeholder="john@example.com" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <InputText @bind-Value="model.Phone" class="form-control" placeholder="(555) 123-4567" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Date of Birth</label>
+                    <InputDate @bind-Value="model.DateOfBirth" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Gender</label>
+                    <InputSelect @bind-Value="model.Gender" class="form-control">
+                        <option value="">Select</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                        <option>Other</option>
+                    </InputSelect>
+                </div>
+            </div>
+
+            <h4 style="margin: 24px 0 16px; color: var(--text-primary); font-weight: 600;">Address</h4>
+            <div class="form-row">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label class="form-label">Address</label>
+                    <InputText @bind-Value="model.Address" class="form-control" placeholder="123 Main St" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">City</label>
+                    <InputText @bind-Value="model.City" class="form-control" placeholder="City" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">State</label>
+                    <InputText @bind-Value="model.State" class="form-control" placeholder="State" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Zip Code</label>
+                    <InputText @bind-Value="model.ZipCode" class="form-control" placeholder="12345" />
+                </div>
+            </div>
+
+            <h4 style="margin: 24px 0 16px; color: var(--text-primary); font-weight: 600;">Insurance & Medical</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Insurance Provider</label>
+                    <InputText @bind-Value="model.InsuranceProvider" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Policy Number</label>
+                    <InputText @bind-Value="model.InsurancePolicyNumber" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Primary Diagnosis</label>
+                    <InputText @bind-Value="model.PrimaryDiagnosis" class="form-control" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Physician Name</label>
+                    <InputText @bind-Value="model.PhysicianName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Physician Phone</label>
+                    <InputText @bind-Value="model.PhysicianPhone" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <InputSelect @bind-Value="model.Status" class="form-control">
+                        <option>Active</option>
+                        <option>Inactive</option>
+                        <option>Discharged</option>
+                        <option>On Hold</option>
+                    </InputSelect>
+                </div>
+            </div>
+
+            <h4 style="margin: 24px 0 16px; color: var(--text-primary); font-weight: 600;">Emergency Contact</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Contact Name</label>
+                    <InputText @bind-Value="model.EmergencyContactName" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Phone</label>
+                    <InputText @bind-Value="model.EmergencyContactPhone" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Relationship</label>
+                    <InputText @bind-Value="model.EmergencyContactRelation" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Notes</label>
+                <InputTextArea @bind-Value="model.Notes" class="form-control" rows="3" />
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-save"></i> @(isEdit ? "Update Client" : "Create Client")
+                </button>
+                <button type="button" class="btn btn-outline" @onclick="GoBack">Cancel</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public int? Id { get; set; }
+
+    private Client model = new();
+    private bool isEdit;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            var existing = await ClientService.GetByIdAsync(Id.Value);
+            if (existing != null)
+            {
+                model = existing;
+                isEdit = true;
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (isEdit)
+            await ClientService.UpdateAsync(model);
+        else
+            await ClientService.CreateAsync(model);
+
+        Navigation.NavigateTo("/client/list");
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/client/list");
+}

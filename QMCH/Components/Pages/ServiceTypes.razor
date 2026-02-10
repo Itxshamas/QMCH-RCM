@@ -1,0 +1,46 @@
+@page "/client/servicetypes/list"
+@inject IClientService ClientService
+@rendermode InteractiveServer
+
+<PageTitle>Service Types - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left"><h1>Service Types</h1><p>Healthcare service type definitions</p></div>
+    <div class="page-header-actions">
+        <button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Add Service Type</button>
+    </div>
+</div>
+
+<DataGrid TItem="ServiceType" Items="items" Title="Service Types" IsLoading="isLoading">
+    <HeaderTemplate>
+        <th>Code</th><th>Name</th><th>Default Rate</th><th>Status</th><th style="width: 100px;">Actions</th>
+    </HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><span class="badge badge-info">@item.Code</span></td>
+        <td><strong>@item.Name</strong></td>
+        <td>@(item.DefaultRate?.ToString("C") ?? "N/A")</td>
+        <td><span class="badge @(item.IsActive ? "badge-success" : "badge-secondary")">@(item.IsActive ? "Active" : "Inactive")</span></td>
+        <td><button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i class="fa fa-trash"></i></button></td>
+    </RowTemplate>
+</DataGrid>
+
+<ModalDialog @bind-IsVisible="showModal" Title="Add Service Type">
+    <EditForm Model="newItem" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Name *</label><InputText @bind-Value="newItem.Name" class="form-control" /></div>
+            <div class="form-group"><label class="form-label">Code</label><InputText @bind-Value="newItem.Code" class="form-control" /></div>
+        </div>
+        <div class="form-group"><label class="form-label">Default Rate ($)</label><InputNumber @bind-Value="newItem.DefaultRate" class="form-control" /></div>
+        <div class="form-group"><label class="form-label">Description</label><InputTextArea @bind-Value="newItem.Description" class="form-control" /></div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+    </EditForm>
+</ModalDialog>
+
+@code {
+    private List<ServiceType> items = new(); private bool isLoading = true; private bool showModal; private ServiceType newItem = new();
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData() { isLoading = true; items = await ClientService.GetServiceTypesAsync(); isLoading = false; }
+    private async Task Save() { await ClientService.CreateServiceTypeAsync(newItem); newItem = new(); showModal = false; await LoadData(); }
+    private async Task Delete(int id) { await ClientService.DeleteServiceTypeAsync(id); await LoadData(); }
+}

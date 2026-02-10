@@ -1,0 +1,44 @@
+<div class="erp-topbar">
+    <div class="topbar-left">
+        <div class="topbar-breadcrumb">
+            <span>QHMCPro</span>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Dashboard</span>
+        </div>
+    </div>
+
+    <div class="topbar-right">
+        <button class="topbar-btn" title="Notifications">
+            <i class="fa fa-bell"></i>
+            <span class="badge-dot"></span>
+        </button>
+        <button class="topbar-btn" title="Messages">
+            <i class="fa fa-envelope"></i>
+        </button>
+        <button class="topbar-btn" title="Settings">
+            <i class="fa fa-cog"></i>
+        </button>
+
+        <AuthorizeView>
+            <Authorized Context="authState">
+                <div class="topbar-user">
+                    <div class="topbar-avatar">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div class="topbar-user-info">
+                        <div class="topbar-user-name">@authState.User.Identity?.Name</div>
+                        <div class="topbar-user-role">Administrator</div>
+                    </div>
+                </div>
+                <a href="/logout" class="btn btn-outline btn-sm">
+                    <i class="fa fa-sign-out-alt"></i> Logout
+                </a>
+            </Authorized>
+            <NotAuthorized>
+                <a href="/signin" class="btn btn-primary btn-sm">
+                    <i class="fa fa-sign-in-alt"></i> Sign In
+                </a>
+            </NotAuthorized>
+        </AuthorizeView>
+    </div>
+</div>

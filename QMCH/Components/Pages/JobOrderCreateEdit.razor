@@ -1,0 +1,107 @@
+@page "/hr/aquisition/requisition/list/create"
+@inject IHRService HRService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>@(isEdit ? "Edit" : "Create") Job Order - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>@(isEdit ? "Edit Job Order" : "Create Job Order")</h1>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-outline"
+            @onclick='() => Navigation.NavigateTo("/hr/aquisition/requisition/list")'><i class="fa fa-arrow-left"></i>
+            Back</button></div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fa fa-briefcase" style="margin-right: 8px;"></i> Job Order Details</h3>
+    </div>
+    <div class="card-body">
+        <EditForm Model="model" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Title *</label>
+                    <InputText @bind-Value="model.Title" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Department</label>
+                    <InputText @bind-Value="model.Department" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Location</label>
+                    <InputText @bind-Value="model.Location" class="form-control" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label"># of Positions</label>
+                    <InputNumber @bind-Value="model.NumberOfPositions" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Priority</label>
+                    <InputSelect @bind-Value="model.Priority" class="form-control">
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                        <option>Urgent</option>
+                    </InputSelect>
+                </div>
+                <div class="form-group"><label class="form-label">Status</label>
+                    <InputSelect @bind-Value="model.Status" class="form-control">
+                        <option>Open</option>
+                        <option>In Progress</option>
+                        <option>Filled</option>
+                        <option>Closed</option>
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Pay Range Min</label>
+                    <InputNumber @bind-Value="model.PayRangeMin" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Pay Range Max</label>
+                    <InputNumber @bind-Value="model.PayRangeMax" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Posted Date</label>
+                    <InputDate @bind-Value="model.PostedDate" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group"><label class="form-label">Description</label>
+                <InputTextArea @bind-Value="model.Description" class="form-control" rows="4" />
+            </div>
+            <div class="form-group"><label class="form-label">Requirements</label>
+                <InputTextArea @bind-Value="model.Requirements" class="form-control" rows="3" />
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> @(isEdit ? "Update" :
+                    "Create")</button>
+                <button type="button" class="btn btn-outline"
+                    @onclick='() => Navigation.NavigateTo("/hr/aquisition/requisition/list")'>Cancel</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public int? Id { get; set; }
+    private JobOrder model = new()
+        {
+            PostedDate = DateTime.Today,
+            Priority = "Medium",
+            Status = "Open",
+            NumberOfPositions =
+        1
+        }; private bool isEdit;
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            var e = await
+    HRService.GetJobOrderByIdAsync(Id.Value); if (e != null) { model = e; isEdit = true; }
+        }
+    }
+    private async Task Save()
+    {
+        if (isEdit) await HRService.UpdateJobOrderAsync(model);
+        else await
+    HRService.CreateJobOrderAsync(model); Navigation.NavigateTo("/hr/aquisition/requisition/list");
+    }
+}

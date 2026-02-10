@@ -1,0 +1,67 @@
+@page "/client/clienttypes/list"
+@inject IClientService ClientService
+@rendermode InteractiveServer
+
+<PageTitle>Client Types - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Client Types</h1>
+        <p>Manage client type classifications</p>
+    </div>
+    <div class="page-header-actions">
+        <button class="btn btn-primary" @onclick="() => showModal = true">
+            <i class="fa fa-plus"></i> Add Type
+        </button>
+    </div>
+</div>
+
+<DataGrid TItem="ClientType" Items="items" Title="Client Types" IsLoading="isLoading">
+    <HeaderTemplate>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th style="width: 120px;">Actions</th>
+    </HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><strong>@item.Name</strong></td>
+        <td>@item.Description</td>
+        <td><span class="badge @(item.IsActive ? "badge-success" : "badge-secondary")">@(item.IsActive ? "Active" : "Inactive")</span></td>
+        <td>@item.CreatedAt.ToString("MMM dd, yyyy")</td>
+        <td>
+            <button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i class="fa fa-trash"></i></button>
+        </td>
+    </RowTemplate>
+</DataGrid>
+
+<ModalDialog @bind-IsVisible="showModal" Title="Add Client Type">
+    <EditForm Model="newItem" OnValidSubmit="HandleSave">
+        <DataAnnotationsValidator />
+        <div class="form-group">
+            <label class="form-label">Name <span class="required">*</span></label>
+            <InputText @bind-Value="newItem.Name" class="form-control" />
+            <ValidationMessage For="() => newItem.Name" />
+        </div>
+        <div class="form-group">
+            <label class="form-label">Description</label>
+            <InputTextArea @bind-Value="newItem.Description" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+    </EditForm>
+</ModalDialog>
+
+@code {
+    private List<ClientType> items = new();
+    private bool isLoading = true;
+    private bool showModal;
+    private ClientType newItem = new();
+
+    protected override async Task OnInitializedAsync() { await LoadData(); }
+
+    private async Task LoadData() { isLoading = true; items = await ClientService.GetClientTypesAsync(); isLoading = false; }
+
+    private async Task HandleSave() { await ClientService.CreateClientTypeAsync(newItem); newItem = new(); showModal = false; await LoadData(); }
+
+    private async Task Delete(int id) { await ClientService.DeleteClientTypeAsync(id); await LoadData(); }
+}

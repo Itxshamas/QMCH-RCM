@@ -1,0 +1,215 @@
+@using Microsoft.AspNetCore.Components.Routing
+
+<nav class="erp-sidebar">
+    <div class="sidebar-brand">
+        <span class="brand-text"><img src="~/images/logo.png" alt="Alternate Text" /></span>
+    </div>
+
+    <div class="sidebar-nav">
+        <div class="sidebar-section-title">Main</div>
+
+        <NavLink class="sidebar-item" href="/" Match="NavLinkMatch.All">
+            <i class="fa fa-home item-icon"></i>
+            <span class="item-label">Home</span>
+        </NavLink>
+
+        <NavLink class="sidebar-item" href="/dashboard/analytic/view">
+            <i class="fa fa-chart-line item-icon"></i>
+            <span class="item-label">Analytic</span>
+        </NavLink>
+
+        <div class="sidebar-section-title">Recruitment</div>
+
+        <div @onclick='() => ToggleMenu("recruitment")' class="sidebar-item">
+            <i class="fa fa-user-plus item-icon"></i>
+            <span class="item-label">Recruitment Tracker</span>
+            <i class="fa fa-chevron-right expand-icon @(IsExpanded("recruitment") ? "expanded" : "")"></i>
+        </div>
+        @if (IsExpanded("recruitment"))
+        {
+            <div class="sidebar-children">
+                <NavLink class="sidebar-item" href="/hr/aquisition/requisition/list">
+                    <span class="item-label">Job Orders</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/hr/agency/list">
+                    <span class="item-label">HR Agencies</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/hr/aquisition/applicants/list">
+                    <span class="item-label">Applicants</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/hr/aquisition/interview/schedule/list">
+                    <span class="item-label">Interviews</span>
+                </NavLink>
+            </div>
+        }
+
+        <div @onclick='() => ToggleMenu("recruitment2")' class="sidebar-item">
+            <i class="fa fa-briefcase item-icon"></i>
+            <span class="item-label">Recruitment</span>
+            <i class="fa fa-chevron-right expand-icon @(IsExpanded("recruitment2") ? "expanded" : "")"></i>
+        </div>
+        @if (IsExpanded("recruitment2"))
+        {
+            <div class="sidebar-children">
+                <NavLink class="sidebar-item" href="/hr/aquisition/requisition/list">
+                    <span class="item-label">Requisitions</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/hr/aquisition/applicants/list">
+                    <span class="item-label">Applicant List</span>
+                </NavLink>
+            </div>
+        }
+
+        <div class="sidebar-section-title">People</div>
+
+        <div @onclick='() => ToggleMenu("employees")' class="sidebar-item">
+            <i class="fa fa-users item-icon"></i>
+            <span class="item-label">Employees</span>
+            <i class="fa fa-chevron-right expand-icon @(IsExpanded("employees") ? "expanded" : "")"></i>
+        </div>
+        @if (IsExpanded("employees"))
+        {
+            <div class="sidebar-children">
+                <NavLink class="sidebar-item" href="/caregiver/list">
+                    <span class="item-label">Employee List</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/caregiver/classifications/list">
+                    <span class="item-label">Classifications</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/caregiver/medical/schedule/list">
+                    <span class="item-label">Medical Tracker</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/attendance/list">
+                    <span class="item-label">Attendance</span>
+                </NavLink>
+            </div>
+        }
+
+        <NavLink class="sidebar-item" href="/caregiver/medical/schedule/list">
+            <i class="fa fa-notes-medical item-icon"></i>
+            <span class="item-label">Medical Tracker</span>
+        </NavLink>
+
+        <NavLink class="sidebar-item" href="/training/session/list">
+            <i class="fa fa-graduation-cap item-icon"></i>
+            <span class="item-label">Training</span>
+        </NavLink>
+
+        <div class="sidebar-section-title">Operations</div>
+
+        <div @onclick='() => ToggleMenu("clients")' class="sidebar-item">
+            <i class="fa fa-user-tie item-icon"></i>
+            <span class="item-label">Clients</span>
+            <i class="fa fa-chevron-right expand-icon @(IsExpanded("clients") ? "expanded" : "")"></i>
+        </div>
+        @if (IsExpanded("clients"))
+        {
+            <div class="sidebar-children">
+                <NavLink class="sidebar-item" href="/client/list">
+                    <span class="item-label">Client List</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/client/clienttypes/list">
+                    <span class="item-label">Client Types</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/client/servicetypes/list">
+                    <span class="item-label">Service Types</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/client/location/all">
+                    <span class="item-label">Locations</span>
+                </NavLink>
+            </div>
+        }
+
+        <NavLink class="sidebar-item" href="/documents">
+            <i class="fa fa-folder-open item-icon"></i>
+            <span class="item-label">Document Manager</span>
+        </NavLink>
+
+        <NavLink class="sidebar-item" href="/leave/grid/list">
+            <i class="fa fa-plane item-icon"></i>
+            <span class="item-label">Leave Manager</span>
+        </NavLink>
+
+        <NavLink class="sidebar-item" href="/schedule/calendar">
+            <i class="fa fa-calendar-alt item-icon"></i>
+            <span class="item-label">Schedule</span>
+        </NavLink>
+
+        <NavLink class="sidebar-item" href="/attendance/list">
+            <i class="fa fa-clock item-icon"></i>
+            <span class="item-label">Attendance</span>
+        </NavLink>
+
+        <div @onclick='() => ToggleMenu("timesheets")' class="sidebar-item">
+            <i class="fa fa-file-invoice item-icon"></i>
+            <span class="item-label">Timesheets</span>
+            <i class="fa fa-chevron-right expand-icon @(IsExpanded("timesheets") ? "expanded" : "")"></i>
+        </div>
+        @if (IsExpanded("timesheets"))
+        {
+            <div class="sidebar-children">
+                <NavLink class="sidebar-item" href="/timesheet/payroll/list">
+                    <span class="item-label">Payroll</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/timesheet/billing/list">
+                    <span class="item-label">Billing</span>
+                </NavLink>
+            </div>
+        }
+
+        <div @onclick='() => ToggleMenu("reports")' class="sidebar-item">
+            <i class="fa fa-chart-pie item-icon"></i>
+            <span class="item-label">Reports</span>
+            <i class="fa fa-chevron-right expand-icon @(IsExpanded("reports") ? "expanded" : "")"></i>
+        </div>
+        @if (IsExpanded("reports"))
+        {
+            <div class="sidebar-children">
+                <NavLink class="sidebar-item" href="/reports/hr/grid">
+                    <span class="item-label">HR Reports</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/reports/operation/grid">
+                    <span class="item-label">Operation Reports</span>
+                </NavLink>
+            </div>
+        }
+
+        <NavLink class="sidebar-item" href="/caregiver/search/list">
+            <i class="fa fa-search item-icon"></i>
+            <span class="item-label">Nurse Search</span>
+        </NavLink>
+
+        <div class="sidebar-section-title">Admin</div>
+
+        <div @onclick='() => ToggleMenu("admin")' class="sidebar-item">
+            <i class="fa fa-cogs item-icon"></i>
+            <span class="item-label">Admin</span>
+            <i class="fa fa-chevron-right expand-icon @(IsExpanded("admin") ? "expanded" : "")"></i>
+        </div>
+        @if (IsExpanded("admin"))
+        {
+            <div class="sidebar-children">
+                <NavLink class="sidebar-item" href="/admin/users/list">
+                    <span class="item-label">Users</span>
+                </NavLink>
+                <NavLink class="sidebar-item" href="/admin/roles/list">
+                    <span class="item-label">Roles & Privileges</span>
+                </NavLink>
+            </div>
+        }
+    </div>
+</nav>
+
+@code {
+    private HashSet<string> _expandedMenus = new();
+
+    private void ToggleMenu(string menuId)
+    {
+        if (_expandedMenus.Contains(menuId))
+            _expandedMenus.Remove(menuId);
+        else
+            _expandedMenus.Add(menuId);
+    }
+
+    private bool IsExpanded(string menuId) => _expandedMenus.Contains(menuId);
+}

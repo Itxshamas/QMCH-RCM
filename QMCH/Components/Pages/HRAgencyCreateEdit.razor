@@ -1,0 +1,73 @@
+@page "/hr/agency/list/create"
+@inject IHRService HRService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>@(isEdit ? "Edit" : "Add") HR Agency - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>@(isEdit ? "Edit Agency" : "Add New Agency")</h1>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-outline"
+            @onclick='() => Navigation.NavigateTo("/hr/agency/list")'><i class="fa fa-arrow-left"></i> Back</button>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><i class="fa fa-building" style="margin-right: 8px;"></i> Agency Details</h3>
+    </div>
+    <div class="card-body">
+        <EditForm Model="model" OnValidSubmit="Save">
+            <DataAnnotationsValidator />
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Agency Name *</label>
+                    <InputText @bind-Value="model.Name" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Contact Person</label>
+                    <InputText @bind-Value="model.ContactPerson" class="form-control" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Email</label>
+                    <InputText @bind-Value="model.Email" class="form-control" />
+                </div>
+                <div class="form-group"><label class="form-label">Phone</label>
+                    <InputText @bind-Value="model.Phone" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group"><label class="form-label">Address</label>
+                <InputText @bind-Value="model.Address" class="form-control" />
+            </div>
+            <div class="form-group"><label class="form-label">Notes</label>
+                <InputTextArea @bind-Value="model.Notes" class="form-control" rows="3" />
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> @(isEdit ? "Update" :
+                    "Create")</button>
+                <button type="button" class="btn btn-outline"
+                    @onclick='() => Navigation.NavigateTo("/hr/agency/list")'>Cancel</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public int? Id { get; set; }
+    private HRAgency model = new(); private bool isEdit;
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id.HasValue)
+        {
+            var e = await
+            HRService.GetAgencyByIdAsync(Id.Value); if (e != null) { model = e; isEdit = true; }
+        }
+    }
+    private async Task Save()
+    {
+        if (isEdit) await HRService.UpdateAgencyAsync(model);
+        else await
+        HRService.CreateAgencyAsync(model); Navigation.NavigateTo("/hr/agency/list");
+    }
+}

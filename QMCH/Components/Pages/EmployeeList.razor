@@ -1,0 +1,47 @@
+@page "/caregiver/list"
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Employees - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left"><h1>Employee List</h1><p>Manage caregivers and staff</p></div>
+    <div class="page-header-actions">
+        <button class="btn btn-primary" @onclick='() => Navigation.NavigateTo("/caregiver/list/create")'><i class="fa fa-plus"></i> Add Employee</button>
+    </div>
+</div>
+
+<DataGrid TItem="Employee" Items="items" Title="Employees" IsLoading="isLoading" OnSearchChanged="HandleSearch">
+    <HeaderTemplate>
+        <th>Name</th><th>Email</th><th>Phone</th><th>Job Title</th><th>Status</th><th>Hire Date</th><th style="width: 120px;">Actions</th>
+    </HeaderTemplate>
+    <RowTemplate Context="emp">
+        <td><strong>@emp.FirstName @emp.LastName</strong></td>
+        <td>@emp.Email</td>
+        <td>@emp.Phone</td>
+        <td>@emp.JobTitle</td>
+        <td><span class="badge @(emp.Status == "Active" ? "badge-success" : "badge-secondary")">@emp.Status</span></td>
+        <td>@(emp.HireDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
+        <td>
+            <div style="display: flex; gap: 6px;">
+                <button class="btn btn-outline btn-sm" @onclick='() => Navigation.NavigateTo($"/caregiver/list/create?id={emp.Id}")'><i class="fa fa-edit"></i></button>
+                <button class="btn btn-danger btn-sm" @onclick="() => Delete(emp.Id)"><i class="fa fa-trash"></i></button>
+            </div>
+        </td>
+    </RowTemplate>
+</DataGrid>
+
+@code {
+    private List<Employee> allItems = new(); private IEnumerable<Employee> items = Enumerable.Empty<Employee>(); private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync() { await LoadData(); }
+    private async Task LoadData() { isLoading = true; allItems = await EmployeeService.GetAllAsync(); items = allItems; isLoading = false; }
+    private async Task Delete(int id) { await EmployeeService.DeleteAsync(id); await LoadData(); }
+    private Task HandleSearch(string term)
+    {
+        items = string.IsNullOrWhiteSpace(term) ? allItems :
+            allItems.Where(e => $"{e.FirstName} {e.LastName}".Contains(term, StringComparison.OrdinalIgnoreCase));
+        return Task.CompletedTask;
+    }
+}

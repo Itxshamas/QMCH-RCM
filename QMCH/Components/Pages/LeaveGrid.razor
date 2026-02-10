@@ -1,0 +1,134 @@
+@page "/leave/grid/list"
+@inject ILeaveService LeaveService
+@rendermode InteractiveServer
+
+<PageTitle>Leave Manager - QHMCPro</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-left">
+        <h1>Leave Manager</h1>
+        <p>Employee leave requests and approvals</p>
+    </div>
+    <div class="page-header-actions"><button class="btn btn-primary" @onclick="() => showModal = true"><i
+                class="fa fa-plus"></i> Request Leave</button></div>
+</div>
+
+<DataGrid TItem="Leave" Items="items" Title="Leave Requests" IsLoading="isLoading" OnSearchChanged="HandleSearch">
+    <HeaderTemplate>
+        <th>Employee</th>
+        <th>Type</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Days</th>
+        <th>Status</th>
+        <th>Requested</th>
+        <th style="width: 140px;">Actions</th>
+    </HeaderTemplate>
+    <RowTemplate Context="item">
+        <td><strong>@item.EmployeeName</strong></td>
+        <td><span class="badge badge-info">@item.LeaveType</span></td>
+        <td>@item.StartDate.ToString("MMM dd, yyyy")</td>
+        <td>@item.EndDate.ToString("MMM dd, yyyy")</td>
+        <td>@item.TotalDays</td>
+        <td><span class="badge @GetBadge(item.Status)">@item.Status</span></td>
+        <td>@item.RequestedDate.ToString("MMM dd, yyyy")</td>
+        <td>
+            <div style="display: flex; gap: 6px;">
+                @if (item.Status == "Pending")
+                {
+                    <button class="btn btn-success btn-sm" @onclick='() => UpdateStatus(item.Id, "Approved")'><i
+                            class="fa fa-check"></i></button>
+                    <button class="btn btn-danger btn-sm" @onclick='() => UpdateStatus(item.Id, "Rejected")'><i
+                            class="fa fa-times"></i></button>
+                }
+                <button class="btn btn-outline btn-sm" @onclick="() => Delete(item.Id)"><i
+                        class="fa fa-trash"></i></button>
+            </div>
+        </td>
+    </RowTemplate>
+</DataGrid>
+
+<ModalDialog @bind-IsVisible="showModal" Title="Request Leave" Size="lg">
+    <EditForm Model="newItem" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Employee Name *</label>
+                <InputText @bind-Value="newItem.EmployeeName" class="form-control" />
+            </div>
+            <div class="form-group"><label class="form-label">Leave Type</label>
+                <InputSelect @bind-Value="newItem.LeaveType" class="form-control">
+                    <option>Annual</option>
+                    <option>Sick</option>
+                    <option>Personal</option>
+                    <option>Maternity</option>
+                    <option>Paternity</option>
+                    <option>Bereavement</option>
+                    <option>Unpaid</option>
+                </InputSelect>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label class="form-label">Start Date *</label>
+                <InputDate @bind-Value="newItem.StartDate" class="form-control" />
+            </div>
+            <div class="form-group"><label class="form-label">End Date *</label>
+                <InputDate @bind-Value="newItem.EndDate" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group"><label class="form-label">Reason</label>
+            <InputTextArea @bind-Value="newItem.Reason" class="form-control" rows="3" />
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Submit Request</button>
+    </EditForm>
+</ModalDialog>
+
+@code {
+    private List<Leave> allItems = new(); private IEnumerable<Leave> items = Enumerable.Empty<Leave>(); private bool
+    isLoading = true; private bool showModal;
+    private Leave newItem = new()
+        {
+            StartDate = DateTime.Today,
+            EndDate = DateTime.Today.AddDays(1),
+            LeaveType = "Annual",
+            Status = "Pending",
+            RequestedDate = DateTime.Today
+        };
+
+    protected override async Task OnInitializedAsync() => await LoadData();
+    private async Task LoadData()
+    {
+        isLoading = true; allItems = await LeaveService.GetAllAsync(); items = allItems;
+        isLoading = false;
+    }
+    private async Task Save()
+    {
+        await LeaveService.CreateAsync(newItem); newItem = new()
+            {
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddDays(1),
+                LeaveType = "Annual",
+                Status = "Pending",
+                RequestedDate = DateTime.Today
+            };
+        showModal = false; await LoadData();
+    }
+    private async Task UpdateStatus(int id, string status)
+    {
+        await LeaveService.UpdateStatusAsync(id, status); await
+    LoadData();
+    }
+    private async Task Delete(int id) { await LeaveService.DeleteAsync(id); await LoadData(); }
+    private Task HandleSearch(string t)
+    {
+        items = string.IsNullOrWhiteSpace(t) ? allItems : allItems.Where(x =>
+    x.EmployeeName.Contains(t, StringComparison.OrdinalIgnoreCase)); return Task.CompletedTask;
+    }
+    private string GetBadge(string s) => s switch
+    {
+        "Approved" => "badge-success",
+        "Rejected" => "badge-danger",
+        "Pending"
+    => "badge-warning",
+        _ => "badge-secondary"
+    };
+}
