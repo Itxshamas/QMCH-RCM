@@ -1,0 +1,331 @@
+﻿/* Page Header */
+.page-header {
+    background: linear-gradient(90deg, #2c3e50 0%, #8e44ad 20%, #3498db 40%, #16a085 60%, #f39c12 80%, #e74c3c 100%);
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.page-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    letter-spacing: 0.5px;
+}
+
+.breadcrumb {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+    .breadcrumb span {
+        margin: 0 2px;
+    }
+
+/* Client Header */
+.client-header {
+    background-color: white;
+    padding: 15px 20px;
+    margin-bottom: 0;
+    border-bottom: 3px solid #e0e0e0;
+}
+
+    .client-header h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+
+/* Tab Navigation */
+.tab-navigation {
+    display: flex;
+    gap: 0;
+    background-color: #f5f5f5;
+    padding: 0;
+    border-bottom: 1px solid #ddd;
+    flex-wrap: wrap;
+}
+
+    .tab-navigation.secondary {
+        background-color: #fafafa;
+    }
+
+    .tab-navigation.tertiary {
+        background-color: white;
+        margin-bottom: 20px;
+    }
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 15px;
+    background-color: transparent;
+    border: none;
+    border-right: 1px solid #ddd;
+    cursor: pointer;
+    font-size: 12px;
+    color: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+    min-width: 150px;
+}
+
+    .tab-btn:hover {
+        background-color: #e8e8e8;
+    }
+
+    .tab-btn.active {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    .tab-btn.orange-btn {
+        background-color: #ff9800;
+        color: white;
+        flex: 0 0 auto;
+    }
+
+        .tab-btn.orange-btn:hover {
+            background-color: #e68900;
+        }
+
+    .tab-btn i {
+        font-size: 14px;
+    }
+
+/* Form Container */
+.form-container {
+    background-color: white;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+.form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-row-inline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.form-group-inline {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-control {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 13px;
+    background-color: white;
+    width: 100%;
+}
+
+    .form-control:focus {
+        outline: none;
+        border-color: #17a2b8;
+        box-shadow: 0 0 0 2px rgba(23, 162, 184, 0.1);
+    }
+
+/* Profile Picture Section */
+.profile-picture {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: #fafafa;
+}
+
+.avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+    .avatar-placeholder i {
+        font-size: 48px;
+        color: #999;
+    }
+
+.btn-picture {
+    width: 100%;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn-picture {
+    background-color: #6c757d;
+    color: white;
+}
+
+    .btn-picture.danger {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .btn-picture.primary {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    .btn-picture:hover {
+        opacity: 0.9;
+    }
+
+/* Section Titles */
+.section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin: 25px 0 10px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.subtitle {
+    font-size: 12px;
+    color: #666;
+    margin: -5px 0 15px 0;
+    font-style: italic;
+}
+
+/* Address Section */
+.address-section {
+    background-color: #fafafa;
+    padding: 20px;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+}
+
+/* Blacklist Section */
+.blacklist-section {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #555;
+    cursor: pointer;
+    margin: 0;
+}
+
+    .checkbox-label input[type="checkbox"] {
+        cursor: pointer;
+    }
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    padding: 20px;
+    background-color: white;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn {
+    padding: 10px 30px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-save {
+    background-color: #ff9800;
+    color: white;
+}
+
+    .btn-save:hover {
+        background-color: #e68900;
+    }
+
+.btn-save-close {
+    background-color: #4caf50;
+    color: white;
+}
+
+    .btn-save-close:hover {
+        background-color: #45a049;
+    }
+
+.btn-close {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+    .btn-close:hover {
+        background-color: #e0e0e0;
+    }
+
+/* Validation Messages */
+.validation-message {
+    color: #dc3545;
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .form-row-inline {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .form-row-inline {
+        grid-template-columns: 1fr;
+    }
+
+    .tab-btn {
+        min-width: 120px;
+        font-size: 11px;
+        padding: 10px 8px;
+    }
+}

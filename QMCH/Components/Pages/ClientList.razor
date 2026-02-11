@@ -1,95 +1,226 @@
 @page "/client/list"
-@inject IClientService ClientService
-@inject NavigationManager Navigation
 @rendermode InteractiveServer
 
 <PageTitle>Clients - QHMCPro</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>Client List</h1>
-        <p>Manage all clients and their information</p>
+<div class="client-management-page">
+    <div class="page-header-section">
+        <h1 class="page-title">CLIENT MANAGEMENT</h1>
+        <div class="breadcrumb">
+            <span>Client</span>
+            <span class="separator">/</span>
+            <span>Client List</span>
+        </div>
     </div>
-    <div class="page-header-actions">
-        <button class="btn btn-primary" @onclick="CreateNew">
-            <i class="fa fa-plus"></i> Add Client
-        </button>
+
+    <div class="content-section">
+        <div class="toolbar">
+            <button class="btn-new-client" @onclick="CreateNew">
+                <i class="fa fa-user"></i>
+                New Client
+            </button>
+
+            <div class="filter-group">
+                <div class="filter-item">
+                    <label>Area</label>
+                    <select class="filter-select" @bind="selectedArea" @bind:after="ApplyFilters">
+                        <option value="">All</option>
+                        @foreach (var area in areas)
+                        {
+                            <option value="@area">@area</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label>Type</label>
+                    <select class="filter-select" @bind="selectedType" @bind:after="ApplyFilters">
+                        <option value="">All</option>
+                        @foreach (var type in clientTypes)
+                        {
+                            <option value="@type">@type</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label>Services</label>
+                    <select class="filter-select" @bind="selectedService" @bind:after="ApplyFilters">
+                        <option value="">All</option>
+                        @foreach (var service in services)
+                        {
+                            <option value="@service">@service</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <label>Status</label>
+                    <select class="filter-select" @bind="selectedStatus" @bind:after="ApplyFilters">
+                        <option value="">All Clients</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-controls">
+            <div class="show-entries">
+                <label>Show</label>
+                <select class="entries-select" @bind="pageSize" @bind:after="ApplyFilters">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span>entries</span>
+            </div>
+
+            <div class="search-box">
+                <input type="text"
+                       placeholder="Search"
+                       class="search-input"
+                       @bind="searchTerm"
+                       @bind:event="oninput"
+                       @bind:after="HandleSearch" />
+            </div>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner"></div>
+                <p>Loading clients...</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-container">
+                <table class="client-table">
+                    <thead>
+                        <tr>
+                            <th class="checkbox-col">
+                                <input type="checkbox" @onchange="ToggleSelectAll" checked="@selectAll" />
+                            </th>
+                            <th class="sortable-col">
+                                <div class="header-content">
+                                    <i class="fa fa-sort"></i>
+                                    Client ID
+                                </div>
+                            </th>
+                            <th class="sortable-col">Client Name</th>
+                            <th>City</th>
+                            <th>Client Type</th>
+                            <th>Phone1</th>
+                            <th>Active</th>
+                            <th class="actions-col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!filteredClients.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="no-data">
+                                    No clients found. Click 'New Client' to create one.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var client in paginatedClients)
+                            {
+                                <tr class="@(selectedClients.Contains(client.Id) ? "selected" : "")">
+                                    <td class="checkbox-col">
+                                        <input type="checkbox"
+                                               checked="@selectedClients.Contains(client.Id)"
+                                               @onchange="() => ToggleClientSelection(client.Id)" />
+                                    </td>
+                                    <td><strong>@client.ClientId</strong></td>
+                                    <td><strong>@client.FirstName @client.LastName</strong></td>
+                                    <td>@client.City</td>
+                                    <td>@GetClientTypeById(client.ClientTypeId)</td>
+                                    <td>@client.Phone</td>
+                                    <td>
+                                        <span class="status-icon @(client.Status == "Active" ? "active" : "inactive")">
+                                            @if (client.Status == "Active")
+                                            {
+                                                <i class="fa fa-times"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fa fa-check"></i>
+                                            }
+                                        </span>
+                                    </td>
+                                    <td class="actions-col">
+                                        <div class="action-buttons">
+                                            <button class="action-btn view-btn"
+                                                    @onclick="() => View(client.Id)"
+                                                    title="View">
+                                                <i class="fa fa-eye"></i>
+                                            </button>
+                                            <button class="action-btn edit-btn"
+                                                    @onclick="() => Edit(client.Id)"
+                                                    title="Edit">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                            <button class="action-btn search-btn"
+                                                    title="Search">
+                                                <i class="fa fa-search"></i>
+                                            </button>
+                                            <button class="action-btn delete-btn"
+                                                    @onclick="() => Delete(client.Id)"
+                                                    title="Delete">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-footer">
+                <div class="showing-info">
+                    Showing @GetShowingInfo() of @filteredClients.Count() entries
+                </div>
+
+                <div class="pagination">
+                    <button class="page-btn"
+                            @onclick="PreviousPage"
+                            disabled="@(currentPage == 1)">
+                        Previous
+                    </button>
+
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        var pageNum = i;
+                        <button class="page-btn @(currentPage == pageNum ? "active" : "")"
+                                @onclick="() => GoToPage(pageNum)">
+                            @pageNum
+                        </button>
+                    }
+
+                    @if (totalPages > 5)
+                    {
+                        <span class="page-ellipsis">...</span>
+                        <button class="page-btn" @onclick="() => GoToPage(totalPages)">
+                            @totalPages
+                        </button>
+                    }
+
+                    <button class="page-btn"
+                            @onclick="NextPage"
+                            disabled="@(currentPage == totalPages)">
+                        Next
+                    </button>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
-<DataGrid TItem="Client" Items="clients" Title="Clients" IsLoading="isLoading"
-          EmptyMessage="No clients found. Click 'Add Client' to create one."
-          OnSearchChanged="HandleSearch">
-    <HeaderTemplate>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>City</th>
-        <th>Status</th>
-        <th>Created</th>
-        <th style="width: 120px;">Actions</th>
-    </HeaderTemplate>
-    <RowTemplate Context="client">
-        <td><strong>@client.FirstName @client.LastName</strong></td>
-        <td>@client.Email</td>
-        <td>@client.Phone</td>
-        <td>@client.City</td>
-        <td>
-            <span class="badge @(client.Status == "Active" ? "badge-success" : "badge-secondary")">
-                @client.Status
-            </span>
-        </td>
-        <td>@client.CreatedAt.ToString("MMM dd, yyyy")</td>
-        <td>
-            <div style="display: flex; gap: 6px;">
-                <button class="btn btn-outline btn-sm" @onclick="() => Edit(client.Id)" title="Edit">
-                    <i class="fa fa-edit"></i>
-                </button>
-                <button class="btn btn-danger btn-sm" @onclick="() => Delete(client.Id)" title="Delete">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </div>
-        </td>
-    </RowTemplate>
-</DataGrid>
 
-@code {
-    private List<Client> allClients = new();
-    private IEnumerable<Client> clients = Enumerable.Empty<Client>();
-    private bool isLoading = true;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadData();
-    }
-
-    private async Task LoadData()
-    {
-        isLoading = true;
-        allClients = await ClientService.GetAllAsync();
-        clients = allClients;
-        isLoading = false;
-    }
-
-    private void CreateNew() => Navigation.NavigateTo("/client/list/create");
-
-    private void Edit(int id) => Navigation.NavigateTo($"/client/list/create?id={id}");
-
-    private async Task Delete(int id)
-    {
-        await ClientService.DeleteAsync(id);
-        await LoadData();
-    }
-
-    private Task HandleSearch(string term)
-    {
-        if (string.IsNullOrWhiteSpace(term))
-            clients = allClients;
-        else
-            clients = allClients.Where(c =>
-                c.FirstName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                c.LastName.Contains(term, StringComparison.OrdinalIgnoreCase) ||
-                (c.Email ?? "").Contains(term, StringComparison.OrdinalIgnoreCase));
-        return Task.CompletedTask;
-    }
-}
