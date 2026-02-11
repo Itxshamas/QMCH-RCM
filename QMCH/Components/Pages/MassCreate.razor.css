@@ -1,0 +1,48 @@
+﻿/* Mass Create styles for Client Types */
+
+.mass-header {
+    margin-bottom: 12px;
+}
+
+.mass-breadcrumbs {
+    color: #777;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.mass-title {
+    margin: 0 0 6px 0;
+    color: #333333;
+}
+
+.mass-sub {
+    margin: 0 0 12px 0;
+    color: #555;
+}
+
+.mass-table .mass-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.row-index { text-align:center; }
+
+.empty-state { text-align:center; color:#666; padding:14px; }
+
+.mass-footer {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:12px;
+}
+
+.btn-green { background:#28a745; color:#fff; border:none; padding:8px 12px; border-radius:4px; }
+.btn-red { background:#dc3545; color:#fff; border:none; padding:8px 12px; border-radius:4px; }
+.icon-btn { background:#f4f4f4; border:1px solid #ccc; padding:6px 8px; border-radius:4px; cursor:pointer; }
+
+/* reuse table styles from main css, but ensure header color matches primary */
+.mass-table thead { background:#17a2b8; color:#fff; }
+

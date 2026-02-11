@@ -17,8 +17,10 @@ namespace QMCH.Services
         public async Task DeleteAsync(int id) { var e = await _db.Clients.FindAsync(id); if (e != null) { _db.Clients.Remove(e); await _db.SaveChangesAsync(); } }
         public async Task<int> GetCountAsync() => await _db.Clients.CountAsync();
 
-        public async Task<List<ClientType>> GetClientTypesAsync() => await _db.ClientTypes.OrderBy(c => c.Name).ToListAsync();
+        public async Task<List<ClientType>> GetClientTypesAsync() => await _db.ClientTypes.OrderBy(c => c.ShortDescription).ToListAsync();
+        public async Task<ClientType?> GetClientTypeByIdAsync(int id) => await _db.ClientTypes.FindAsync(id);
         public async Task CreateClientTypeAsync(ClientType item) { _db.ClientTypes.Add(item); await _db.SaveChangesAsync(); }
+        public async Task UpdateClientTypeAsync(ClientType item) { _db.ClientTypes.Update(item); await _db.SaveChangesAsync(); }
         public async Task DeleteClientTypeAsync(int id) { var e = await _db.ClientTypes.FindAsync(id); if (e != null) { _db.ClientTypes.Remove(e); await _db.SaveChangesAsync(); } }
 
         public async Task<List<ServiceType>> GetServiceTypesAsync() => await _db.ServiceTypes.OrderBy(c => c.Name).ToListAsync();

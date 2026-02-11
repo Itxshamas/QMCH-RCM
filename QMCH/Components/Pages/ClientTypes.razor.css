@@ -1,0 +1,244 @@
+﻿/* ── Top Buttons ── */
+.top-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.btn-green {
+    background-color: #28a745; /* requested green */
+    color: white;
+    border: none;
+    padding: 8px 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 130px;
+}
+
+    .btn-green:hover {
+        background-color: #218838;
+    }
+
+.btn-red {
+    background-color: #dc3545; /* requested red */
+    color: white;
+    border: none;
+    padding: 8px 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 130px;
+}
+
+    .btn-red:hover {
+        background-color: #c82333;
+    }
+
+/* ── Table Wrapper ── */
+.table-wrapper {
+    background: white;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* ── Table Controls ── */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.table-controls-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .table-controls-left select {
+        padding: 4px 6px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+
+.table-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+    .table-controls-right input {
+        padding: 4px 8px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+
+/* ── Table ── */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .custom-table thead {
+        background-color: #17a2b8; /* primary teal/cyan */
+        color: white;
+    }
+
+    .custom-table th {
+        padding: 10px 12px;
+        border: 1px solid #00acc1;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .custom-table td {
+        padding: 8px 12px;
+        border: 1px solid #e0e0e0;
+        font-size: 14px;
+    }
+
+    /* ── Data rows ── */
+    .custom-table tbody tr.data-row {
+        background-color: #ffffff;
+    }
+
+        .custom-table tbody tr.data-row:hover {
+            background-color: #f9f9f9;
+        }
+
+    /* ── Action rows (sub-row beneath each data row) ── */
+    .custom-table tbody tr.action-row td {
+        border-top: none;
+        padding: 4px 8px 6px 8px;
+        background-color: #ffffff;
+    }
+
+    .custom-table tbody tr.data-row td {
+        border-bottom: none;
+    }
+
+    /* ── Row pair separator ── */
+    .custom-table tbody tr.action-row:not(:last-child) td {
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+/* ── Action cell alignment ── */
+.action-cell {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* ── Icon Buttons ── */
+.icon-btn {
+    background: #f4f4f4;
+    border: 1px solid #cccccc;
+    padding: 4px 8px;
+    margin-left: 3px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #555;
+}
+
+    .icon-btn:hover {
+        background-color: #e0e0e0;
+        border-color: #bbb;
+    }
+
+/* ── Table Footer ── */
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* ── Pagination ── */
+.pagination {
+    display: flex;
+    gap: 3px;
+}
+
+    .pagination button {
+        padding: 5px 12px;
+        border: 1px solid #cccccc;
+        background: #f4f4f4;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+        .pagination button:hover {
+            background-color: #e0e0e0;
+        }
+
+    .pagination .active {
+        background-color: #00bcd4;
+        color: white;
+        border-color: #00bcd4;
+    }
+
+/* ── Modal ── */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-box {
+    background: white;
+    padding: 28px 32px;
+    border-radius: 6px;
+    min-width: 380px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.modal-box.modal-green { border-top: 6px solid #28a745; }
+
+    .modal-box h4 {
+        margin: 0 0 20px 0;
+        font-size: 16px;
+        color: #333;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+.modal-field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 14px;
+    font-size: 14px;
+}
+
+    .modal-field label {
+        margin-bottom: 4px;
+        color: #555;
+        font-weight: 500;
+    }
+
+    .modal-field input {
+        padding: 7px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}

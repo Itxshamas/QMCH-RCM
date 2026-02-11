@@ -48,10 +48,10 @@ namespace QMCH.Data
             if (!await context.ClientTypes.AnyAsync())
             {
                 context.ClientTypes.AddRange(
-                    new ClientType { Name = "Home Health", Description = "Home health care patients" },
-                    new ClientType { Name = "Hospice", Description = "Hospice care patients" },
-                    new ClientType { Name = "Private Duty", Description = "Private duty care clients" },
-                    new ClientType { Name = "Skilled Nursing", Description = "Skilled nursing facility clients" }
+                    new ClientType { ShortDescription = "Home Health", Description = "Home health care patients" },
+                    new ClientType { ShortDescription = "Hospice", Description = "Hospice care patients" },
+                    new ClientType { ShortDescription = "Private Duty", Description = "Private duty care clients" },
+                    new ClientType { ShortDescription = "Skilled Nursing", Description = "Skilled nursing facility clients" }
                 );
                 await context.SaveChangesAsync();
             }

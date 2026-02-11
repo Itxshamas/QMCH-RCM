@@ -1,0 +1,101 @@
+﻿@page "/client/clienttypes/list/create/mass"
+
+@rendermode InteractiveServer
+
+@using System.Linq
+@using QMCH.Components.Layout
+@inject NavigationManager Nav
+@inject QMCH.Services.IClientService ClientService
+
+<PageTitle>Mass Create Client Types</PageTitle>
+
+<div class="mass-header">
+    <div class="mass-breadcrumbs">Client / Client Types / Mass Create</div>
+    <h2 class="mass-title">Mass Create Client Types</h2>
+    <p class="mass-sub">Add multiple client type rows and save them at once. Empty rows or rows without a Description will be ignored.</p>
+    <div style="margin-top:8px;">
+        <button class="btn-green" @onclick="AddRow"><i class="fa fa-plus"></i> Add Row</button>
+        <button class="btn-green" @onclick="SaveAll"><i class="fa fa-save"></i> Save All</button>
+        <button class="btn-red" @onclick="Cancel"><i class="fa fa-times"></i> Cancel</button>
+    </div>
+    
+</div>
+
+<div class="table-wrapper">
+    <table class="custom-table mass-table">
+        <thead>
+            <tr>
+                <th style="width:40px;">#</th>
+                <th>Description</th>
+                <th style="width:260px;">Short Description</th>
+                <th style="width:120px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (rows == null || rows.Count == 0)
+            {
+                <tr>
+                    <td colspan="4" class="empty-state">No rows. Click "Add Row" to create entries.</td>
+                </tr>
+            }
+            else
+            {
+                @for (int i = 0; i < rows.Count; i++)
+                {
+                    var row = rows[i];
+                    <tr @key="row">
+                        <td class="row-index">@(i + 1)</td>
+                        <td>
+                            <input class="mass-input" type="text" @bind="row.Description" placeholder="Description (required)" maxlength="150" />
+                        </td>
+                        <td>
+                            <input class="mass-input" type="text" @bind="row.ShortDescription" placeholder="Short Description" maxlength="50" />
+                        </td>
+                        <td>
+                            <button class="icon-btn" title="Remove" @onclick="() => RemoveRow(row)"><i class="fa fa-trash"></i> Remove</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<QMCH.Models.ClientType> rows = new();
+
+    protected override void OnInitialized()
+    {
+        rows.Add(new QMCH.Models.ClientType());
+    }
+
+    void AddRow()
+    {
+        rows.Add(new QMCH.Models.ClientType());
+    }
+
+    void RemoveRow(int idx)
+    {
+        if (idx >= 0 && idx < rows.Count) rows.RemoveAt(idx);
+    }
+
+    void RemoveRow(QMCH.Models.ClientType? item)
+    {
+        if (item == null) return;
+        rows.Remove(item);
+    }
+
+    async Task SaveAll()
+    {
+        foreach (var r in rows.Where(x => !string.IsNullOrWhiteSpace(x.Description)))
+        {
+            await ClientService.CreateClientTypeAsync(r);
+        }
+        Nav.NavigateTo("/client/clienttypes/list");
+    }
+
+    void Cancel()
+    {
+        Nav.NavigateTo("/client/clienttypes/list");
+    }
+}

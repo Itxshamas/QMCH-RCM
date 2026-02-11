@@ -12,7 +12,9 @@ namespace QMCH.Services
         Task<int> GetCountAsync();
 
         Task<List<ClientType>> GetClientTypesAsync();
+        Task<ClientType?> GetClientTypeByIdAsync(int id);
         Task CreateClientTypeAsync(ClientType item);
+        Task UpdateClientTypeAsync(ClientType item);
         Task DeleteClientTypeAsync(int id);
 
         Task<List<ServiceType>> GetServiceTypesAsync();
