@@ -1,118 +1,270 @@
-@page "/dashboard/analytic/view"
-@inject IClientService ClientService
-@inject IEmployeeService EmployeeService
-@rendermode InteractiveServer
+﻿@page "/dashboard/analytic/view"
+@using QMCH.Components.Pages
+@inherits AnalyticsBase
 
-<PageTitle>Analytics - QHMCPro</PageTitle>
+<PageTitle>Analytics - QHMC</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>Analytics Dashboard</h1>
-        <p>Key performance metrics and operational insights</p>
-    </div>
-    <div class="page-header-actions">
-        <select class="form-control" style="width: auto;">
-            <option>Last 30 Days</option>
-            <option>Last 7 Days</option>
-            <option>This Month</option>
-            <option>This Year</option>
-        </select>
-    </div>
-</div>
+<div class="analytics-container">
 
-<div class="stats-row">
-    <div class="stat-card">
-        <div class="stat-icon blue"><i class="fa fa-user-tie"></i></div>
-        <div class="stat-info">
-            <h4>@clientCount</h4>
-            <p>Active Clients</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon green"><i class="fa fa-users"></i></div>
-        <div class="stat-info">
-            <h4>@employeeCount</h4>
-            <p>Active Employees</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon orange"><i class="fa fa-calendar-check"></i></div>
-        <div class="stat-info">
-            <h4>0</h4>
-            <p>Schedules This Week</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon purple"><i class="fa fa-dollar-sign"></i></div>
-        <div class="stat-info">
-            <h4>$0.00</h4>
-            <p>Revenue MTD</p>
-        </div>
-    </div>
-</div>
+    <!-- WORKFORCE SUMMARY SECTION -->
+    <div class="analytics-card workforce-card">
 
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
-    <div class="card">
+        <!-- Header -->
+        <div class="workforce-header">
+
+            <!-- Left Controls -->
+            <div class="header-controls">
+                <button class="icon-btn" @onclick="GoToPreviousMonth">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+                <button class="icon-btn" @onclick="GoToNextMonth">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+                <button class="today-btn" @onclick="GoToToday">Today</button>
+            </div>
+
+            <!-- Title -->
+            <div class="workforce-title">
+                Workforce Summary - @CurrentMonthYearDisplay
+            </div>
+
+            <!-- Right Controls -->
+            <div class="header-controls">
+                <button class="today-btn" @onclick="GoToToday">Today</button>
+                <button class="icon-btn" @onclick="GoToPreviousMonth">
+                    <i class="fa fa-chevron-left"></i>
+                </button>
+                <button class="icon-btn" @onclick="GoToNextMonth">
+                    <i class="fa fa-chevron-right"></i>
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Chart + Dates Wrapper -->
+        <div class="workforce-chart-wrapper">
+
+            <!-- Chart Area -->
+            <div class="workforce-chart">
+                <!-- ApexCharts / Chart.js will render here -->
+            </div>
+
+            <!-- Bottom Dates -->
+            <div class="workforce-x-axis">
+                @for (int day = 1; day <= DaysInCurrentMonth; day++)
+                {
+                    <span>@day.ToString("00")-@CurrentDate.ToString("MMM")-@CurrentDate.Year</span>
+                }
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SECTION 2 : CLIENT VISIT SUMMARY -->
+    <div class="analytics-card">
         <div class="card-header">
-            <h3>Client Growth Trend</h3>
+            <h3>Client Visit Summary by Service Type</h3>
         </div>
         <div class="card-body">
-            <div class="empty-state" style="padding: 40px 20px;">
-                <i class="fa fa-chart-area"></i>
-                <h3>Chart Placeholder</h3>
-                <p>Client growth data will be displayed here. Integrate a charting library like Chart.js or ApexCharts.
-                </p>
+            <div class="chart-placeholder">
+                Client visit summary chart will render here
             </div>
         </div>
     </div>
-    <div class="card">
+
+
+    <!-- SECTION 3 : FINANCIAL (PLANNING DATA) -->
+    <div class="analytics-card">
         <div class="card-header">
-            <h3>Employee Distribution</h3>
+            <h3>Financial Client Visit Graph - Planning Data</h3>
         </div>
+
+        <div class="filter-row">
+            <div class="filter-item">
+                <label>Start Date</label>
+                <input type="date" class="form-control" />
+            </div>
+
+            <div class="filter-item">
+                <label>End Date</label>
+                <input type="date" class="form-control" />
+            </div>
+
+            <div class="filter-item">
+                <label>Chart Type</label>
+                <select class="form-control">
+                    <option>Column</option>
+                    <option>Line</option>
+                    <option>Bar</option>
+                </select>
+            </div>
+        </div>
+
         <div class="card-body">
-            <div class="empty-state" style="padding: 40px 20px;">
-                <i class="fa fa-chart-pie"></i>
-                <h3>Chart Placeholder</h3>
-                <p>Employee classification distribution will appear here.</p>
+            <div class="chart-placeholder">
+                Planning data chart will render here
             </div>
         </div>
     </div>
+
+
+
+    <!-- SECTION 4 : FINANCIAL (ACTUAL DATA) -->
+
+    <div class="analytics-card">
+        <div class="card-header">
+            <h3>Financial Client Visit Graph - Actual Data</h3>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-item">
+                <label>Start Date</label>
+                <input type="date" class="form-control" />
+            </div>
+
+            <div class="filter-item">
+                <label>End Date</label>
+                <input type="date" class="form-control" />
+            </div>
+
+            <div class="filter-item">
+                <label>Chart Type</label>
+                <select class="form-control">
+                    <option>Column</option>
+                    <option>Line</option>
+                    <option>Bar</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="chart-placeholder">
+                Actual data chart will render here
+            </div>
+        </div>
+    </div>
+
+
+    <!-- SECTION 5 : ATTENDANCE SUMMARY -->
+    <div class="analytics-card attendance-card">
+
+        <div class="attendance-header">
+            <div class="header-controls">
+                <button class="icon-btn" @onclick="GoToPreviousMonth"><i class="fa fa-chevron-left"></i></button>
+                <button class="icon-btn" @onclick="GoToNextMonth"><i class="fa fa-chevron-right"></i></button>
+            </div>
+
+            <div class="attendance-title">
+                Attendance Summary - @CurrentMonthYearDisplay
+            </div>
+
+            <div class="header-controls">
+                <button class="today-btn" @onclick="GoToToday">Today</button>
+            </div>
+        </div>
+
+        <div class="attendance-status-row">
+            <div class="status-item status-date">Date</div>
+            <div class="status-item status-present">😊<span>Present</span></div>
+            <div class="status-item status-absent">☹️<span>Absence</span></div>
+            <div class="status-item status-checkin">Checked IN</div>
+            <div class="status-item status-checkout">Checked OUT</div>
+            <div class="status-item status-dayoff">Day Off</div>
+            <div class="status-item status-leave">Leave</div>
+            <div class="status-item status-duty">24H Duty</div>
+            <div class="status-item status-reliever">Reliever</div>
+        </div>
+
+        <!-- Attendance Grid -->
+        <div class="attendance-grid">
+            @for (int day = 1; day <= DaysInCurrentMonth; day++)
+            {
+                var currentDay = new DateTime(CurrentDate.Year, CurrentDate.Month, day);
+                <div class="attendance-row">
+                    <div class="attendance-date">@currentDay.ToString("dd-MMM-yyyy")</div>
+
+                    @for (int person = 0; person < GetStaffCount(); person++)
+                    {
+                        var status = GetAttendanceStatus(currentDay, person);
+                        <div class="attendance-cell @status.CssClass">
+                            <div class="cell-content">
+                                <img src="@GetStaffAvatar(person)" alt="Staff" class="staff-avatar" />
+                                <div class="cell-info">
+                                    <span class="staff-name">@GetStaffName(person)</span>
+                                    <span class="time-info">@status.TimeInfo</span>
+                                </div>
+                                <span class="status-badge @status.BadgeClass">@status.BadgeText</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+    </div>
+
+
+    <!-- SECTION 6 : BOTTOM ROW - Biometric & Client Visit Summary -->
+    <div class="bottom-cards-row">
+
+        <!-- Biometric Registration Card -->
+        <div class="analytics-card biometric-card">
+
+            <div class="card-header">
+                <span class="section-title">Pending Biometric Registration</span>
+            </div>
+
+            <div class="biometric-list">
+
+                <div class="biometric-item">
+                    <span class="name">John Smith</span>
+                    <span class="status-pending">Pending</span>
+                </div>
+
+                <div class="biometric-item">
+                    <span class="name">Mary Johnson</span>
+                    <span class="status-pending">Pending</span>
+                </div>
+
+                <div class="biometric-item">
+                    <span class="name">David Lee</span>
+                    <span class="status-pending">Pending</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Client Visit Summary Card -->
+        <div class="analytics-card visit-card">
+
+            <div class="card-header">
+                <span class="section-title">Client Visit Summary</span>
+            </div>
+
+            <div class="visit-summary">
+
+                <div class="visit-box visit-planned">
+                    <span class="visit-count">120</span>
+                    <span class="visit-label">Planned</span>
+                </div>
+
+                <div class="visit-box visit-completed">
+                    <span class="visit-count">98</span>
+                    <span class="visit-label">Completed</span>
+                </div>
+
+                <div class="visit-box visit-pending">
+                    <span class="visit-count">22</span>
+                    <span class="visit-label">Pending</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-    <div class="card">
-        <div class="card-header">
-            <h3>Revenue vs Expenses</h3>
-        </div>
-        <div class="card-body">
-            <div class="empty-state" style="padding: 40px 20px;">
-                <i class="fa fa-chart-bar"></i>
-                <h3>Chart Placeholder</h3>
-                <p>Financial data comparison chart will be rendered here.</p>
-            </div>
-        </div>
-    </div>
-    <div class="card">
-        <div class="card-header">
-            <h3>Schedule Utilization</h3>
-        </div>
-        <div class="card-body">
-            <div class="empty-state" style="padding: 40px 20px;">
-                <i class="fa fa-chart-line"></i>
-                <h3>Chart Placeholder</h3>
-                <p>Schedule utilization rate over time.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-@code {
-    private int clientCount;
-    private int employeeCount;
-
-    protected override async Task OnInitializedAsync()
-    {
-        clientCount = await ClientService.GetCountAsync();
-        employeeCount = await EmployeeService.GetCountAsync();
-    }
-}
