@@ -1,0 +1,217 @@
+@page "/client/list/view"
+@rendermode InteractiveServer
+
+<PageTitle>View Client - QHMCPro</PageTitle>
+
+<div class="client-view-page">
+    @if (isLoading)
+    {
+        <div class="loading">Loading client...</div>
+    }
+    else if (client == null)
+    {
+        <div class="no-data">Client not found.</div>
+        <div class="actions">
+            <button class="btn-back" @onclick="Back">Back</button>
+        </div>
+    }
+    else
+    {
+        <div class="header">
+            <h2>Client Details</h2>
+            <div class="actions">
+                <button class="btn-back" @onclick="Back">Back</button>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-row">
+                <label>Client ID</label>
+                <input readonly value="@client.ClientId" />
+                <label>Qatar ID</label>
+                <input readonly value="@client.QatarId" />
+            </div>
+
+            <div class="form-row">
+                <label>First Name</label>
+                <input readonly value="@client.FirstName" />
+                <label>Middle Name</label>
+                <input readonly value="@client.MiddleName" />
+            </div>
+
+            <div class="form-row">
+                <label>Last Name</label>
+                <input readonly value="@client.LastName" />
+                <label>Email</label>
+                <input readonly value="@client.Email" />
+            </div>
+
+            <div class="form-row">
+                <label>Phone</label>
+                <input readonly value="@client.Phone" />
+                <label>Phone 2</label>
+                <input readonly value="@client.Phone2" />
+            </div>
+
+            <div class="form-row">
+                <label>Date of Birth</label>
+                <input readonly value="@(client.DateOfBirth?.ToString("yyyy-MM-dd") ?? string.Empty)" />
+                <label>Gender</label>
+                <input readonly value="@client.Gender" />
+            </div>
+
+            <div class="form-row">
+                <label>Client Type</label>
+                <input readonly value="@client.ClientType" />
+                <label>Service Type Id</label>
+                <input readonly value="@client.ServiceTypeId" />
+            </div>
+
+            <div class="form-row">
+                <label>Status</label>
+                <input readonly value="@client.Status" />
+                <label>Reason</label>
+                <input readonly value="@client.Reason" />
+            </div>
+
+            <div class="form-row">
+                <label>Service Start</label>
+                <input readonly value="@(client.ServiceStartDate?.ToString("yyyy-MM-dd") ?? string.Empty)" />
+                <label>Service End</label>
+                <input readonly value="@(client.ServiceEndDate?.ToString("yyyy-MM-dd") ?? string.Empty)" />
+            </div>
+
+            <div class="form-row">
+                <label>Inquiry Date</label>
+                <input readonly value="@(client.InquiryDate?.ToString("yyyy-MM-dd") ?? string.Empty)" />
+                <label>Assessment Date</label>
+                <input readonly value="@(client.AssessmentDate?.ToString("yyyy-MM-dd") ?? string.Empty)" />
+            </div>
+
+            <div class="form-row">
+                <label>Is Blacklisted</label>
+                <input type="checkbox" disabled checked="@client.IsBlacklisted" />
+                <label>Location Id</label>
+                <input readonly value="@client.LocationId" />
+            </div>
+
+            <h3>Home Address</h3>
+            <div class="form-row">
+                <label>Street</label>
+                <input readonly value="@client.Street" />
+                <label>Area</label>
+                <input readonly value="@client.Area" />
+            </div>
+
+            <div class="form-row">
+                <label>State</label>
+                <input readonly value="@client.State" />
+                <label>Building No.</label>
+                <input readonly value="@client.BuildingNumber" />
+            </div>
+
+            <div class="form-row">
+                <label>Street No.</label>
+                <input readonly value="@client.StreetNumber" />
+                <label>Country</label>
+                <input readonly value="@client.Country" />
+            </div>
+
+            <div class="form-row">
+                <label>Zip Code</label>
+                <input readonly value="@client.ZipCode" />
+                <label>City</label>
+                <input readonly value="@client.City" />
+            </div>
+
+            <h3>Billing Address</h3>
+            <div class="form-row">
+                <label>Billing Street</label>
+                <input readonly value="@client.BillingStreet" />
+                <label>Billing Area</label>
+                <input readonly value="@client.BillingArea" />
+            </div>
+
+            <div class="form-row">
+                <label>Billing State</label>
+                <input readonly value="@client.BillingState" />
+                <label>Billing Building No.</label>
+                <input readonly value="@client.BillingBuildingNumber" />
+            </div>
+
+            <div class="form-row">
+                <label>Billing Street No.</label>
+                <input readonly value="@client.BillingStreetNumber" />
+                <label>Billing Country</label>
+                <input readonly value="@client.BillingCountry" />
+            </div>
+
+            <div class="form-row">
+                <label>Billing Zip</label>
+                <input readonly value="@client.BillingZipCode" />
+                <label>Address (legacy)</label>
+                <input readonly value="@client.Address" />
+            </div>
+
+            <h3>Insurance / Medical</h3>
+            <div class="form-row">
+                <label>Insurance Provider</label>
+                <input readonly value="@client.InsuranceProvider" />
+                <label>Policy No.</label>
+                <input readonly value="@client.InsurancePolicyNumber" />
+            </div>
+
+            <div class="form-row">
+                <label>Primary Diagnosis</label>
+                <input readonly value="@client.PrimaryDiagnosis" />
+                <label>Physician</label>
+                <input readonly value="@client.PhysicianName" />
+            </div>
+
+            <div class="form-row">
+                <label>Physician Phone</label>
+                <input readonly value="@client.PhysicianPhone" />
+                <label>Emergency Contact</label>
+                <input readonly value="@client.EmergencyContactName" />
+            </div>
+
+            <div class="form-row">
+                <label>Emergency Phone</label>
+                <input readonly value="@client.EmergencyContactPhone" />
+                <label>Relation</label>
+                <input readonly value="@client.EmergencyContactRelation" />
+            </div>
+
+            <div class="form-row full-width">
+                <label>Notes</label>
+                <textarea readonly>@client.Notes</textarea>
+            </div>
+
+            <div class="form-row">
+                <label>Profile Picture</label>
+                <input readonly value="@client.ProfilePicturePath" />
+                <label>Latitude</label>
+                <input readonly value="@(client.Latitude?.ToString() ?? string.Empty)" />
+            </div>
+
+            <div class="form-row">
+                <label>Longitude</label>
+                <input readonly value="@(client.Longitude?.ToString() ?? string.Empty)" />
+                <label>Created At</label>
+                <input readonly value="@client.CreatedAt.ToString("yyyy-MM-dd HH:mm")" />
+            </div>
+
+            <div class="form-row">
+                <label>Updated At</label>
+                <input readonly value="@client.UpdatedAt.ToString("yyyy-MM-dd HH:mm")" />
+                <label>Created By</label>
+                <input readonly value="@client.CreatedBy" />
+            </div>
+
+            <div class="form-row">
+                <label>Updated By</label>
+                <input readonly value="@client.UpdatedBy" />
+            </div>
+        </div>
+    }
+</div>

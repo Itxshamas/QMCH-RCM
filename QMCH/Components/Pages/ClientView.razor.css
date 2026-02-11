@@ -1,0 +1,9 @@
+.client-view-page { padding: 16px; }
+.client-view-page .header { display:flex; justify-content:space-between; align-items:center; }
+.client-view-page .form-grid { margin-top:12px; display:flex; flex-direction:column; gap:12px; }
+.client-view-page .form-row { display:grid; grid-template-columns: 1fr 1fr; gap:12px; align-items:center; }
+.client-view-page .form-row.full-width { grid-column: 1 / -1; }
+.client-view-page label { font-weight:600; }
+.client-view-page input[readonly], .client-view-page textarea[readonly] { background:#f8f8f8; border:1px solid #ddd; padding:6px; }
+.client-view-page textarea { min-height:80px; width:100%; }
+.client-view-page .btn-back { background:#eee; border:1px solid #ccc; padding:6px 10px; }
