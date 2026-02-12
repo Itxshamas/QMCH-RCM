@@ -1,0 +1,253 @@
+﻿.classifications-container {
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+/* Top Buttons */
+.top-buttons {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.btn-green {
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-green:hover {
+    background-color: #1b5e20;
+}
+
+.btn-red {
+    background-color: #c62828;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-red:hover {
+    background-color: #ad1457;
+}
+
+/* Quick Add Section */
+.table-wrapper {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.quick-add-section {
+    padding: 20px;
+}
+
+.quick-add-form {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.quick-add-form .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.quick-add-form .button-group {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Filter Section */
+.filter-section {
+    padding: 15px 20px;
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+.filter-section .form-group {
+    margin-bottom: 0;
+    min-width: 200px;
+}
+
+/* Form Group */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    font-weight: 500;
+    font-size: 13px;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.form-control {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    background-color: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #2e7d32;
+    box-shadow: 0 0 4px rgba(46, 125, 50, 0.2);
+}
+
+/* Table Controls */
+.table-controls {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+.table-controls-left,
+.table-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.table-controls select {
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+    background-color: white;
+}
+
+.table-controls input {
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+/* Table */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+.custom-table thead {
+    background-color: #00b8d4;
+    color: white;
+    font-weight: 500;
+}
+
+.custom-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+}
+
+.custom-table tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+.custom-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.custom-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #333;
+}
+
+.custom-table input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+/* Action Buttons */
+.action-cell {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.icon-btn {
+    background-color: transparent;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.icon-btn:hover {
+    background-color: #eee;
+    color: #333;
+}
+
+/* Pagination */
+.pagination {
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #666;
+}
+
+.pagination-buttons {
+    display: flex;
+    gap: 4px;
+}
+
+.btn-pagination {
+    background-color: white;
+    border: 1px solid #ddd;
+    color: #333;
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-pagination:hover {
+    background-color: #f5f5f5;
+    border-color: #999;
+}
+
+.btn-pagination.active {
+    background-color: #00b8d4;
+    color: white;
+    border-color: #00b8d4;
+}

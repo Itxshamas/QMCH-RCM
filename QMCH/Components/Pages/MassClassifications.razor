@@ -1,0 +1,90 @@
+﻿@page "/caregiver/classifications/list/create/mass"
+@inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Mass Classifications - Create - QMCH</PageTitle>
+
+<div class="mass-classifications-container">
+    <!-- Header Section -->
+    <div class="header-section">
+        <h1>POSITIONS - CREATE</h1>
+        <div class="breadcrumb">
+            <span>Nurse</span> / <span>Configuration</span> / <span>Positions</span> / <span class="active">New</span>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <button type="button" class="btn-cancel" @onclick="GoBack">
+            <i class="fa fa-arrow-left"></i> Cancel
+        </button>
+        <button type="button" class="btn-save" @onclick="SaveAllClassifications">
+            <i class="fa fa-save"></i> Save
+        </button>
+    </div>
+
+    <!-- Form Grid -->
+    <div class="form-grid-wrapper">
+        <div class="form-grid">
+            <!-- Header Row -->
+            <div class="grid-header">
+                <div class="grid-col-job-title">
+                    <span>Job Title</span>
+                </div>
+                <div class="grid-col-description">
+                    <span>Description</span>
+                </div>
+                <div class="grid-col-actions">
+                    <span>&nbsp;</span>
+                </div>
+            </div>
+
+            <!-- Data Rows -->
+            @foreach (var classification in classifications)
+            {
+                int index = classifications.IndexOf(classification);
+                <div class="grid-row">
+                    <!-- Job Title Dropdown -->
+                    <div class="grid-col-job-title">
+                        <select @bind="classification.Name" class="form-select">
+                            <option value="">Select</option>
+                            @foreach (var job in availableJobTitles)
+                            {
+                                <option value="@job">@job</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Description Input -->
+                    <div class="grid-col-description">
+                        <input type="text" 
+                               @bind="classification.Description" 
+                               maxlength="500"
+                               placeholder="Enter description"
+                               class="form-input" />
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid-col-actions">
+                        <button type="button" 
+                                class="action-btn delete-btn" 
+                                @onclick="() => RemoveRow(index)"
+                                title="Delete">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                        @if (index == classifications.Count - 1)
+                        {
+                            <button type="button" 
+                                    class="action-btn add-btn" 
+                                    @onclick="AddNewRow"
+                                    title="Add">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

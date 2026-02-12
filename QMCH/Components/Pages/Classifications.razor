@@ -1,41 +1,156 @@
 @page "/caregiver/classifications/list"
 @inject IEmployeeService EmployeeService
+@inject NavigationManager Navigation
 @rendermode InteractiveServer
 
 <PageTitle>Classifications - QHMC</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left"><h1>Classifications</h1><p>Employee classification types</p></div>
-    <div class="page-header-actions"><button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Add Classification</button></div>
-</div>
+<div class="classifications-container">
+    <!-- Top Action Buttons -->
+    <div class="top-buttons">
+        <button class="btn-green" @onclick="ToggleQuickAdd">
+            <i class="fa fa-plus"></i> Quick Add
+        </button>
+        <button class="btn-green" @onclick="GoToMassCreate">
+            <i class="fa fa-edit"></i> Mass Create
+        </button>
+        <button class="btn-red" @onclick="DeleteSelected">
+            <i class="fa fa-trash"></i> Delete
+        </button>
+    </div>
 
-<DataGrid TItem="Classification" Items="items" Title="Classifications" IsLoading="isLoading">
-    <HeaderTemplate><th>Code</th><th>Name</th><th>Description</th><th>Status</th><th style="width: 100px;">Actions</th></HeaderTemplate>
-    <RowTemplate Context="item">
-        <td><span class="badge badge-primary">@item.Code</span></td>
-        <td><strong>@item.Name</strong></td>
-        <td>@item.Description</td>
-        <td><span class="badge @(item.IsActive ? "badge-success" : "badge-secondary")">@(item.IsActive ? "Active" : "Inactive")</span></td>
-        <td><button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i class="fa fa-trash"></i></button></td>
-    </RowTemplate>
-</DataGrid>
-
-<ModalDialog @bind-IsVisible="showModal" Title="Add Classification">
-    <EditForm Model="newItem" OnValidSubmit="Save">
-        <DataAnnotationsValidator />
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Name *</label><InputText @bind-Value="newItem.Name" class="form-control" /></div>
-            <div class="form-group"><label class="form-label">Code</label><InputText @bind-Value="newItem.Code" class="form-control" /></div>
+    <!-- Quick Add Section -->
+    @if (showQuickAdd)
+    {
+        <div class="table-wrapper quick-add-section">
+            <div class="quick-add-form">
+                <div class="form-group">
+                    <label>Job Title</label>
+                    <select @bind="newItem.Name" class="form-control">
+                        <option value="">Select</option>
+                        @foreach (var job in availableJobTitles)
+                        {
+                            <option value="@job">@job</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" @bind="newItem.Description" maxlength="500" class="form-control" />
+                </div>
+                <div class="button-group">
+                    <button class="btn-green" @onclick="HandleSave">Save</button>
+                    <button class="btn-red" @onclick="CancelQuickAdd">Cancel</button>
+                </div>
+            </div>
         </div>
-        <div class="form-group"><label class="form-label">Description</label><InputTextArea @bind-Value="newItem.Description" class="form-control" /></div>
-        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-    </EditForm>
-</ModalDialog>
+    }
 
-@code {
-    private List<Classification> items = new(); private bool isLoading = true; private bool showModal; private Classification newItem = new();
-    protected override async Task OnInitializedAsync() => await LoadData();
-    private async Task LoadData() { isLoading = true; items = await EmployeeService.GetClassificationsAsync(); isLoading = false; }
-    private async Task Save() { await EmployeeService.CreateClassificationAsync(newItem); newItem = new(); showModal = false; await LoadData(); }
-    private async Task Delete(int id) { await EmployeeService.DeleteClassificationAsync(id); await LoadData(); }
-}
+    <!-- Filter Section -->
+    <div class="table-wrapper filter-section">
+        <div class="filter-group">
+            <label>Job Title</label>
+            <select @onchange="FilterByJobTitle" class="form-control">
+                <option value="">Select</option>
+                @foreach (var job in availableJobTitles)
+                {
+                    <option value="@job" selected="@(job == selectedJobTitle)">@job</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- Table Controls -->
+    <div class="table-wrapper">
+        <div class="table-controls">
+            <div class="table-controls-left">
+                Show
+                <select @onchange="ChangePageSize" value="@pageSize" class="form-control">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+                entries
+            </div>
+            <div class="table-controls-right">
+                Search:
+                <input type="text" @bind="searchText" @bind:event="oninput" placeholder="Search..." class="form-control" />
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th style="width:40px;">
+                        <input type="checkbox" @onchange="ToggleSelectAll" checked="@IsAllSelected" />
+                    </th>
+                    <th style="width:40px;">
+                        <i class="fa fa-bars"></i>
+                    </th>
+                    <th>Job Title</th>
+                    <th>Description</th>
+                    <th style="width:120px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (pagedItems != null && pagedItems.Count > 0)
+                {
+                    @foreach (var item in pagedItems)
+                    {
+                        <tr class="data-row">
+                            <td>
+                                <input type="checkbox" @onchange="() => ToggleSelectItem(item.Id)" checked="@selectedIds.Contains(item.Id)" />
+                            </td>
+                            <td style="text-align:center; color:#999;">
+                                <i class="fa fa-bars" title="Drag"></i>
+                            </td>
+                            <td>@item.Name</td>
+                            <td>@item.Description</td>
+                            <td class="action-cell">
+                                <button class="icon-btn" title="Edit" @onclick="() => ShowEdit(item)">
+                                    <i class="fa fa-pen"></i>
+                                </button>
+                                <button class="icon-btn" title="Delete" @onclick="() => DeleteSingle(item.Id)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                <button class="icon-btn" title="Search" @onclick="() => ShowSearch(item)">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+                else if (!isLoading)
+                {
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:20px; color:#999;">No data found</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <span>Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, filteredItems.Count) of @filteredItems.Count entries</span>
+            <div class="pagination-buttons">
+                @if (currentPage > 1)
+                {
+                    <button @onclick="PreviousPage" class="btn-pagination">Previous</button>
+                }
+                @for (int i = 1; i <= TotalPages; i++)
+                {
+                    int pageNum = i;
+                    <button @onclick="() => GoToPage(pageNum)" 
+                            class="btn-pagination @(currentPage == pageNum ? "active" : "")">
+                        @i
+                    </button>
+                }
+                @if (currentPage < TotalPages)
+                {
+                    <button @onclick="NextPage" class="btn-pagination">Next</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
