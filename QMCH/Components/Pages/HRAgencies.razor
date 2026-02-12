@@ -3,49 +3,143 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>HR Agencies - QHMCPro</PageTitle>
+<PageTitle>HR Agencies - QMCH</PageTitle>
 
 <div class="page-header">
     <div class="page-header-left">
-        <h1>HR Agencies</h1>
-        <p>Staffing and recruitment agencies</p>
+        <h1>RECRUITMENT AGENCY LIST</h1>
     </div>
-    <div class="page-header-actions"><button class="btn btn-primary"
-            @onclick='() => Navigation.NavigateTo("/hr/agency/list/create")'><i class="fa fa-plus"></i> Add
-            Agency</button></div>
+    <div class="page-header-breadcrumb">
+        <a href="/recruitment">Recruitment</a> / <a href="/hr/agency/list">Recruitment Agencies</a>
+    </div>
 </div>
 
-<DataGrid TItem="HRAgency" Items="items" Title="HR Agencies" IsLoading="isLoading">
-    <HeaderTemplate>
-        <th>Name</th>
-        <th>Contact Person</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Status</th>
-        <th style="width: 120px;">Actions</th>
-    </HeaderTemplate>
-    <RowTemplate Context="item">
-        <td><strong>@item.Name</strong></td>
-        <td>@item.ContactPerson</td>
-        <td>@item.Email</td>
-        <td>@item.Phone</td>
-        <td><span class="badge @(item.IsActive ? "badge-success" : "badge-secondary")">@(item.IsActive ? "Active" :
-                "Inactive")</span></td>
-        <td>
-            <div style="display: flex; gap: 6px;">
-                <button class="btn btn-outline btn-sm"
-                    @onclick='() => Navigation.NavigateTo($"/hr/agency/list/create?id={item.Id}")'><i
-                        class="fa fa-edit"></i></button>
-                <button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i
-                        class="fa fa-trash"></i></button>
-            </div>
-        </td>
-    </RowTemplate>
-</DataGrid>
+<div class="content-area">
+    <div class="action-buttons">
+        <button class="btn btn-success" @onclick='() => Navigation.NavigateTo("/hr/agency/list/create")'>
+            <i class="fa fa-plus"></i> New
+        </button>
+        <button class="btn btn-danger">
+            <i class="fa fa-trash"></i> Delete
+        </button>
+        <button class="btn btn-info">
+            <i class="fa fa-lock"></i> Block
+        </button>
+        <button class="btn btn-info">
+            <i class="fa fa-unlock"></i> Unlock
+        </button>
+    </div>
 
-@code {
-    private List<HRAgency> items = new(); private bool isLoading = true;
-    protected override async Task OnInitializedAsync() => await LoadData();
-    private async Task LoadData() { isLoading = true; items = await HRService.GetAgenciesAsync(); isLoading = false; }
-    private async Task Delete(int id) { await HRService.DeleteAgencyAsync(id); await LoadData(); }
-}
+    <div class="grid-controls">
+        <div class="show-entries">
+            <label>Show <select @onchange="@OnPageSizeChanged">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select> entries</label>
+        </div>
+        <div class="search-box">
+            <input type="text" placeholder="Search..." @bind="searchTerm" @bind:event="oninput" 
+                   @onkeyup="OnSearchChanged" />
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        @if (isLoading)
+        {
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <p>Loading agencies...</p>
+            </div>
+        }
+        else if (filteredItems == null || filteredItems.Count == 0)
+        {
+            <div class="empty-state">
+                <p>No agencies found.</p>
+            </div>
+        }
+        else
+        {
+            <table class="data-table">
+                <thead>
+                    <tr class="table-header">
+                        <th><input type="checkbox" /></th>
+                        <th><i class="fa fa-building"></i> Agency Name</th>
+                        <th>Country</th>
+                        <th>Email</th>
+                        <th>Registered On</th>
+                        <th>Enabled Weblogin</th>
+                        <th style="width: 80px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in GetPaginatedItems())
+                    {
+                        <tr class="table-row">
+                            <td><input type="checkbox" /></td>
+                            <td>
+                                <div class="row-actions">
+                                    <button class="action-btn edit" @onclick='() => Navigation.NavigateTo($"/hr/agency/list/create?id={item.Id}")' title="Edit">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete" @onclick="() => Delete(item.Id)" title="Delete">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                    <button class="action-btn search" title="Search">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                                <span class="agency-name">@item.Name</span>
+                            </td>
+                            <td>@item.Country</td>
+                            <td>@item.Email</td>
+                            <td>@item.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>
+                                <button class="weblogin-btn @(item.IsWebloginEnabled ? "enabled" : "disabled")" 
+                                        @onclick="() => ToggleWeblogin(item.Id)">
+                                    <i class="@(item.IsWebloginEnabled ? "fa fa-check-square" : "fa fa-times-circle")"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <div class="row-actions-vertical">
+                                    <button class="action-btn edit" @onclick='() => Navigation.NavigateTo($"/hr/agency/list/create?id={item.Id}")'>
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete" @onclick="() => Delete(item.Id)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    @if (filteredItems != null && filteredItems.Count > 0)
+    {
+        <div class="pagination-info">
+            <span>Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, filteredItems.Count) of @filteredItems.Count entries</span>
+        </div>
+
+        <div class="pagination">
+            <button class="btn btn-outline" @onclick="() => GoToPage(currentPage - 1)" disabled="@(currentPage <= 1)">
+                Previous
+            </button>
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                int pageNum = i;
+                <button class="btn @(currentPage == pageNum ? "btn-active" : "btn-outline")" 
+                        @onclick="() => GoToPage(pageNum)">
+                    @pageNum
+                </button>
+            }
+            <button class="btn btn-outline" @onclick="() => GoToPage(currentPage + 1)" 
+                    disabled="@(currentPage >= totalPages)">
+                Next
+            </button>
+        </div>
+    }
+</div>

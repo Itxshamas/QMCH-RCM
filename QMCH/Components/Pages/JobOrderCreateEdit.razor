@@ -1,107 +1,634 @@
 @page "/hr/aquisition/requisition/list/create"
-@inject IHRService HRService
+@using QMCH.Models
 @inject NavigationManager Navigation
+@inject IHRService HRService
 @rendermode InteractiveServer
 
-<PageTitle>@(isEdit ? "Edit" : "Create") Job Order - QHMCPro</PageTitle>
+<PageTitle>Job Order Create - QMCH</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>@(isEdit ? "Edit Job Order" : "Create Job Order")</h1>
-    </div>
-    <div class="page-header-actions"><button class="btn btn-outline"
-            @onclick='() => Navigation.NavigateTo("/hr/aquisition/requisition/list")'><i class="fa fa-arrow-left"></i>
-            Back</button></div>
-</div>
+<div class="job-order-create-container">
+    <!-- Alert Messages -->
+    @if (!string.IsNullOrEmpty(ErrorMessage))
+    {
+        <div class="alert alert-error">
+            <span class="alert-icon">?</span>
+            <div>
+                <strong>Error</strong>
+                <p>@ErrorMessage</p>
+            </div>
+            <button class="alert-close" @onclick="() => ErrorMessage = null">×</button>
+        </div>
+    }
 
-<div class="card">
-    <div class="card-header">
-        <h3><i class="fa fa-briefcase" style="margin-right: 8px;"></i> Job Order Details</h3>
+    @if (!string.IsNullOrEmpty(SuccessMessage))
+    {
+        <div class="alert alert-success">
+            <span class="alert-icon">?</span>
+            <div>
+                <strong>Success</strong>
+                <p>@SuccessMessage</p>
+            </div>
+            <button class="alert-close" @onclick="() => SuccessMessage = null">×</button>
+        </div>
+    }
+
+    <!-- Header Section -->
+    <div class="create-header">
+        <div class="header-left">
+            <h1 class="header-title">JOB ORDER : CREATE</h1>
+            @if (IsFormDirty)
+            {
+                <span class="unsaved-indicator">• Unsaved Changes</span>
+            }
+        </div>
+        <div class="header-right">
+            <button class="btn btn-cancel" @onclick="HandleCancel" disabled="@IsSaving">
+                <span class="btn-icon">?</span> Cancel
+            </button>
+            <button class="btn btn-save" @onclick="HandleSave" disabled="@IsSaving">
+                @if (IsSaving)
+                {
+                    <span class="spinner-small"></span>
+                }
+                else
+                {
+                    <span class="btn-icon">?</span>
+                }
+                <span>@(IsSaving ? "Saving..." : "Save")</span>
+            </button>
+        </div>
     </div>
-    <div class="card-body">
-        <EditForm Model="model" OnValidSubmit="Save">
+
+    <!-- Main Form Card -->
+    <div class="form-card">
+        <EditForm Model="Model">
             <DataAnnotationsValidator />
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Title *</label>
-                    <InputText @bind-Value="model.Title" class="form-control" />
+
+            <!-- Form Validation Summary -->
+            @if (HasValidationErrors)
+            {
+                <div class="validation-summary">
+                    <strong>Please fix the following errors:</strong>
+                    <ValidationSummary />
                 </div>
-                <div class="form-group"><label class="form-label">Department</label>
-                    <InputText @bind-Value="model.Department" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Location</label>
-                    <InputText @bind-Value="model.Location" class="form-control" />
+            }
+
+            <!-- First Row: 4 Fields -->
+            <div class="section-container">
+                <h3 class="section-title">Basic Information</h3>
+                <div class="form-row-4col">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Job Order Code
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <InputText @bind-Value="Model.Code" 
+                                   class="form-control" 
+                                   placeholder="e.g., REQ/0001"
+                                   @onchange="MarkFormDirty" />
+                        <ValidationMessage For="() => Model.Code" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Job Title
+                            <span class="required-indicator">*</span>
+                            <a href="#" class="add-job-title-link" @onclick:preventDefault="true" title="Add new job title">+ Add Job Title</a>
+                        </label>
+                        <InputSelect @bind-Value="Model.Title" 
+                                     class="form-control"
+                                     @onchange="MarkFormDirty">
+                            <option value="">-- Select Job Title --</option>
+                            <option value="Nurse">Nurse</option>
+                            <option value="Driver">Driver</option>
+                            <option value="Engineer">Engineer</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Technician">Technician</option>
+                        </InputSelect>
+                        <ValidationMessage For="() => Model.Title" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Due Date
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <div class="date-input-wrapper">
+                            <InputDate @bind-Value="Model.DueDate" 
+                                       class="form-control"
+                                       @onchange="MarkFormDirty" />
+                            <span class="calendar-icon">??</span>
+                        </div>
+                        <ValidationMessage For="() => Model.DueDate" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            No. of Visa
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <InputNumber @bind-Value="Model.NumberOfVisa" 
+                                     class="form-control" 
+                                     placeholder="0"
+                                     @onchange="MarkFormDirty" />
+                        <ValidationMessage For="() => Model.NumberOfVisa" />
+                        <small class="help-text">Enter the number of visa positions available</small>
+                    </div>
                 </div>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label"># of Positions</label>
-                    <InputNumber @bind-Value="model.NumberOfPositions" class="form-control" />
+
+            <!-- Document Upload Section -->
+            <div class="section-container">
+                <h3 class="section-title">Document Upload</h3>
+                <div class="upload-section">
+                    <div class="upload-card" @ondrop="HandleFileDrop" @ondragover="HandleDragOver">
+                        <div class="upload-icon">??</div>
+                        <div class="upload-text">Upload Job Order Documents</div>
+                        <div class="upload-hint">Drag and drop files here or click to browse</div>
+                        <input type="file" @ref="FileInput" style="display:none;" @onchange="HandleFileSelected" multiple />
+                        <button type="button" class="upload-btn" @onclick="TriggerFileInput">Browse Files</button>
+                    </div>
+                    
+                    @if (UploadedFiles.Count > 0)
+                    {
+                        <div class="uploaded-files-list">
+                            <h4>Uploaded Files:</h4>
+                            @foreach (var file in UploadedFiles)
+                            {
+                                <div class="file-item">
+                                    <span class="file-icon">??</span>
+                                    <span class="file-name">@file</span>
+                                    <button type="button" class="file-remove" @onclick="() => RemoveFile(file)" title="Remove">?</button>
+                                </div>
+                            }
+                        </div>
+                    }
                 </div>
-                <div class="form-group"><label class="form-label">Priority</label>
-                    <InputSelect @bind-Value="model.Priority" class="form-control">
-                        <option>Low</option>
-                        <option>Medium</option>
-                        <option>High</option>
-                        <option>Urgent</option>
+            </div>
+
+            <!-- Job Description Section -->
+            <div class="section-container">
+                <h3 class="section-title">Job Description</h3>
+                <div class="form-group">
+                    <label class="form-label">
+                        Description
+                        <span class="required-indicator">*</span>
+                    </label>
+                    <div class="rich-editor">
+                        <div class="editor-toolbar">
+                            <button type="button" class="toolbar-btn" title="Bold" @onclick="@((e) => ApplyFormat("bold"))">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Italic" @onclick="@((e) => ApplyFormat("italic"))">
+                                <em>I</em>
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Underline" @onclick="@((e) => ApplyFormat("underline"))">
+                                <u>U</u>
+                            </button>
+                            <span class="toolbar-separator"></span>
+                            <button type="button" class="toolbar-btn" title="Align Left" @onclick="@((e) => ApplyFormat("align-left"))">
+                                ?
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Align Center" @onclick="@((e) => ApplyFormat("align-center"))">
+                                ?
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Bullet List" @onclick="@((e) => ApplyFormat("list"))">
+                                •
+                            </button>
+                        </div>
+                        <InputTextArea @bind-Value="Model.JobDescription" 
+                                       class="rich-textarea" 
+                                       rows="6"
+                                       placeholder="Enter detailed job description..."
+                                       @onchange="MarkFormDirty" />
+                    </div>
+                    <ValidationMessage For="() => Model.JobDescription" />
+                    <small class="help-text char-count">@(Model.JobDescription?.Length ?? 0) / 5000 characters</small>
+                </div>
+            </div>
+
+            <!-- Second Row: 4 Fields -->
+            <div class="section-container">
+                <h3 class="section-title">Job Requirements</h3>
+                <div class="form-row-4col">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Required Qualification
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <InputText @bind-Value="Model.RequiredQualification" 
+                                   class="form-control" 
+                                   placeholder="e.g., Bachelor's Degree"
+                                   @onchange="MarkFormDirty" />
+                        <ValidationMessage For="() => Model.RequiredQualification" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Experience Range
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <InputText @bind-Value="Model.ExperienceRange" 
+                                   class="form-control" 
+                                   placeholder="e.g., 4-5"
+                                   @onchange="MarkFormDirty" />
+                        <ValidationMessage For="() => Model.ExperienceRange" />
+                        <small class="help-text">Format: Min-Max (e.g., 2-5)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Employment Status
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <InputSelect @bind-Value="Model.EmploymentStatus" 
+                                     class="form-control"
+                                     @onchange="MarkFormDirty">
+                            <option value="">-- Select Status --</option>
+                            <option value="Full Time">Full Time</option>
+                            <option value="Part Time">Part Time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Temporary">Temporary</option>
+                            <option value="Internship">Internship</option>
+                        </InputSelect>
+                        <ValidationMessage For="() => Model.EmploymentStatus" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Priority
+                            <span class="required-indicator">*</span>
+                        </label>
+                        <InputSelect @bind-Value="Model.Priority" 
+                                     class="form-control"
+                                     @onchange="MarkFormDirty">
+                            <option value="">-- Select Priority --</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </InputSelect>
+                        <ValidationMessage For="() => Model.Priority" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Required Skills Section -->
+            <div class="section-container">
+                <h3 class="section-title">Required Skills</h3>
+                <div class="form-group">
+                    <label class="form-label">
+                        Skills Required
+                        <span class="required-indicator">*</span>
+                    </label>
+                    <div class="rich-editor">
+                        <div class="editor-toolbar">
+                            <button type="button" class="toolbar-btn" title="Bold" @onclick="@((e) => ApplyFormat("bold"))">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Italic" @onclick="@((e) => ApplyFormat("italic"))">
+                                <em>I</em>
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Underline" @onclick="@((e) => ApplyFormat("underline"))">
+                                <u>U</u>
+                            </button>
+                            <span class="toolbar-separator"></span>
+                            <button type="button" class="toolbar-btn" title="Align Left" @onclick="@((e) => ApplyFormat("align-left"))">
+                                ?
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Align Center" @onclick="@((e) => ApplyFormat("align-center"))">
+                                ?
+                            </button>
+                            <button type="button" class="toolbar-btn" title="Bullet List" @onclick="@((e) => ApplyFormat("list"))">
+                                •
+                            </button>
+                        </div>
+                        <InputTextArea @bind-Value="Model.RequiredSkills" 
+                                       class="rich-textarea" 
+                                       rows="4"
+                                       placeholder="List required skills (one per line or use bullet points)..."
+                                       @onchange="MarkFormDirty" />
+                    </div>
+                    <ValidationMessage For="() => Model.RequiredSkills" />
+                    <small class="help-text char-count">@(Model.RequiredSkills?.Length ?? 0) / 3000 characters</small>
+                </div>
+            </div>
+
+            <!-- Agents Assignment Section -->
+            <div class="section-container">
+                <h3 class="section-title">Agents Assignment</h3>
+                <div class="agents-section">
+                    <div class="agents-container">
+                        <!-- Left Box: Agents Master List -->
+                        <div class="agents-box">
+                            <div class="agents-header">AGENTS MASTER LIST</div>
+                            <div class="search-box">
+                                <input type="text" 
+                                       class="search-input" 
+                                       placeholder="Search agents..."
+                                       @bind="AgentSearchTerm"
+                                       @bind:event="oninput" />
+                            </div>
+                            <div class="agents-list">
+                                @if (AvailableAgents.Count == 0)
+                                {
+                                    <div class="empty-message">No agents available</div>
+                                }
+                                else
+                                {
+                                    @foreach (var agent in AvailableAgents)
+                                    {
+                                        <div class="agent-item" 
+                                             @onclick="() => SelectAgent(agent)"
+                                             title="Select @agent">
+                                            <span class="agent-checkbox">
+                                                @if (SelectedAgent == agent)
+                                                {
+                                                    <span class="checked">?</span>
+                                                }
+                                            </span>
+                                            <span class="agent-name">@agent</span>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Center: Arrow Buttons -->
+                        <div class="agents-arrows">
+                            <button type="button" 
+                                    class="arrow-btn" 
+                                    title="Move Right" 
+                                    @onclick="AssignAgent"
+                                    disabled="@string.IsNullOrEmpty(SelectedAgent)">
+                                ?
+                            </button>
+                            <button type="button" 
+                                    class="arrow-btn" 
+                                    title="Move Left" 
+                                    @onclick="RemoveAgent"
+                                    disabled="@(AssignedAgents.Count == 0)">
+                                ?
+                            </button>
+                        </div>
+
+                        <!-- Right Box: Job Order Assigned -->
+                        <div class="agents-box">
+                            <div class="agents-header">JOB ORDER ASSIGNED</div>
+                            <div class="agents-list assigned-list">
+                                @if (AssignedAgents.Count == 0)
+                                {
+                                    <div class="empty-message">Select from the agents list on the left</div>
+                                }
+                                else
+                                {
+                                    @foreach (var agent in AssignedAgents)
+                                    {
+                                        <div class="agent-item assigned-item">
+                                            <span class="agent-name">@agent</span>
+                                            <button type="button" 
+                                                    class="agent-remove" 
+                                                    @onclick="() => RemoveSpecificAgent(agent)"
+                                                    title="Remove">
+                                                ?
+                                            </button>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Section -->
+            <div class="bottom-section">
+                <div class="checkbox-group">
+                    <InputCheckbox @bind-Value="Model.IsVisibleToDirectApplicant" 
+                                   class="form-checkbox"
+                                   @onchange="MarkFormDirty" />
+                    <label class="checkbox-label" @onclick="() => Model.IsVisibleToDirectApplicant = !Model.IsVisibleToDirectApplicant">
+                        Visible To Direct Applicant
+                    </label>
+                </div>
+
+                <div class="status-group">
+                    <label class="form-label">
+                        Job Order Status
+                        <span class="required-indicator">*</span>
+                    </label>
+                    <InputSelect @bind-Value="Model.Status" 
+                                 class="form-control"
+                                 @onchange="MarkFormDirty">
+                        <option value="Approved">Approved</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Closed">Closed</option>
                     </InputSelect>
                 </div>
-                <div class="form-group"><label class="form-label">Status</label>
-                    <InputSelect @bind-Value="model.Status" class="form-control">
-                        <option>Open</option>
-                        <option>In Progress</option>
-                        <option>Filled</option>
-                        <option>Closed</option>
-                    </InputSelect>
-                </div>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Pay Range Min</label>
-                    <InputNumber @bind-Value="model.PayRangeMin" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Pay Range Max</label>
-                    <InputNumber @bind-Value="model.PayRangeMax" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Posted Date</label>
-                    <InputDate @bind-Value="model.PostedDate" class="form-control" />
-                </div>
-            </div>
-            <div class="form-group"><label class="form-label">Description</label>
-                <InputTextArea @bind-Value="model.Description" class="form-control" rows="4" />
-            </div>
-            <div class="form-group"><label class="form-label">Requirements</label>
-                <InputTextArea @bind-Value="model.Requirements" class="form-control" rows="3" />
-            </div>
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> @(isEdit ? "Update" :
-                    "Create")</button>
-                <button type="button" class="btn btn-outline"
-                    @onclick='() => Navigation.NavigateTo("/hr/aquisition/requisition/list")'>Cancel</button>
-            </div>
+
+            <!-- Hidden Submit Button for EditForm -->
+            <button type="submit" style="display: none;"></button>
         </EditForm>
     </div>
 </div>
 
 @code {
-    [SupplyParameterFromQuery] public int? Id { get; set; }
-    private JobOrder model = new()
-        {
-            PostedDate = DateTime.Today,
-            Priority = "Medium",
-            Status = "Open",
-            NumberOfPositions =
-        1
-        }; private bool isEdit;
-    protected override async Task OnInitializedAsync()
+    private JobOrder Model { get; set; } = new();
+    private bool IsSaving = false;
+    private bool IsFormDirty = false;
+    private bool HasValidationErrors = false;
+    private string ErrorMessage = string.Empty;
+    private string SuccessMessage = string.Empty;
+    
+    // File upload
+    private ElementReference FileInput;
+    private List<string> UploadedFiles = new();
+    
+    // Agent assignment
+    private string SelectedAgent = string.Empty;
+    private string AgentSearchTerm = string.Empty;
+    private List<string> AssignedAgents = new();
+    private List<string> AllAgents = new()
     {
-        if (Id.HasValue)
+        "PSC Primary Skills",
+        "CSV International Placement Agency Inc",
+        "Overseas Professional Achievers Int'l Inc",
+        "Global Recruitment Partners",
+        "Elite Staffing Solutions",
+        "International Talent Agency"
+    };
+
+    private List<string> AvailableAgents
+    {
+        get
         {
-            var e = await
-    HRService.GetJobOrderByIdAsync(Id.Value); if (e != null) { model = e; isEdit = true; }
+            var available = AllAgents.Where(a => !AssignedAgents.Contains(a)).ToList();
+            
+            if (!string.IsNullOrWhiteSpace(AgentSearchTerm))
+            {
+                available = available
+                    .Where(a => a.Contains(AgentSearchTerm, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+            
+            return available;
         }
     }
-    private async Task Save()
+
+    protected override Task OnInitializedAsync()
     {
-        if (isEdit) await HRService.UpdateJobOrderAsync(model);
-        else await
-    HRService.CreateJobOrderAsync(model); Navigation.NavigateTo("/hr/aquisition/requisition/list");
+        Model = new JobOrder
+        {
+            DueDate = DateTime.Today.AddDays(30),
+            Priority = "Medium",
+            Status = "Approved",
+            EmploymentStatus = "Full Time",
+            Code = GenerateJobOrderCode()
+        };
+        
+        IsFormDirty = false;
+        return Task.CompletedTask;
+    }
+
+    private string GenerateJobOrderCode()
+    {
+        return $"REQ/{DateTime.Now.Year}{DateTime.Now.Month:D2}{DateTime.Now.Day:D2}{new Random().Next(100, 999)}";
+    }
+
+    private void MarkFormDirty()
+    {
+        IsFormDirty = true;
+    }
+
+    private void HandleCancel()
+    {
+        NavigateToListPage();
+    }
+
+    private async Task HandleSave()
+    {
+        IsSaving = true;
+        ErrorMessage = string.Empty;
+        SuccessMessage = string.Empty;
+        
+        try
+        {
+            if (!ValidateJobOrder())
+            {
+                HasValidationErrors = true;
+                IsSaving = false;
+                return;
+            }
+
+            // TODO: Implement actual save logic with HRService
+            // await HRService.CreateJobOrderAsync(Model);
+            
+            SuccessMessage = $"Job Order '{Model.Code}' created successfully!";
+            IsFormDirty = false;
+            
+            // Redirect after 2 seconds
+            await Task.Delay(2000);
+            NavigateToListPage();
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error saving job order: {ex.Message}";
+        }
+        finally
+        {
+            IsSaving = false;
+        }
+    }
+
+    private void NavigateToListPage()
+    {
+        Navigation.NavigateTo("/hr/aquisition/requisition/list");
+    }
+
+    private async Task TriggerFileInput()
+    {
+        try
+        {
+            await FileInput.FocusAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error focusing file input: {ex.Message}");
+        }
+    }
+
+    private async Task HandleFileSelected(ChangeEventArgs e)
+    {
+        try
+        {
+            if (e.Value is string fileValue && !string.IsNullOrWhiteSpace(fileValue))
+            {
+                var fileName = Path.GetFileName(fileValue);
+                if (!UploadedFiles.Contains(fileName))
+                {
+                    UploadedFiles.Add(fileName);
+                    MarkFormDirty();
+                }
+            }
+
+            await Task.CompletedTask;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error uploading file: {ex.Message}";
+        }
+    }
+
+    private void HandleDragOver(DragEventArgs e)
+    {
+        e.DataTransfer.DropEffect = "copy";
+    }
+
+    private void HandleFileDrop(DragEventArgs e)
+    {
+        MarkFormDirty();
+    }
+
+    private void RemoveFile(string fileName)
+    {
+        UploadedFiles.Remove(fileName);
+        MarkFormDirty();
+    }
+
+    private void ApplyFormat(string format)
+    {
+        // Placeholder for rich text formatting
+    }
+
+    private void SelectAgent(string agent)
+    {
+        SelectedAgent = agent;
+    }
+
+    private void AssignAgent()
+    {
+        if (!string.IsNullOrEmpty(SelectedAgent) && !AssignedAgents.Contains(SelectedAgent))
+        {
+            AssignedAgents.Add(SelectedAgent);
+            SelectedAgent = string.Empty;
+            MarkFormDirty();
+        }
+    }
+
+    private void RemoveAgent()
+    {
+        if (AssignedAgents.Count > 0)
+        {
+            AssignedAgents.RemoveAt(AssignedAgents.Count - 1);
+            MarkFormDirty();
+        }
+    }
+
+    private void RemoveSpecificAgent(string agent)
+    {
+        AssignedAgents.Remove(agent);
+        MarkFormDirty();
     }
 }

@@ -1,77 +1,117 @@
 @page "/hr/aquisition/requisition/list"
-@inject IHRService HRService
+@using QMCH.Models
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>Job Orders - QHMCPro</PageTitle>
+<PageTitle>Job Orders - QMCH</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>Job Orders</h1>
-        <p>Manage hiring requisitions</p>
-    </div>
-    <div class="page-header-actions"><button class="btn btn-primary"
-            @onclick='() => Navigation.NavigateTo("/hr/aquisition/requisition/list/create")'><i class="fa fa-plus"></i>
-            New Requisition</button></div>
-</div>
-
-<DataGrid TItem="JobOrder" Items="items" Title="Job Orders" IsLoading="isLoading" OnSearchChanged="HandleSearch">
-    <HeaderTemplate>
-        <th>Title</th>
-        <th>Department</th>
-        <th>Positions</th>
-        <th>Priority</th>
-        <th>Status</th>
-        <th>Posted</th>
-        <th style="width: 120px;">Actions</th>
-    </HeaderTemplate>
-    <RowTemplate Context="item">
-        <td><strong>@item.Title</strong></td>
-        <td>@item.Department</td>
-        <td>@item.NumberOfPositions</td>
-        <td><span class="badge @GetPriorityBadge(item.Priority)">@item.Priority</span></td>
-        <td><span class="badge @GetStatusBadge(item.Status)">@item.Status</span></td>
-        <td>@item.PostedDate.ToString("MMM dd, yyyy")</td>
-        <td>
-            <div style="display: flex; gap: 6px;">
-                <button class="btn btn-outline btn-sm"
-                    @onclick='() => Navigation.NavigateTo($"/hr/aquisition/requisition/list/create?id={item.Id}")'><i
-                        class="fa fa-edit"></i></button>
-                <button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i
-                        class="fa fa-trash"></i></button>
+<div class="job-orders-container">
+    <!-- Page Header -->
+    <div class="page-header-section">
+        <div class="header-left">
+            <h1 class="page-title">JOB ORDERS</h1>
+        </div>
+        <div class="header-right">
+            <div class="breadcrumb">
+                <span>Recruitment / Talent Acquisition / Job Orders</span>
             </div>
-        </td>
-    </RowTemplate>
-</DataGrid>
+        </div>
+    </div>
 
-@code {
-    private List<JobOrder> allItems = new(); private IEnumerable<JobOrder> items = Enumerable.Empty<JobOrder>(); private
-    bool isLoading = true;
-    protected override async Task OnInitializedAsync() => await LoadData();
-    private async Task LoadData()
-    {
-        isLoading = true; allItems = await HRService.GetJobOrdersAsync(); items = allItems;
-        isLoading = false;
-    }
-    private async Task Delete(int id) { await HRService.DeleteJobOrderAsync(id); await LoadData(); }
-    private Task HandleSearch(string t)
-    {
-        items = string.IsNullOrWhiteSpace(t) ? allItems : allItems.Where(x =>
-        x.Title.Contains(t, StringComparison.OrdinalIgnoreCase)); return Task.CompletedTask;
-    }
-    private string GetPriorityBadge(string p) => p switch
-    {
-        "High" => "badge-danger",
-        "Medium" => "badge-warning",
-        _ =>
-        "badge-info"
-    };
-    private string GetStatusBadge(string s) => s switch
-    {
-        "Open" => "badge-success",
-        "Filled" => "badge-primary",
-        "Closed"
-        => "badge-secondary",
-        _ => "badge-info"
-    };
-}
+    <!-- Controls Section -->
+    <div class="controls-section">
+        <button class="btn btn-success btn-new" @onclick="HandleNewClick">
+            <span class="plus-icon">+</span> New
+        </button>
+
+        <div class="controls-right">
+            <select class="status-dropdown" @bind="selectedStatus">
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Closed">Closed</option>
+            </select>
+            <input type="text" class="search-box" placeholder="Search" @oninput="HandleSearch" />
+        </div>
+    </div>
+
+    <!-- Show entries and Search -->
+    <div class="entries-info">
+        <div>
+            <label>Show</label>
+            <select class="entries-dropdown">
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+            </select>
+            <label>entries</label>
+        </div>
+        <div class="search-right">Search</div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-wrapper">
+        <table class="job-orders-table">
+            <thead>
+                <tr class="table-header">
+                    <th class="col-checkbox"><input type="checkbox" /></th>
+                    <th>Job Order Code</th>
+                    <th>Job Title</th>
+                    <th>No.of Visa</th>
+                    <th>Filled Visa</th>
+                    <th>Priority</th>
+                    <th>Job Order Status</th>
+                    <th>Raised By</th>
+                    <th>Due Date</th>
+                    <th class="col-actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in filteredItems)
+                {
+                    <tr class="table-row">
+                        <td class="col-checkbox"><input type="checkbox" /></td>
+                        <td>@item.Code</td>
+                        <td>@item.Title</td>
+                        <td>@item.NumberOfVisa</td>
+                        <td>@item.FilledVisa</td>
+                        <td>
+                            <span class="badge @GetPriorityBadge(item.Priority)">
+                                @item.Priority
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge @GetStatusBadge(item.Status)">
+                                @item.Status
+                            </span>
+                        </td>
+                        <td>@item.RaisedBy</td>
+                        <td>@item.DueDate.ToString("yyyy-MM-dd")</td>
+                        <td class="col-actions">
+                            <button class="action-btn" title="Edit">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="action-btn" title="View">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                            <button class="action-btn" title="Search">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Section -->
+    <div class="pagination-section">
+        <div class="entries-display">
+            Showing 1 to @items.Count() of @items.Count() entries
+        </div>
+        <div class="pagination-controls">
+            <button class="pagination-btn">Previous</button>
+            <button class="pagination-btn active">1</button>
+            <button class="pagination-btn">Next</button>
+        </div>
+    </div>
+</div>

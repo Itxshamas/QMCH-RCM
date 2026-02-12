@@ -3,71 +3,151 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>@(isEdit ? "Edit" : "Add") HR Agency - QHMCPro</PageTitle>
+<PageTitle>@(isEdit ? "Edit" : "Create") HR Agency - QMCH</PageTitle>
 
 <div class="page-header">
     <div class="page-header-left">
-        <h1>@(isEdit ? "Edit Agency" : "Add New Agency")</h1>
+        <h1>RECRUITMENT AGENCY LIST : @(isEdit ? "EDIT" : "CREATE")</h1>
     </div>
-    <div class="page-header-actions"><button class="btn btn-outline"
-            @onclick='() => Navigation.NavigateTo("/hr/agency/list")'><i class="fa fa-arrow-left"></i> Back</button>
-    </div>
-</div>
-
-<div class="card">
-    <div class="card-header">
-        <h3><i class="fa fa-building" style="margin-right: 8px;"></i> Agency Details</h3>
-    </div>
-    <div class="card-body">
-        <EditForm Model="model" OnValidSubmit="Save">
-            <DataAnnotationsValidator />
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Agency Name *</label>
-                    <InputText @bind-Value="model.Name" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Contact Person</label>
-                    <InputText @bind-Value="model.ContactPerson" class="form-control" />
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Email</label>
-                    <InputText @bind-Value="model.Email" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Phone</label>
-                    <InputText @bind-Value="model.Phone" class="form-control" />
-                </div>
-            </div>
-            <div class="form-group"><label class="form-label">Address</label>
-                <InputText @bind-Value="model.Address" class="form-control" />
-            </div>
-            <div class="form-group"><label class="form-label">Notes</label>
-                <InputTextArea @bind-Value="model.Notes" class="form-control" rows="3" />
-            </div>
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> @(isEdit ? "Update" :
-                    "Create")</button>
-                <button type="button" class="btn btn-outline"
-                    @onclick='() => Navigation.NavigateTo("/hr/agency/list")'>Cancel</button>
-            </div>
-        </EditForm>
+    <div class="page-header-breadcrumb">
+        <a href="/recruitment">Recruitment</a> / <a href="/hr/agency/list">Recruitment Agencies</a> / @(isEdit ? "Edit" : "New")
     </div>
 </div>
 
-@code {
-    [SupplyParameterFromQuery] public int? Id { get; set; }
-    private HRAgency model = new(); private bool isEdit;
-    protected override async Task OnInitializedAsync()
-    {
-        if (Id.HasValue)
-        {
-            var e = await
-            HRService.GetAgencyByIdAsync(Id.Value); if (e != null) { model = e; isEdit = true; }
-        }
-    }
-    private async Task Save()
-    {
-        if (isEdit) await HRService.UpdateAgencyAsync(model);
-        else await
-        HRService.CreateAgencyAsync(model); Navigation.NavigateTo("/hr/agency/list");
-    }
-}
+<div class="content-area">
+    <div class="form-container">
+        <div class="form-header">
+            <div class="button-group">
+                <button type="button" class="btn btn-cancel" @onclick='() => Navigation.NavigateTo("/hr/agency/list")'>
+                    <i class="fa fa-times"></i> Cancel
+                </button>
+                <button type="button" class="btn btn-save" @onclick="HandleSave">
+                    <i class="fa fa-save"></i> Save
+                </button>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab @(activeTab == "agency" ? "active" : "")" 
+                        @onclick='() => activeTab = "agency"'>
+                    Agency Details
+                </button>
+                <button class="tab @(activeTab == "contact" ? "active" : "")" 
+                        @onclick='() => activeTab = "contact"'>
+                    Contact Details
+                </button>
+                <button class="tab @(activeTab == "account" ? "active" : "")" 
+                        @onclick='() => activeTab = "account"'>
+                    Account Details
+                </button>
+            </div>
+
+            <EditForm Model="model" OnValidSubmit="Save" class="form-content">
+                <DataAnnotationsValidator />
+
+                @if (activeTab == "agency")
+                {
+                    <div class="tab-content">
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label class="form-label">Agency Name <span class="required">*</span></label>
+                                <InputText @bind-Value="model.Name" class="form-control" placeholder="Enter agency name" />
+                                <ValidationMessage For="() => model.Name" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Primary Phone</label>
+                                <InputText @bind-Value="model.PrimaryPhone" class="form-control" placeholder="Enter primary phone" />
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Address</label>
+                            <InputText @bind-Value="model.Address" class="form-control" placeholder="Enter address" />
+                        </div>
+
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label class="form-label">Country</label>
+                                <InputSelect @bind-Value="model.Country" class="form-control">
+                                    <option value="">Select</option>
+                                    @foreach (var country in GetCountries())
+                                    {
+                                        <option value="@country">@country</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Secondary Phone</label>
+                                <InputText @bind-Value="model.SecondaryPhone" class="form-control" placeholder="Enter secondary phone" />
+                            </div>
+                        </div>
+
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label class="form-label">State</label>
+                                <InputText @bind-Value="model.State" class="form-control" placeholder="Enter state" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Fax</label>
+                                <InputText @bind-Value="model.Fax" class="form-control" placeholder="Enter fax" />
+                            </div>
+                        </div>
+
+                        <div class="form-group-row">
+                            <div class="form-group">
+                                <label class="form-label">City</label>
+                                <InputText @bind-Value="model.City" class="form-control" placeholder="Enter city" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Website URL</label>
+                                <InputText @bind-Value="model.WebsiteURL" class="form-control" placeholder="Enter website URL" />
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @if (activeTab == "contact")
+                {
+                    <div class="tab-content">
+                        <div class="form-group">
+                            <label class="form-label">Contact Person</label>
+                            <InputText @bind-Value="model.ContactPerson" class="form-control" placeholder="Enter contact person name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <InputText @bind-Value="model.Email" class="form-control" type="email" placeholder="Enter email address" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <InputTextArea @bind-Value="model.Notes" class="form-control" rows="4" placeholder="Enter additional notes" />
+                        </div>
+                    </div>
+                }
+
+                @if (activeTab == "account")
+                {
+                    <div class="tab-content">
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <InputSelect @bind-Value="model.Status" class="form-control">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                                <option value="Blocked">Blocked</option>
+                            </InputSelect>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-checkbox">
+                                <InputCheckbox @bind-Value="model.IsWebloginEnabled" />
+                                <span>Enable Weblogin</span>
+                            </label>
+                        </div>
+                    </div>
+                }
+            </EditForm>
+        </div>
+    </div>
+</div>
