@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QMCH.Data;
 
@@ -11,9 +12,11 @@ using QMCH.Data;
 namespace QMCH.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260212055502_QMCH00012")]
+    partial class QMCH00012
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -596,18 +599,6 @@ namespace QMCH.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("BloodGroupStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("BusinessUnit")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Category")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<DateTime?>("CertificationExpiry")
                         .HasColumnType("datetime2");
 
@@ -620,18 +611,6 @@ namespace QMCH.Migrations
 
                     b.Property<int>("ClassificationId")
                         .HasColumnType("int");
-
-                    b.Property<string>("ContractFor")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ContractStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Country")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -654,10 +633,6 @@ namespace QMCH.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<string>("FingerPrintStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -673,23 +648,14 @@ namespace QMCH.Migrations
                     b.Property<bool>("IsCandidate")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsEmployeeReJoined")
-                        .HasColumnType("bit");
-
                     b.Property<string>("JobTitle")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("JoinDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("LastWorkingDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LicenseExpiry")
                         .HasColumnType("datetime2");
@@ -697,10 +663,6 @@ namespace QMCH.Migrations
                     b.Property<string>("LicenseNumber")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("MedicalStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("MiddleName")
                         .HasMaxLength(100)
@@ -715,26 +677,6 @@ namespace QMCH.Migrations
                     b.Property<bool>("OQHPLicenseVerified")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("PRCIdentificationExpire")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("PRCIdentificationIssued")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PRCRegistrationNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("PassportExpire")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("PassportIssued")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PassportNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<decimal?>("PayRate")
                         .HasColumnType("decimal(18,2)");
 
@@ -746,77 +688,12 @@ namespace QMCH.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Phone1")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Phone2")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<byte[]>("PhotoData")
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("PhotoMimeType")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("PoliceClearStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Position")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("PreliminaryAssessmentExpire")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("PreliminaryAssessmentIssued")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("QCHPLicenseExpire")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("QCHPLicenseIssued")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("QCHPLicenseNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("QatarIdExpire")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("QatarIdIssued")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("QatarIdNumber")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("QatarIdStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ReasonInActive")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("RecruitmentAgency")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("RejoinedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("RoleInSystem")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SCHLicenseStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Skills")
                         .HasColumnType("nvarchar(max)");
@@ -830,14 +707,7 @@ namespace QMCH.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("Street")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
                     b.Property<DateTime?>("TerminationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("TravellingDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("UpdatedAt")

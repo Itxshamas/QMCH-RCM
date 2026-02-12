@@ -3,45 +3,229 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>Employees - QHMCPro</PageTitle>
+<PageTitle>Employee Management - QHMCPro</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left"><h1>Employee List</h1><p>Manage caregivers and staff</p></div>
-    <div class="page-header-actions">
-        <button class="btn btn-primary" @onclick='() => Navigation.NavigateTo("/caregiver/list/create")'><i class="fa fa-plus"></i> Add Employee</button>
+<div class="employee-header">
+    <h2>EMPLOYEE MANAGEMENT</h2>
+    <div class="header-actions">
+        <button class="btn btn-success" @onclick="NavigateToCreate">
+            <i class="fa fa-plus"></i> New Employee
+        </button>
+        <button class="btn btn-accent" @onclick="RefreshData">
+            <i class="fa fa-refresh"></i> Recalculate
+        </button>
+        <a href="#" class="clear-filters-link" @onclick:preventDefault="true" @onclick="ClearFilters">× Clear Filters</a>
     </div>
 </div>
 
-<DataGrid TItem="Employee" Items="items" Title="Employees" IsLoading="isLoading" OnSearchChanged="HandleSearch">
-    <HeaderTemplate>
-        <th>Name</th><th>Email</th><th>Phone</th><th>Job Title</th><th>Status</th><th>Hire Date</th><th style="width: 120px;">Actions</th>
-    </HeaderTemplate>
-    <RowTemplate Context="emp">
-        <td><strong>@emp.FirstName @emp.LastName</strong></td>
-        <td>@emp.Email</td>
-        <td>@emp.Phone</td>
-        <td>@emp.JobTitle</td>
-        <td><span class="badge @(emp.Status == "Active" ? "badge-success" : "badge-secondary")">@emp.Status</span></td>
-        <td>@(emp.HireDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
-        <td>
-            <div style="display: flex; gap: 6px;">
-                <button class="btn btn-outline btn-sm" @onclick='() => Navigation.NavigateTo($"/caregiver/list/create?id={emp.Id}")'><i class="fa fa-edit"></i></button>
-                <button class="btn btn-danger btn-sm" @onclick="() => Delete(emp.Id)"><i class="fa fa-trash"></i></button>
-            </div>
-        </td>
-    </RowTemplate>
-</DataGrid>
+<div class="filter-container">
+    <div class="filter-grid">
+        <div class="filter-item">
+            <label>Business Unit</label>
+            <select class="form-control" @onchange="OnBusinessUnitChanged">
+                <option value="">---Select---</option>
+                <option value="QHMC">Quality Home Medical Care</option>
+                <option value="MN">Maid & Nanny</option>
+                <option value="HO">Head Office</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>Department</label>
+            <select class="form-control" @onchange="OnDepartmentChanged">
+                <option value="">---Select Business Unit---</option>
+                <option value="Nursing">Nursing</option>
+                <option value="Healthcare">Healthcare</option>
+                <option value="Domestic">Domestic Services</option>
+                <option value="Childcare">Childcare</option>
+                <option value="Administration">Administration</option>
+                <option value="HR">Human Resources</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>Job Title</label>
+            <select class="form-control" @onchange="OnJobTitleChanged">
+                <option value="">---Select---</option>
+                <option value="RN">Registered Nurse</option>
+                <option value="LPN">Licensed Practical Nurse</option>
+                <option value="CNA">Certified Nursing Assistant</option>
+                <option value="HHA">Home Health Aide</option>
+                <option value="Nanny">Nanny</option>
+                <option value="Housekeeper">Housekeeper</option>
+                <option value="Caregiver">Caregiver</option>
+                <option value="Manager">Manager</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>Position</label>
+            <select class="form-control" @onchange="OnPositionChanged">
+                <option value="">---Select Job Title---</option>
+                <option value="FullTime">Full Time</option>
+                <option value="PartTime">Part Time</option>
+                <option value="Contract">Contract</option>
+                <option value="Temporary">Temporary</option>
+            </select>
+        </div>
+    </div>
+    <div class="filter-grid">
+        <div class="filter-item">
+            <label>Category</label>
+            <select class="form-control" @onchange="OnCategoryChanged">
+                <option value="">--Select--</option>
+                <option value="Clinical">Clinical</option>
+                <option value="Non-Clinical">Non-Clinical</option>
+                <option value="Management">Management</option>
+                <option value="Support">Support</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>License</label>
+            <select class="form-control" @onchange="OnLicenseChanged">
+                <option value="">--Select--</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Expired">Expired</option>
+                <option value="Pending">Pending</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>Competency</label>
+            <select class="form-control" @onchange="OnCompetencyChanged">
+                <option value="">--All--</option>
+                <option value="Level1">Level 1</option>
+                <option value="Level2">Level 2</option>
+                <option value="Level3">Level 3</option>
+                <option value="Expert">Expert</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>Contract Status</label>
+            <select class="form-control" @onchange="OnContractStatusChanged">
+                <option value="">--All--</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Suspended">Suspended</option>
+                <option value="Terminated">Terminated</option>
+            </select>
+        </div>
+    </div>
+    <div class="filter-grid">
+        <div class="filter-item">
+            <label>NFC Registered</label>
+            <select class="form-control" @onchange="OnNFCChanged">
+                <option value="">--All--</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+        <div class="filter-item">
+            <label>BIO Metric Registered</label>
+            <select class="form-control" @onchange="OnBIOChanged">
+                <option value="">--All--</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+            </select>
+        </div>
+    </div>
+    <div class="search-bar">
+        <input type="text" placeholder="Search" class="search-input" @bind="searchTerm" @oninput="HandleSearchDebounced" />
+    </div>
+</div>
 
-@code {
-    private List<Employee> allItems = new(); private IEnumerable<Employee> items = Enumerable.Empty<Employee>(); private bool isLoading = true;
-
-    protected override async Task OnInitializedAsync() { await LoadData(); }
-    private async Task LoadData() { isLoading = true; allItems = await EmployeeService.GetAllAsync(); items = allItems; isLoading = false; }
-    private async Task Delete(int id) { await EmployeeService.DeleteAsync(id); await LoadData(); }
-    private Task HandleSearch(string term)
+<div class="employee-table-container">
+    @if (isLoading)
     {
-        items = string.IsNullOrWhiteSpace(term) ? allItems :
-            allItems.Where(e => $"{e.FirstName} {e.LastName}".Contains(term, StringComparison.OrdinalIgnoreCase));
-        return Task.CompletedTask;
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading employees...</p>
+        </div>
     }
+    else if (filteredItems == null || !filteredItems.Any())
+    {
+        <div class="empty-state">
+            <i class="fa fa-inbox"></i>
+            <h3>No Employees Found</h3>
+            <p>Start by adding your first employee to the system.</p>
+            <button class="btn btn-primary" @onclick="NavigateToCreate">
+                <i class="fa fa-plus"></i> Add First Employee
+            </button>
+        </div>
+    }
+    else
+    {
+        <table class="employee-table">
+            <thead>
+                <tr>
+                    <th style="width: 40px;"><input type="checkbox" /></th>
+                    <th style="width: 80px;">ID</th>
+                    <th>Employee Name</th>
+                    <th>Position</th>
+                    <th>License Status</th>
+                    <th>License Date</th>
+                    <th>License End Date</th>
+                    <th>Country</th>
+                    <th>Union Affiliation</th>
+                    <th style="width: 120px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var emp in filteredItems)
+                {
+                    <tr>
+                        <td><input type="checkbox" /></td>
+                        <td class="emp-id">@emp.Id</td>
+                        <td class="emp-name">@emp.FirstName @emp.LastName</td>
+                        <td>@(emp.JobTitle ?? "—")</td>
+                        <td>
+                            <span class="status-badge @GetStatusClass(emp.Status)">
+                                @(emp.Status == "Active" ? "?" : "?")
+                            </span>
+                        </td>
+                        <td>@(emp.HireDate?.ToString("yyyy-01-01") ?? "—")</td>
+                        <td>@(emp.LicenseExpiry?.ToString("yyyy-12-31") ?? "—")</td>
+                        <td>@(emp.City ?? "—")</td>
+                        <td>—</td>
+                        <td>
+                            <div class="action-icons">
+                                <button class="icon-btn" @onclick="() => NavigateToEdit(emp.Id)" title="Edit">
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                                <button class="icon-btn" @onclick="() => ConfirmDelete(emp.Id, emp.FirstName, emp.LastName)" title="Delete">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="table-footer">
+            <span>Showing 1 to 25 of 27 entries</span>
+            <div class="pagination">
+                <button class="page-btn">Previous</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">Next</button>
+            </div>
+        </div>
+    }
+</div>
+
+@if (showDeleteConfirm)
+{
+    <div class="modal-overlay" @onclick="CancelDelete">
+        <div class="modal-dialog" @onclick:stopPropagation="true">
+            <div class="modal-header">
+                <h2>Confirm Delete</h2>
+                <button class="btn-close" @onclick="CancelDelete"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>@deleteConfirmName</strong>?</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 12px;">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" @onclick="CancelDelete">Cancel</button>
+                <button class="btn btn-danger" @onclick="ConfirmDeleteAction">Delete Employee</button>
+            </div>
+        </div>
+    </div>
 }

@@ -21,6 +21,16 @@
     </CascadingAuthenticationState>
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="@Assets["js/app.js"]"></script>
+    <script>
+        // Expose JavaScript function for Blazor interop
+        window.triggerFileInput = function(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.click();
+            }
+        };
+    </script>
 </body>
 
 </html>

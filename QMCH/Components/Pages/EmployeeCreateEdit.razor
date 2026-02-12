@@ -1,144 +1,658 @@
 @page "/caregiver/list/create"
-@inject IEmployeeService EmployeeService
-@inject NavigationManager Navigation
+
 @rendermode InteractiveServer
 
-<PageTitle>@(isEdit ? "Edit" : "Add") Employee - QHMCPro</PageTitle>
+<PageTitle>@(isEdit ? "Edit Employee" : "Add New Employee") - QMCH</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>@(isEdit ? "Edit Employee" : "Add New Employee")</h1>
-    </div>
-    <div class="page-header-actions"><button class="btn btn-outline"
-            @onclick='() => Navigation.NavigateTo("/caregiver/list")'><i class="fa fa-arrow-left"></i> Back</button>
-    </div>
+<div class="employee-form-page">
+    <EditForm Model="model" OnValidSubmit="@Save" class="form-wrapper">
+        <DataAnnotationsValidator />
+
+        <!-- Navigation Section -->
+        <div class="navigation-section">
+            <div class="navigation-header">
+                <h3>Navigation</h3>
+                <button type="button" class="collapse-btn" @onclick="@ToggleNavigation">
+                    <i class="fa fa-chevron-up"></i>
+                </button>
+            </div>
+
+            @if (showNavigation)
+            {
+                <div class="navigation-grid">
+                    <!-- Column 1: Employee Data -->
+                    <div class="nav-column">
+                        <div class="nav-card active" @onclick="@(() => SetActiveSection("personal"))">
+                            <i class="fa fa-user"></i>
+                            <span>Employee Data</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-code"></i>
+                            <span>Skills</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-calendar"></i>
+                            <span>Attendance</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-sticky-note"></i>
+                            <span>Notes</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-shield-alt"></i>
+                            <span>Police Clear</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-fingerprint"></i>
+                            <span>Finger Print</span>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Compensation -->
+                    <div class="nav-column">
+                        <div class="nav-card">
+                            <i class="fa fa-dollar-sign"></i>
+                            <span>Compensation</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-sliders-h"></i>
+                            <span>Custom Fields</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-ban"></i>
+                            <span>Unavailable</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-bell"></i>
+                            <span>Reminders</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-passport"></i>
+                            <span>Residence Permit</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-heartbeat"></i>
+                            <span>Medical</span>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Candidate -->
+                    <div class="nav-column">
+                        <div class="nav-card">
+                            <i class="fa fa-user-tie"></i>
+                            <span>Candidate</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-calendar-alt"></i>
+                            <span>Schedule</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-history"></i>
+                            <span>Visit History</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-home"></i>
+                            <span>Sup. Visits</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-file-contract"></i>
+                            <span>Contract</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-briefcase"></i>
+                            <span>In Services</span>
+                        </div>
+                    </div>
+
+                    <!-- Column 4: Documents -->
+                    <div class="nav-column">
+                        <div class="nav-card">
+                            <i class="fa fa-file"></i>
+                            <span>Documents</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-calendar-times"></i>
+                            <span>Leaves</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-times-circle"></i>
+                            <span>Exclusions</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-certificate"></i>
+                            <span>QCHP License</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-droplet"></i>
+                            <span>Blood Group</span>
+                        </div>
+                        <div class="nav-card">
+                            <i class="fa fa-ellipsis-h"></i>
+                            <span>Miscellaneous</span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="form-layout">
+            <!-- Left Sidebar Navigation -->
+            <aside class="sidebar-nav">
+                <div class="nav-section">
+                    <button type="button" 
+                            class="nav-item @(activeSection == "personal" ? "active" : "")" 
+                            @onclick="@(() => SetActiveSection("personal"))">
+                        <i class="fa fa-user"></i>
+                        <span>Personal Data</span>
+                    </button>
+
+                    <button type="button" 
+                            class="nav-item @(activeSection == "contract" ? "active" : "")" 
+                            @onclick="@(() => SetActiveSection("contract"))">
+                        <i class="fa fa-file-contract"></i>
+                        <span>Contract Details</span>
+                    </button>
+
+                    <button type="button" 
+                            class="nav-item @(activeSection == "legal" ? "active" : "")" 
+                            @onclick="@(() => SetActiveSection("legal"))">
+                        <i class="fa fa-file-alt"></i>
+                        <span>Legal Documents</span>
+                    </button>
+
+                    <button type="button" 
+                            class="nav-item @(activeSection == "contacts" ? "active" : "")" 
+                            @onclick="@(() => SetActiveSection("contacts"))">
+                        <i class="fa fa-address-book"></i>
+                        <span>Employee Contacts</span>
+                    </button>
+
+                    <button type="button" 
+                            class="nav-item @(activeSection == "login" ? "active" : "")" 
+                            @onclick="@(() => SetActiveSection("login"))">
+                        <i class="fa fa-sign-in-alt"></i>
+                        <span>Login Detail</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Form Content -->
+            <main class="form-content">
+                <!-- Personal Data Section -->
+                @if (activeSection == "personal")
+                {
+                    <div class="form-section-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Employee ID</label>
+                                <InputNumber @bind-Value="model.Id" class="form-control" disabled />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Other ID</label>
+                                <InputText @bind-Value="model.LicenseNumber" class="form-control" placeholder="" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">First Name <span style="color: red;">*</span></label>
+                                <InputText @bind-Value="model.FirstName" class="form-control" placeholder="" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Middle Name</label>
+                                <InputText @bind-Value="model.MiddleName" class="form-control" placeholder="" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Name <span style="color: red;">*</span></label>
+                                <InputText @bind-Value="model.LastName" class="form-control" placeholder="" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Birth Date</label>
+                                <InputDate @bind-Value="model.DateOfBirth" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Blood Group</label>
+                                <InputSelect @bind-Value="model.BloodGroup" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Gender</label>
+                                <InputSelect @bind-Value="model.Gender" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Photo</label>
+                                <div style="display: flex; gap: 10px;">
+                                    @if (!string.IsNullOrEmpty(photoPreview))
+                                    {
+                                        <img src="@photoPreview" alt="Employee Photo" style="max-width: 100px; max-height: 100px; border-radius: 4px;" />
+                                    }
+                                    <button type="button" class="btn btn-sm btn-primary" @onclick="@TriggerPhotoUpload">
+                                        <i class="fa fa-upload"></i> @(string.IsNullOrEmpty(photoPreview) ? "Upload Photo" : "Change Photo")
+                                    </button>
+                                </div>
+                                <InputFile id="@photoInputId" class="hidden-file-input" accept=".png,.jpg,.jpeg" OnChange="@OnPhotoSelected" style="display:none" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <InputCheckbox @bind-Value="model.IsCandidate" />
+                                    <span>Is Candidate</span>
+                                </label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <InputCheckbox @bind-Value="model.NFCRegistered" />
+                                    <span>NFC Registered</span>
+                                </label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <InputCheckbox @bind-Value="model.BioMetricRegistered" />
+                                    <span>Biometric Registered</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <InputCheckbox @bind-Value="model.BackgroundCheckCompleted" />
+                                    <span>Background Check</span>
+                                </label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <InputCheckbox @bind-Value="model.DrivingLicenseVerified" />
+                                    <span>Driving License</span>
+                                </label>
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <InputCheckbox @bind-Value="model.OQHPLicenseVerified" />
+                                    <span>QCHP License</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Contract Details Section -->
+                @if (activeSection == "contract")
+                {
+                    <div class="form-section-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Qatar ID #</label>
+                                <InputText @bind-Value="model.QatarIdNumber" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Qatar ID Issued</label>
+                                <InputDate @bind-Value="model.QatarIdIssued" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Qatar ID Expire</label>
+                                <InputDate @bind-Value="model.QatarIdExpire" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">QCHP License #</label>
+                                <InputText @bind-Value="model.QCHPLicenseNumber" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">QCHP License Issued</label>
+                                <InputDate @bind-Value="model.QCHPLicenseIssued" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">QCHP License Expire</label>
+                                <InputDate @bind-Value="model.QCHPLicenseExpire" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Passport #</label>
+                                <InputText @bind-Value="model.PassportNumber" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Passport Issued</label>
+                                <InputDate @bind-Value="model.PassportIssued" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Passport Expire</label>
+                                <InputDate @bind-Value="model.PassportExpire" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">PRC Registration #</label>
+                                <InputText @bind-Value="model.PRCRegistrationNumber" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">PRC Identification Issued</label>
+                                <InputDate @bind-Value="model.PRCIdentificationIssued" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">PRC Identification Expire</label>
+                                <InputDate @bind-Value="model.PRCIdentificationExpire" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Preliminary Assessment Issued</label>
+                                <InputDate @bind-Value="model.PreliminaryAssessmentIssued" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Preliminary Assessment Expire</label>
+                                <InputDate @bind-Value="model.PreliminaryAssessmentExpire" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Legal Documents Section -->
+                @if (activeSection == "legal")
+                {
+                    <div class="form-section-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Join Date</label>
+                                <InputDate @bind-Value="model.JoinDate" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contract for</label>
+                                <InputSelect @bind-Value="model.ContractFor" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="Full Time">Full Time</option>
+                                    <option value="Part Time">Part Time</option>
+                                    <option value="Contract">Contract</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Last Working Date</label>
+                                <InputDate @bind-Value="model.LastWorkingDate" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Travelling Date</label>
+                                <InputDate @bind-Value="model.TravellingDate" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <InputCheckbox @bind-Value="model.IsEmployeeReJoined" />
+                                    <span>Click here if Employee Re-Joined</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Rejoined Date</label>
+                                <InputDate @bind-Value="model.RejoinedDate" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Business Unit</label>
+                                <InputSelect @bind-Value="model.BusinessUnit" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="Unit 1">Unit 1</option>
+                                    <option value="Unit 2">Unit 2</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Department</label>
+                                <InputSelect @bind-Value="model.Department" class="form-control">
+                                    <option value="">--Select Business Unit--</option>
+                                    <option value="HR">HR</option>
+                                    <option value="IT">IT</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Job Title</label>
+                                <InputSelect @bind-Value="model.JobTitle" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="Manager">Manager</option>
+                                    <option value="Staff">Staff</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Position</label>
+                                <InputSelect @bind-Value="model.Position" class="form-control">
+                                    <option value="">--Select Job Title--</option>
+                                    <option value="Position 1">Position 1</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Category</label>
+                                <InputSelect @bind-Value="model.Category" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="Cat 1">Cat 1</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Role in System</label>
+                                <InputSelect @bind-Value="model.RoleInSystem" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="User">User</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Recruitment Agency</label>
+                                <InputSelect @bind-Value="model.RecruitmentAgency" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="Agency 1">Agency 1</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Contract Status</label>
+                                <InputSelect @bind-Value="model.ContractStatus" class="form-control">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Reason (In Active)</label>
+                                <InputSelect @bind-Value="model.ReasonInActive" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="Reason 1">Reason 1</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Medical Status</label>
+                                <InputSelect @bind-Value="model.MedicalStatus" class="form-control">
+                                    <option value="">Yet to Start</option>
+                                    <option value="Completed">Completed</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Blood Group Status</label>
+                                <InputSelect @bind-Value="model.BloodGroupStatus" class="form-control">
+                                    <option value="">Yet to Start</option>
+                                    <option value="Completed">Completed</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Finger Print Status</label>
+                                <InputSelect @bind-Value="model.FingerPrintStatus" class="form-control">
+                                    <option value="">Yet to Start</option>
+                                    <option value="Completed">Completed</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Qatar ID Status</label>
+                                <InputSelect @bind-Value="model.QatarIdStatus" class="form-control">
+                                    <option value="">Yet to Start</option>
+                                    <option value="Completed">Completed</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Police Clear. Status</label>
+                                <InputSelect @bind-Value="model.PoliceClearStatus" class="form-control">
+                                    <option value="">Yet to Start</option>
+                                    <option value="Completed">Completed</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">SCH License Status</label>
+                                <InputSelect @bind-Value="model.SCHLicenseStatus" class="form-control">
+                                    <option value="">Yet to Start</option>
+                                    <option value="Completed">Completed</option>
+                                </InputSelect>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Employee Contacts Section -->
+                @if (activeSection == "contacts")
+                {
+                    <div class="form-section-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Phone 1</label>
+                                <InputText @bind-Value="model.Phone1" class="form-control" placeholder="" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Phone 2</label>
+                                <InputText @bind-Value="model.Phone2" class="form-control" placeholder="" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <InputText @bind-Value="model.Email" class="form-control" placeholder="" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Street</label>
+                                <InputText @bind-Value="model.Street" class="form-control" placeholder="" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">City</label>
+                                <InputText @bind-Value="model.City" class="form-control" placeholder="" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">State</label>
+                                <InputText @bind-Value="model.State" class="form-control" placeholder="" />
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Country</label>
+                                <InputSelect @bind-Value="model.Country" class="form-control">
+                                    <option value="">--Select--</option>
+                                    <option value="Qatar">Qatar</option>
+                                    <option value="UAE">UAE</option>
+                                    <option value="Saudi Arabia">Saudi Arabia</option>
+                                    <option value="Other">Other</option>
+                                </InputSelect>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Zip#</label>
+                                <InputText @bind-Value="model.ZipCode" class="form-control" placeholder="" />
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Login Detail Section -->
+                @if (activeSection == "login")
+                {
+                    <div class="form-section-content">
+                        <div class="form-group">
+                            <p class="placeholder-text">Login Detail section - To be configured</p>
+                        </div>
+                    </div>
+                }
+            </main>
+
+            <!-- Right Photo Section -->
+            <aside class="photo-sidebar">
+                <div class="photo-container">
+                    @if (!string.IsNullOrEmpty(photoPreview))
+                    {
+                        <img src="@photoPreview" alt="Employee Photo" class="photo-image" />
+                    }
+                    else
+                    {
+                        <div class="photo-placeholder">
+                            <i class="fa fa-user-circle"></i>
+                        </div>
+                    }
+                </div>
+
+                <button type="button" class="btn-photo btn-add-photo" @onclick="@TriggerPhotoUpload">
+                    <i class="fa fa-image"></i> Add Photo
+                </button>
+
+                @if (!string.IsNullOrEmpty(photoPreview))
+                {
+                    <button type="button" class="btn-photo btn-delete-photo" @onclick="@DeletePhoto">
+                        <i class="fa fa-trash"></i> Delete Photo
+                    </button>
+                }
+
+                <InputFile id="@photoInputId" class="hidden-file-input" accept=".png,.jpg,.jpeg" OnChange="@OnPhotoSelected" style="display:none" />
+            </aside>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-save">
+                <i class="fa fa-edit"></i> @(activeSection == "login" ? "Save & Complete" : "Save & Next")
+            </button>
+            <button type="submit" class="btn btn-save-close" @onclick="@SetSaveAndClose">
+                <i class="fa fa-check"></i> Save & Close
+            </button>
+            <button type="button" class="btn btn-close-form" @onclick="@NavigateBack">
+                Close
+            </button>
+        </div>
+    </EditForm>
 </div>
-
-<div class="card">
-    <div class="card-header">
-        <h3><i class="fa fa-user" style="margin-right: 8px;"></i> Employee Information</h3>
-    </div>
-    <div class="card-body">
-        <EditForm Model="model" OnValidSubmit="Save">
-            <DataAnnotationsValidator />
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">First Name *</label>
-                    <InputText @bind-Value="model.FirstName" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Last Name *</label>
-                    <InputText @bind-Value="model.LastName" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Email</label>
-                    <InputText @bind-Value="model.Email" class="form-control" />
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Phone</label>
-                    <InputText @bind-Value="model.Phone" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Date of Birth</label>
-                    <InputDate @bind-Value="model.DateOfBirth" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Gender</label>
-                    <InputSelect @bind-Value="model.Gender" class="form-control">
-                        <option value="">Select</option>
-                        <option>Male</option>
-                        <option>Female</option>
-                        <option>Other</option>
-                    </InputSelect>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Job Title</label>
-                    <InputText @bind-Value="model.JobTitle" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Department</label>
-                    <InputText @bind-Value="model.Department" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Hire Date</label>
-                    <InputDate @bind-Value="model.HireDate" class="form-control" />
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Pay Rate ($)</label>
-                    <InputNumber @bind-Value="model.PayRate" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Pay Type</label>
-                    <InputSelect @bind-Value="model.PayType" class="form-control">
-                        <option value="">Select</option>
-                        <option>Hourly</option>
-                        <option>Salary</option>
-                        <option>Per Visit</option>
-                    </InputSelect>
-                </div>
-                <div class="form-group"><label class="form-label">Status</label>
-                    <InputSelect @bind-Value="model.Status" class="form-control">
-                        <option>Active</option>
-                        <option>Inactive</option>
-                        <option>On Leave</option>
-                        <option>Terminated</option>
-                    </InputSelect>
-                </div>
-            </div>
-            <div class="form-group"><label class="form-label">Address</label>
-                <InputText @bind-Value="model.Address" class="form-control" />
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">City</label>
-                    <InputText @bind-Value="model.City" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">State</label>
-                    <InputText @bind-Value="model.State" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Zip</label>
-                    <InputText @bind-Value="model.ZipCode" class="form-control" />
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">License Number</label>
-                    <InputText @bind-Value="model.LicenseNumber" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">License Expiry</label>
-                    <InputDate @bind-Value="model.LicenseExpiry" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Certification Expiry</label>
-                    <InputDate @bind-Value="model.CertificationExpiry" class="form-control" />
-                </div>
-            </div>
-            <div class="form-group"><label class="form-label">Skills</label>
-                <InputTextArea @bind-Value="model.Skills" class="form-control" rows="2" />
-            </div>
-            <div class="form-group"><label class="form-label">Certifications</label>
-                <InputTextArea @bind-Value="model.Certifications" class="form-control" rows="2" />
-            </div>
-            <div class="form-group"><label class="form-label">Notes</label>
-                <InputTextArea @bind-Value="model.Notes" class="form-control" rows="3" />
-            </div>
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> @(isEdit ? "Update" : "Create")
-                    Employee</button>
-                <button type="button" class="btn btn-outline"
-                    @onclick='() => Navigation.NavigateTo("/caregiver/list")'>Cancel</button>
-            </div>
-        </EditForm>
-    </div>
-</div>
-
-@code {
-    [SupplyParameterFromQuery] public int? Id { get; set; }
-    private Employee model = new(); private bool isEdit;
-    protected override async Task OnInitializedAsync()
-    {
-        if (Id.HasValue)
-        {
-            var e = await
-    EmployeeService.GetByIdAsync(Id.Value); if (e != null) { model = e; isEdit = true; }
-        }
-    }
-    private async Task Save()
-    {
-        if (isEdit) await EmployeeService.UpdateAsync(model);
-        else await
-    EmployeeService.CreateAsync(model); Navigation.NavigateTo("/caregiver/list");
-    }
-}
