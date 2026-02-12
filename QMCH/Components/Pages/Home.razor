@@ -111,10 +111,12 @@
                    OnClick="@(() => Nav("/admin/roles/list"))" />
 </div>
 
-<!-- Services Section - Compact Grid -->
+<!-- Services Section - Interactive Grid with Modals -->
 <div class="services-section">
+    <!-- Services Container -->
     <div class="services-container">
-        <div class="service-card" @onclick="@(() => Nav("/ils"))">
+        <!-- ILS Service Card -->
+        <div class="service-card" @onclick="@(() => OpenModal("ILS"))">
             <div class="service-card-image">
                 <img src="images/home/ils.png" alt="ILS" />
                 <span class="service-badge">1</span>
@@ -122,7 +124,8 @@
             <span class="service-label">ILS</span>
         </div>
 
-        <div class="service-card" @onclick="@(() => Nav("/pls"))">
+        <!-- PLS Service Card -->
+        <div class="service-card" @onclick="@(() => OpenModal("PLS"))">
             <div class="service-card-image">
                 <img src="images/home/pls.png" alt="PLS" />
                 <span class="service-badge">2</span>
@@ -130,7 +133,8 @@
             <span class="service-label">PLS</span>
         </div>
 
-        <div class="service-card" @onclick="@(() => Nav("/competency"))">
+        <!-- Competency Service Card -->
+        <div class="service-card" @onclick="@(() => OpenModal("Competency"))">
             <div class="service-card-image">
                 <img src="images/home/competency.png" alt="Competency" />
                 <span class="service-badge">3</span>
@@ -138,7 +142,8 @@
             <span class="service-label">Competency</span>
         </div>
 
-        <div class="service-card" @onclick="@(() => Nav("/temporary-lic"))">
+        <!-- Temporary LIC Service Card -->
+        <div class="service-card" @onclick="@(() => OpenModal("Temporary Lic"))">
             <div class="service-card-image">
                 <img src="images/home/temporary-lic.png" alt="Temporary LIC" />
                 <span class="service-badge">4</span>
@@ -146,7 +151,8 @@
             <span class="service-label">Temporary Lic</span>
         </div>
 
-        <div class="service-card" @onclick="@(() => Nav("/permanent-lic"))">
+        <!-- Permanent LIC Service Card -->
+        <div class="service-card" @onclick="@(() => OpenModal("Permanent Lic"))">
             <div class="service-card-image">
                 <img src="images/home/permanent-lic.png" alt="Permanent LIC" />
                 <span class="service-badge">5</span>
@@ -154,7 +160,8 @@
             <span class="service-label">Permanent Lic</span>
         </div>
 
-        <div class="service-card" @onclick="@(() => Nav("/prometric"))">
+        <!-- Prometric Service Card -->
+        <div class="service-card" @onclick="@(() => OpenModal("Prometric"))">
             <div class="service-card-image">
                 <img src="images/home/prometric.png" alt="Prometric" />
                 <span class="service-badge">6</span>
@@ -162,7 +169,8 @@
             <span class="service-label">Prometric</span>
         </div>
 
-        <div class="service-card" @onclick="@(() => Nav("/qid"))">
+        <!-- QID Service Card -->
+        <div class="service-card" @onclick="@(() => OpenModal("QID"))">
             <div class="service-card-image">
                 <img src="images/home/qid.png" alt="QID" />
                 <span class="service-badge">7</span>
@@ -170,7 +178,8 @@
             <span class="service-label">QID</span>
         </div>
 
-        <div class="service-card" @onclick="@(() => Nav("/service-order"))">
+        <!-- Service Order Card -->
+        <div class="service-card" @onclick="@(() => OpenModal("Service Order"))">
             <div class="service-card-image">
                 <img src="images/home/service-order.png" alt="Service Order" />
                 <span class="service-badge">8</span>
@@ -178,4 +187,72 @@
             <span class="service-label">Service Order</span>
         </div>
     </div>
+
+    <!-- Modal Overlay -->
+    @if (IsModalOpen)
+    {
+        <div class="modal-overlay" @onclick="CloseModal"></div>
+
+        <!-- Modal Container -->
+        <div class="modal-container">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h2 class="modal-title">@CurrentModalData?.Title</h2>
+                <button class="modal-close" @onclick="CloseModal" aria-label="Close modal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Data Table -->
+                <table class="modal-table">
+                    <thead>
+                        <tr>
+                            <th>EMPLOYEE#</th>
+                            <th>NAME</th>
+                            <th>DATE OF E...</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (CurrentModalData?.TableData != null)
+                        {
+                            @foreach (var row in CurrentModalData.TableData)
+                            {
+                                <tr>
+                                    <td>@row.EmployeeId</td>
+                                    <td>@row.Name</td>
+                                    <td>@row.Date</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+
+                <!-- Footer Content -->
+                <div class="modal-footer-content">
+                    @if (CurrentModalData?.ContentType == "ILS")
+                    {
+                        <p class="modal-text">@CurrentModalData.Title</p>
+                    }
+                    else if (CurrentModalData?.ContentType == "PLS")
+                    {
+                        <ol class="modal-list">
+                            @foreach (var item in CurrentModalData.ListItems ?? new List<string>())
+                            {
+                                <li>@item</li>
+                            }
+                        </ol>
+                    }
+                    else if (CurrentModalData?.ContentType == "Table")
+                    {
+                        <p class="modal-text">@CurrentModalData.Title Data Summary</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>
