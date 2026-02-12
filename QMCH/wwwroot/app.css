@@ -11,13 +11,11 @@
     --primary-light: #2D4A7A;
     --primary-dark: #0F1B33;
     --primary-gradient: linear-gradient(135deg, #1B2A4A 0%, #2D4A7A 50%, #1a3a6a 100%);
-
     /* Accent Colors */
     --accent: #00B4D8;
     --accent-light: #48CAE4;
     --accent-dark: #0096C7;
     --accent-gradient: linear-gradient(135deg, #00B4D8, #48CAE4);
-
     /* Semantic Colors */
     --success: #10B981;
     --success-light: #D1FAE5;
@@ -27,7 +25,6 @@
     --danger-light: #FEE2E2;
     --info: #3B82F6;
     --info-light: #DBEAFE;
-
     /* Neutrals */
     --bg-body: #F0F2F5;
     --bg-card: #FFFFFF;
@@ -37,36 +34,31 @@
     --text-muted: #94A3B8;
     --border: #E2E8F0;
     --border-light: #F1F5F9;
-
     /* Sidebar */
     --sidebar-width: 270px;
     --sidebar-collapsed-width: 70px;
     --sidebar-bg: linear-gradient(180deg, #1B2A4A 0%, #162240 40%, #0F1B33 100%);
-    --sidebar-text: #CBD5E1;
+    --sidebar-text: #fff;
     --sidebar-text-active: #FFFFFF;
     --sidebar-hover: rgba(255, 255, 255, 0.08);
-    --sidebar-active: rgba(0, 180, 216, 0.15);
-    --sidebar-active-border: #00B4D8;
-
+    --sidebar-active: #028c98;
+    --sidebar-active-border: #028c98;
     /* Topbar */
     --topbar-height: 64px;
     --topbar-bg: #FFFFFF;
     --topbar-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-
     /* Shadows */
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
     /* Borders */
     --radius-sm: 6px;
     --radius: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
     --radius-xl: 24px;
-
     /* Transitions */
     --transition: all 0.2s ease;
     --transition-slow: all 0.3s ease;
@@ -109,6 +101,7 @@ a {
    Sidebar
    ============================================ */
 .erp-sidebar {
+    border-right: 1px solid #0e6f75;
     width: var(--sidebar-width);
     min-height: 100vh;
     background: var(--sidebar-bg);
@@ -123,15 +116,18 @@ a {
 }
 
 .sidebar-brand {
+    background: #01c6d7;
     height: var(--topbar-height);
     display: flex;
     align-items: center;
     padding: 0 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    
+    
     flex-shrink: 0;
 }
 
 .sidebar-brand img {
+
     height: 36px;
     width: auto;
 }
@@ -149,10 +145,11 @@ a {
 }
 
 .sidebar-nav {
+    background: #01c6d7;
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 12px 0;
+    
 }
 
 .sidebar-nav::-webkit-scrollbar {
@@ -173,7 +170,7 @@ a {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--text-muted);
+    color: #ddd;
     padding: 16px 20px 8px;
 }
 
@@ -256,10 +253,41 @@ a {
     font-weight: 400;
 }
 
+.brand-text {
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: 70px; /* apni navbar height ke mutabiq adjust kar lena */
+}
+
+    .brand-text h4 {
+        
+        margin: 0;
+        font-weight: 600;
+    }
+
+
+.logo-container {
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.company-logo {
+    max-height: 80px;
+    object-fit: contain;
+}
+
+
 /* ============================================
    Main Content Area
    ============================================ */
 .erp-main {
+
     flex: 1;
     margin-left: var(--sidebar-width);
     display: flex;
@@ -283,15 +311,18 @@ a {
     top: 0;
     z-index: 999;
     flex-shrink: 0;
+    background: #01c6d7;
 }
 
 .topbar-left {
+
     display: flex;
     align-items: center;
     gap: 16px;
 }
 
 .topbar-breadcrumb {
+
     display: flex;
     align-items: center;
     gap: 8px;
@@ -300,6 +331,7 @@ a {
 }
 
 .topbar-breadcrumb .breadcrumb-separator {
+
     color: var(--text-muted);
 }
 
@@ -534,7 +566,7 @@ a {
 
 .card-header {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid #0e6f75;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -674,7 +706,7 @@ a {
 
 .data-grid-header {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #0e6f75;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -720,24 +752,24 @@ a {
     background: var(--bg-body);
 }
 
-.data-table th {
-    padding: 12px 16px;
-    text-align: left;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-}
+    .data-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        border-bottom: 1px solid #0e6f75;
+        white-space: nowrap;
+    }
 
-.data-table td {
-    padding: 14px 16px;
-    font-size: 13.5px;
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-light);
-}
+    .data-table td {
+        padding: 14px 16px;
+        font-size: 13.5px;
+        color: var(--text-primary);
+        border-bottom: 1px solid #0e6f75;
+    }
 
 .data-table tbody tr {
     transition: var(--transition);
@@ -907,7 +939,7 @@ textarea.form-control {
 
 .modal-header {
     padding: 20px 24px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #0e6f75;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1021,7 +1053,7 @@ textarea.form-control {
     text-transform: uppercase;
     color: var(--text-secondary);
     background: var(--bg-body);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid #0e6f75;
 }
 
 .calendar-day {
