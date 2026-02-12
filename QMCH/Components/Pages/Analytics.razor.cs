@@ -18,6 +18,110 @@ namespace QMCH.Components.Pages
             // Initial render
         }
 
+        protected double GetDayPresencePercent(DateTime day)
+        {
+            var present = 0;
+            for (int s = 0; s < GetStaffCount(); s++)
+            {
+                var st = GetAttendanceStatus(day, s);
+                if (st.CssClass == "cell-present") present++;
+            }
+            if (GetStaffCount() == 0) return 0;
+            return (present * 100.0) / GetStaffCount();
+        }
+
+        protected bool showDayDetail = false;
+        protected DateTime detailDay;
+        protected List<(string Staff, string Status, string Time)> dayDetails = new();
+
+        protected void DayClicked(DateTime day)
+        {
+            detailDay = day;
+            dayDetails.Clear();
+            for (int s = 0; s < GetStaffCount(); s++)
+            {
+                var st = GetAttendanceStatus(day, s);
+                dayDetails.Add((GetStaffName(s), st.BadgeText, st.TimeInfo));
+            }
+            showDayDetail = true;
+        }
+
+        protected void CloseDayDetail() => showDayDetail = false;
+
+        // KPI helpers
+        protected int TotalStaff => GetStaffCount();
+        protected double AveragePresencePercent
+        {
+            get
+            {
+                // rough synthetic metric
+                var days = DaysInCurrentMonth;
+                var presentCount = 0;
+                for (int d = 1; d <= days; d++)
+                {
+                    var day = new DateTime(CurrentDate.Year, CurrentDate.Month, d);
+                    for (int s = 0; s < GetStaffCount(); s++)
+                    {
+                        var st = GetAttendanceStatus(day, s);
+                        if (st.CssClass == "cell-present") presentCount++;
+                    }
+                }
+                var possible = days * GetStaffCount();
+                if (possible == 0) return 0;
+                return (presentCount * 100.0) / possible;
+            }
+        }
+
+        protected int TotalAbsent
+        {
+            get
+            {
+                var count = 0;
+                for (int d = 1; d <= DaysInCurrentMonth; d++)
+                {
+                    var day = new DateTime(CurrentDate.Year, CurrentDate.Month, d);
+                    for (int s = 0; s < GetStaffCount(); s++)
+                    {
+                        var st = GetAttendanceStatus(day, s);
+                        if (st.CssClass == "cell-absent") count++;
+                    }
+                }
+                return count;
+            }
+        }
+
+        protected string SelectedChartType { get; set; } = "Line";
+        protected bool ShowGridlines { get; set; } = true;
+        protected bool ShowWeekends { get; set; } = true;
+
+        protected void ToggleGridlines() { ShowGridlines = !ShowGridlines; }
+        protected void ToggleWeekends() { ShowWeekends = !ShowWeekends; }
+
+        protected void ExportCsv()
+        {
+            // For now create a CSV string and copy to clipboard (browser will prompt).
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Date,Staff,Status,Time");
+            for (int d = 1; d <= DaysInCurrentMonth; d++)
+            {
+                var day = new DateTime(CurrentDate.Year, CurrentDate.Month, d);
+                for (int s = 0; s < GetStaffCount(); s++)
+                {
+                    var st = GetAttendanceStatus(day, s);
+                    sb.AppendLine($"{day:yyyy-MM-dd},{GetStaffName(s)},{st.BadgeText},{st.TimeInfo}");
+                }
+            }
+
+            // JS interop could be used to download the CSV; for now place in clipboard
+            try
+            {
+                var csv = sb.ToString();
+                // Use Clipboard via navigator.clipboard if available - left as simple alert for now
+                Console.WriteLine("CSV Export:\n" + csv.Substring(0, Math.Min(1000, csv.Length)));
+            }
+            catch { }
+        }
+
         protected void GoToPreviousMonth()
         {
             CurrentDate = CurrentDate.AddMonths(-1);

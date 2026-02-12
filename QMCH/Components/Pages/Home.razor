@@ -11,12 +11,13 @@
         <h1>Dashboard</h1>
         <p>Welcome back! Here's an overview of your healthcare operations.</p>
     </div>
-    <div class="page-header-actions"> <span class="badge badge-info">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span> </div>
+    <div class="page-header-actions">
+        <span class="badge badge-info">@TodayDate</span>
+    </div>
 </div>
 
-@* Dashboard Cards Grid *@
+<!-- Main Dashboard Cards Grid - 6 Columns -->
 <div class="dashboard-grid">
-
     <DashboardCard Image="images/home/dashboard.jpg"
                    Label="Dashboard"
                    OnClick="@(() => Nav("/dashboard/analytic/view"))" />
@@ -108,5 +109,73 @@
     <DashboardCard Image="images/home/employee_role.jpg"
                    Label="Employee Roles"
                    OnClick="@(() => Nav("/admin/roles/list"))" />
+</div>
 
+<!-- Services Section - Compact Grid -->
+<div class="services-section">
+    <div class="services-container">
+        <div class="service-card" @onclick="@(() => Nav("/ils"))">
+            <div class="service-card-image">
+                <img src="images/home/ils.png" alt="ILS" />
+                <span class="service-badge">1</span>
+            </div>
+            <span class="service-label">ILS</span>
+        </div>
+
+        <div class="service-card" @onclick="@(() => Nav("/pls"))">
+            <div class="service-card-image">
+                <img src="images/home/pls.png" alt="PLS" />
+                <span class="service-badge">2</span>
+            </div>
+            <span class="service-label">PLS</span>
+        </div>
+
+        <div class="service-card" @onclick="@(() => Nav("/competency"))">
+            <div class="service-card-image">
+                <img src="images/home/competency.png" alt="Competency" />
+                <span class="service-badge">3</span>
+            </div>
+            <span class="service-label">Competency</span>
+        </div>
+
+        <div class="service-card" @onclick="@(() => Nav("/temporary-lic"))">
+            <div class="service-card-image">
+                <img src="images/home/temporary-lic.png" alt="Temporary LIC" />
+                <span class="service-badge">4</span>
+            </div>
+            <span class="service-label">Temporary Lic</span>
+        </div>
+
+        <div class="service-card" @onclick="@(() => Nav("/permanent-lic"))">
+            <div class="service-card-image">
+                <img src="images/home/permanent-lic.png" alt="Permanent LIC" />
+                <span class="service-badge">5</span>
+            </div>
+            <span class="service-label">Permanent Lic</span>
+        </div>
+
+        <div class="service-card" @onclick="@(() => Nav("/prometric"))">
+            <div class="service-card-image">
+                <img src="images/home/prometric.png" alt="Prometric" />
+                <span class="service-badge">6</span>
+            </div>
+            <span class="service-label">Prometric</span>
+        </div>
+
+        <div class="service-card" @onclick="@(() => Nav("/qid"))">
+            <div class="service-card-image">
+                <img src="images/home/qid.png" alt="QID" />
+                <span class="service-badge">7</span>
+            </div>
+            <span class="service-label">QID</span>
+        </div>
+
+        <div class="service-card" @onclick="@(() => Nav("/service-order"))">
+            <div class="service-card-image">
+                <img src="images/home/service-order.png" alt="Service Order" />
+                <span class="service-badge">8</span>
+            </div>
+            <span class="service-label">Service Order</span>
+        </div>
+    </div>
 </div>
