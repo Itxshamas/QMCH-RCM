@@ -1,0 +1,180 @@
+@page "/client/servicetypes/list/create/mass"
+@using QMCH.Models
+@using QMCH.Services
+@inject IClientService ClientService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Mass Create Service Types - QHMCPro</PageTitle>
+
+<div class="mass-create-page">
+    <div class="page-header-section">
+        <h1 class="page-title">SERVICE TYPES/CODES - MASS CREATE</h1>
+        <div class="breadcrumb">
+            <span>Client</span>
+            <span class="separator">/</span>
+            <span>Configuration</span>
+            <span class="separator">/</span>
+            <span>Service Type/Codes</span>
+            <span class="separator">/</span>
+            <span>New</span>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <div class="action-buttons">
+            <button class="btn btn-cancel" @onclick="Cancel">
+                <i class="fa fa-times"></i> Cancel
+            </button>
+            <button class="btn btn-success" @onclick="SaveAll" disabled="@(formItems.Count == 0 || isSaving)">
+                <i class="fa fa-save"></i> Save
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="mass-create-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">
+                            <i class="fa fa-trash-alt" title="Delete row"></i>
+                        </th>
+                        <th>Description</th>
+                        <th>Short Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < formItems.Count; i++)
+                    {
+                        int index = i;
+                        var item = formItems[index];
+
+                        <tr>
+                            <td class="delete-cell">
+                                <button class="btn-delete-row" @onclick="() => RemoveRow(index)" title="Delete row" type="button">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <textarea class="form-control" placeholder="Enter description" rows="2"
+                                       @bind="item.Description" @bind:event="oninput"></textarea>
+                                @if (string.IsNullOrEmpty(item.Description))
+                                {
+                                    <span class="validation-error">Required</span>
+                                }
+                            </td>
+                            <td>
+                                <textarea class="form-control" placeholder="Enter short description" rows="2"
+                                       @bind="item.ShortDescription" @bind:event="oninput"></textarea>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (formItems.Count == 0)
+            {
+                <div class="empty-form-state">
+                    <p>No rows added. Click "Add Row" to add a service type.</p>
+                </div>
+            }
+        </div>
+
+        <div class="add-row-section">
+            <button class="btn btn-add-row" @onclick="AddRow">
+                <i class="fa fa-plus"></i> Add Row
+            </button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success">
+                <i class="fa fa-check"></i> @successMessage
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-error">
+                <i class="fa fa-times"></i> @errorMessage
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<QMCH.Models.ServiceType> formItems = new();
+    private bool isSaving = false;
+    private string successMessage = string.Empty;
+    private string errorMessage = string.Empty;
+
+    protected override Task OnInitializedAsync()
+    {
+        // Initialize with one empty row
+        AddRow();
+        return Task.CompletedTask;
+    }
+
+    private void AddRow()
+    {
+        formItems.Add(new QMCH.Models.ServiceType
+        {
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        });
+    }
+
+    private void RemoveRow(int index)
+    {
+        if (index >= 0 && index < formItems.Count)
+        {
+            formItems.RemoveAt(index);
+        }
+    }
+
+    private async Task SaveAll()
+    {
+        // Validate all rows
+        if (formItems.Any(item => string.IsNullOrWhiteSpace(item.Description)))
+        {
+            errorMessage = "All rows must have a description.";
+            successMessage = string.Empty;
+            return;
+        }
+
+        isSaving = true;
+        errorMessage = string.Empty;
+        successMessage = string.Empty;
+
+        try
+        {
+            // Set CreatedAt for all items
+            foreach (var item in formItems)
+            {
+                item.CreatedAt = DateTime.UtcNow;
+            }
+
+            await ClientService.CreateMultipleServiceTypesAsync(formItems);
+
+            successMessage = $"Successfully created {formItems.Count} service type(s).";
+            formItems.Clear();
+
+            // Navigate back after 2 seconds
+            await Task.Delay(1500);
+            NavigationManager.NavigateTo("/client/servicetypes/list");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error creating service types: {ex.Message}";
+            Console.WriteLine($"Error: {ex}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/client/servicetypes/list");
+    }
+}

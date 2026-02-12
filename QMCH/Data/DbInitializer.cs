@@ -60,13 +60,13 @@ namespace QMCH.Data
             if (!await context.ServiceTypes.AnyAsync())
             {
                 context.ServiceTypes.AddRange(
-                    new ServiceType { Name = "Personal Care", Code = "PC", DefaultRate = 25.00m },
-                    new ServiceType { Name = "Skilled Nursing", Code = "SN", DefaultRate = 65.00m },
-                    new ServiceType { Name = "Physical Therapy", Code = "PT", DefaultRate = 75.00m },
-                    new ServiceType { Name = "Occupational Therapy", Code = "OT", DefaultRate = 70.00m },
-                    new ServiceType { Name = "Speech Therapy", Code = "ST", DefaultRate = 70.00m },
-                    new ServiceType { Name = "Home Health Aide", Code = "HHA", DefaultRate = 22.00m },
-                    new ServiceType { Name = "Companionship", Code = "COMP", DefaultRate = 18.00m }
+                    new ServiceType { Description = "Personal Care", Code = "PC", DefaultRate = 25.00m },
+                    new ServiceType { Description = "Skilled Nursing", Code = "SN", DefaultRate = 65.00m },
+                    new ServiceType { Description = "Physical Therapy", Code = "PT", DefaultRate = 75.00m },
+                    new ServiceType { Description = "Occupational Therapy", Code = "OT", DefaultRate = 70.00m },
+                    new ServiceType { Description = "Speech Therapy", Code = "ST", DefaultRate = 70.00m },
+                    new ServiceType { Description = "Home Health Aide", Code = "HHA", DefaultRate = 22.00m },
+                    new ServiceType { Description = "Companionship", Code = "COMP", DefaultRate = 18.00m }
                 );
                 await context.SaveChangesAsync();
             }

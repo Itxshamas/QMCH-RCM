@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Pages\NewFolder\" />
+    <Folder Include="Components\Pages\Client\" />
   </ItemGroup>
 
 </Project>

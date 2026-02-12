@@ -1,0 +1,319 @@
+@page "/client/servicetypes/list"
+@using QMCH.Models
+@using QMCH.Services
+@inject IClientService ClientService
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Service Types - QHMCPro</PageTitle>
+
+<div class="servicetype-list-page">
+    <div class="page-header-section">
+        <h1 class="page-title">SERVICE TYPES/CODES</h1>
+        <div class="breadcrumb">
+            <span>Client</span>
+            <span class="separator">/</span>
+            <span>Configuration</span>
+            <span class="separator">/</span>
+            <span>Service Type/Codes</span>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <div class="action-toolbar">
+            <button class="btn btn-primary" @onclick="() => showAddModal = true">
+                <i class="fa fa-plus"></i> Quick Add
+            </button>
+            <button class="btn btn-secondary" @onclick="NavigateToMassCreate">
+                <i class="fa fa-copy"></i> Mass Create
+            </button>
+            <button class="btn btn-danger" @onclick="DeleteSelected" disabled="@(selectedItems.Count == 0)">
+                <i class="fa fa-trash"></i> Delete
+            </button>
+        </div>
+
+        <div class="table-controls">
+            <div class="show-entries">
+                <label>Show</label>
+                <select class="entries-select" @bind="pageSize" @bind:after="OnPageSizeChanged">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+                <span>entries</span>
+            </div>
+
+            <div class="search-box">
+                <input type="text" placeholder="Search..." class="search-input" @bind="searchTerm" @bind:event="oninput" @onkeyup="OnSearch" />
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            @if (isLoading)
+            {
+                <div class="spinner-container">
+                    <div class="spinner"></div>
+                </div>
+            }
+            else if (filteredItems.Count == 0)
+            {
+                <div class="empty-state">
+                    <i class="fa fa-inbox"></i>
+                    <h3>No Service Types Found</h3>
+                    <p>Create your first service type to get started</p>
+                </div>
+            }
+            else
+            {
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">
+                                <input type="checkbox" @onchange="SelectAll" checked="@(selectedItems.Count == filteredItems.Count && filteredItems.Count > 0)" />
+                            </th>
+                            <th>Description</th>
+                            <th>Short Description</th>
+                            <th style="width: 120px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in filteredItems)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" checked="@(selectedItems.Contains(item.Id))" 
+                                           @onchange="@((ChangeEventArgs e) => ToggleSelection(item.Id, (bool)e.Value))" />
+                                </td>
+                                <td><strong>@item.Description</strong></td>
+                                <td>@(item.ShortDescription ?? "N/A")</td>
+                                <td>
+                                    <button class="btn btn-sm btn-edit" @onclick="() => EditItem(item)" title="Edit">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-delete" @onclick="() => DeleteItem(item.Id)" title="Delete">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+
+        @if (filteredItems.Count > 0)
+        {
+            <div class="pagination-footer">
+                <span>Showing 1 to @filteredItems.Count of @items.Count entries</span>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<ModalDialog @bind-IsVisible="showAddModal" Title="@(editingItem?.Id > 0 ? "Edit Service Type" : "Add Service Type")" Size="lg">
+    <div class="modal-form">
+        <div class="form-group">
+            <label class="form-label">Description *</label>
+            <input type="text" class="form-control" placeholder="Enter description" 
+                   @bind="formItem.Description" @bind:event="oninput" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Short Description</label>
+            <textarea class="form-control" rows="4" placeholder="Enter short description"
+                      @bind="formItem.ShortDescription" @bind:event="oninput"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+            <button type="button" class="btn btn-primary" @onclick="SaveItem">Save</button>
+        </div>
+    </div>
+</ModalDialog>
+
+<!-- Delete Confirmation Modal -->
+<ModalDialog @bind-IsVisible="showDeleteModal" Title="Confirm Delete">
+    <div class="delete-confirmation">
+        <p>Are you sure you want to delete this service type?</p>
+        <p class="text-muted">This action cannot be undone.</p>
+    </div>
+    <div class="form-actions">
+        <button class="btn btn-secondary" @onclick="() => showDeleteModal = false">Cancel</button>
+        <button class="btn btn-danger" @onclick="ConfirmDelete">Delete</button>
+    </div>
+</ModalDialog>
+
+@code {
+    private List<QMCH.Models.ServiceType> items = new();
+    private List<QMCH.Models.ServiceType> filteredItems = new();
+    private List<int> selectedItems = new();
+    private bool isLoading = true;
+    private bool showAddModal = false;
+    private bool showDeleteModal = false;
+    private string searchTerm = string.Empty;
+    private int pageSize = 10;
+    private QMCH.Models.ServiceType? editingItem;
+    private QMCH.Models.ServiceType formItem = new();
+    private int itemToDeleteId = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        try
+        {
+            items = await ClientService.GetServiceTypesAsync();
+            ApplyFilters();
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ApplyFilters()
+    {
+        filteredItems = string.IsNullOrEmpty(searchTerm)
+            ? items.Take(pageSize).ToList()
+            : items.Where(x => x.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                              (x.Code?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                              (x.ShortDescription?.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ?? false))
+                   .Take(pageSize)
+                   .ToList();
+    }
+
+    private void OnSearch()
+    {
+        ApplyFilters();
+    }
+
+    private void OnPageSizeChanged()
+    {
+        ApplyFilters();
+    }
+
+    private void EditItem(QMCH.Models.ServiceType item)
+    {
+        editingItem = item;
+        formItem = new QMCH.Models.ServiceType
+        {
+            Id = item.Id,
+            Description = item.Description,
+            ShortDescription = item.ShortDescription,
+            Code = item.Code,
+            DefaultRate = item.DefaultRate,
+            IsActive = item.IsActive,
+            CreatedAt = item.CreatedAt
+        };
+        showAddModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showAddModal = false;
+        editingItem = null;
+        formItem = new();
+    }
+
+    private async Task SaveItem()
+    {
+        // Validate Description is not empty
+        if (string.IsNullOrWhiteSpace(formItem.Description))
+        {
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        try
+        {
+            if (editingItem?.Id > 0)
+            {
+                // Update existing
+                await ClientService.UpdateServiceTypeAsync(formItem);
+            }
+            else
+            {
+                // Create new
+                formItem.CreatedAt = DateTime.UtcNow;
+                formItem.IsActive = true; // Set default to active
+                await ClientService.CreateServiceTypeAsync(formItem);
+            }
+
+            CloseModal();
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving service type: {ex.Message}");
+        }
+    }
+
+    private void DeleteItem(int id)
+    {
+        itemToDeleteId = id;
+        showDeleteModal = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        try
+        {
+            await ClientService.DeleteServiceTypeAsync(itemToDeleteId);
+            showDeleteModal = false;
+            itemToDeleteId = 0;
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting service type: {ex.Message}");
+        }
+    }
+
+    private async Task DeleteSelected()
+    {
+        if (selectedItems.Count == 0) return;
+
+        foreach (var id in selectedItems)
+        {
+            await ClientService.DeleteServiceTypeAsync(id);
+        }
+
+        selectedItems.Clear();
+        await LoadData();
+    }
+
+    private void SelectAll(ChangeEventArgs e)
+    {
+        if ((bool)e.Value)
+        {
+            selectedItems = filteredItems.Select(x => x.Id).ToList();
+        }
+        else
+        {
+            selectedItems.Clear();
+        }
+    }
+
+    private void ToggleSelection(int id, bool isSelected)
+    {
+        if (isSelected)
+        {
+            if (!selectedItems.Contains(id))
+                selectedItems.Add(id);
+        }
+        else
+        {
+            selectedItems.Remove(id);
+        }
+    }
+
+    private void NavigateToMassCreate()
+    {
+        NavigationManager.NavigateTo("/client/servicetypes/list/create/mass");
+    }
+}

@@ -23,9 +23,12 @@ namespace QMCH.Services
         public async Task UpdateClientTypeAsync(ClientType item) { _db.ClientTypes.Update(item); await _db.SaveChangesAsync(); }
         public async Task DeleteClientTypeAsync(int id) { var e = await _db.ClientTypes.FindAsync(id); if (e != null) { _db.ClientTypes.Remove(e); await _db.SaveChangesAsync(); } }
 
-        public async Task<List<ServiceType>> GetServiceTypesAsync() => await _db.ServiceTypes.OrderBy(c => c.Name).ToListAsync();
+        public async Task<List<ServiceType>> GetServiceTypesAsync() => await _db.ServiceTypes.OrderBy(c => c.Description).ToListAsync();
+        public async Task<ServiceType?> GetServiceTypeByIdAsync(int id) => await _db.ServiceTypes.FindAsync(id);
         public async Task CreateServiceTypeAsync(ServiceType item) { _db.ServiceTypes.Add(item); await _db.SaveChangesAsync(); }
+        public async Task UpdateServiceTypeAsync(ServiceType item) { _db.ServiceTypes.Update(item); await _db.SaveChangesAsync(); }
         public async Task DeleteServiceTypeAsync(int id) { var e = await _db.ServiceTypes.FindAsync(id); if (e != null) { _db.ServiceTypes.Remove(e); await _db.SaveChangesAsync(); } }
+        public async Task CreateMultipleServiceTypesAsync(List<ServiceType> items) { _db.ServiceTypes.AddRange(items); await _db.SaveChangesAsync(); }
 
         public async Task<List<Location>> GetLocationsAsync() => await _db.Locations.OrderBy(c => c.Name).ToListAsync();
         public async Task CreateLocationAsync(Location item) { _db.Locations.Add(item); await _db.SaveChangesAsync(); }

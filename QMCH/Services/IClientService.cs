@@ -18,8 +18,11 @@ namespace QMCH.Services
         Task DeleteClientTypeAsync(int id);
 
         Task<List<ServiceType>> GetServiceTypesAsync();
+        Task<ServiceType?> GetServiceTypeByIdAsync(int id);
         Task CreateServiceTypeAsync(ServiceType item);
+        Task UpdateServiceTypeAsync(ServiceType item);
         Task DeleteServiceTypeAsync(int id);
+        Task CreateMultipleServiceTypesAsync(List<ServiceType> items);
 
         Task<List<Location>> GetLocationsAsync();
         Task CreateLocationAsync(Location item);

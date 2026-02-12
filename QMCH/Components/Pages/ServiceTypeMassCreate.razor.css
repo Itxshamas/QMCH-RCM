@@ -1,0 +1,253 @@
+.mass-create-page {
+    padding: 20px;
+}
+
+.page-header-section {
+    margin-bottom: 30px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 20px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 10px 0;
+}
+
+.breadcrumb {
+    font-size: 12px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.breadcrumb .separator {
+    margin: 0 8px;
+    color: #ddd;
+}
+
+.content-section {
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.btn-cancel {
+    background-color: #ff9800;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #f57c00;
+}
+
+.btn-success {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+.btn-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-add-row {
+    background-color: #2196f3;
+    color: white;
+    padding: 8px 16px;
+}
+
+.btn-add-row:hover {
+    background-color: #0b7dda;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    min-height: 200px;
+}
+
+.mass-create-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.mass-create-table thead {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.mass-create-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid #f0f0f0;
+}
+
+.mass-create-table td {
+    padding: 12px;
+    border: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.delete-cell {
+    text-align: center;
+}
+
+.btn-delete-row {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.btn-delete-row:hover {
+    background-color: #da190b;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #2196f3;
+    box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.validation-error {
+    display: block;
+    color: #f44336;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.add-row-section {
+    padding: 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: center;
+}
+
+.empty-form-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-form-state p {
+    font-size: 14px;
+    margin: 0;
+}
+
+/* Alert Styles */
+.alert {
+    padding: 15px 20px;
+    border-radius: 4px;
+    margin: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.alert i {
+    font-size: 16px;
+}
+
+.alert-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+.alert-error {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: row-reverse;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        font-size: 12px;
+        padding: 8px 12px;
+    }
+
+    .mass-create-table th,
+    .mass-create-table td {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .page-title {
+        font-size: 20px;
+    }
+
+    .breadcrumb {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mass-create-table {
+        font-size: 11px;
+    }
+
+    .mass-create-table th,
+    .mass-create-table td {
+        padding: 6px;
+    }
+
+    .btn {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+}
