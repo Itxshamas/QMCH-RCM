@@ -1,43 +1,161 @@
 @page "/caregiver/search/list"
-@inject IEmployeeService EmployeeService
 @rendermode InteractiveServer
 
-<PageTitle>Nurse Search - QHMCPro</PageTitle>
+<PageTitle>Nurse Search - Quality Homecare System</PageTitle>
 
 <div class="page-header">
-    <div class="page-header-left"><h1>Nurse Search</h1><p>Find qualified caregivers by skills, certifications, and availability</p></div>
+    <div class="page-header-content">
+        <h1>FIND NURSES WHO ARE AVAILABLE FOR AN UPCOMING SCHEDULE</h1>
+        <p>You can find the nurses by percentage available to fill, against the total searched hours</p>
+    </div>
+    <div class="page-header-actions">
+        <a href="/" class="action-link">Switch to Maid & Nanny</a>
+    </div>
 </div>
 
-<div class="card" style="margin-bottom: 20px;">
-    <div class="card-body">
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Search</label><input type="text" class="form-control" placeholder="Name, skills, certifications..." @bind="searchTerm" @bind:event="oninput" /></div>
-            <div class="form-group"><label class="form-label">Classification</label>
-                <select class="form-control" @bind="classificationFilter">
-                    <option value="">All Classifications</option>
-                    @foreach (var c in classifications) { <option value="@c.Id">@c.Name</option> }
-                </select>
+<div class="search-container">
+    <div class="search-panel">
+        <h3 class="search-title">Required Schedule Hours</h3>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Start Date</label>
+                <div class="input-group">
+                    <InputDate @bind-Value="searchCriteria.StartDate" class="form-control" />
+                    <span class="input-icon"><i class="fa fa-calendar"></i></span>
+                </div>
             </div>
-            <div class="form-group" style="display: flex; align-items: flex-end;"><button class="btn btn-primary" @onclick="Search"><i class="fa fa-search"></i> Search</button></div>
+
+            <div class="form-group">
+                <label>End Date</label>
+                <div class="input-group">
+                    <InputDate @bind-Value="searchCriteria.EndDate" class="form-control" />
+                    <span class="input-icon"><i class="fa fa-calendar"></i></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Start Time</label>
+                <div class="input-group">
+                    <input type="time" @onchange="@((ChangeEventArgs e) => HandleStartTimeChange(e))" value="@searchCriteria.StartTimeString" class="form-control" />
+                    <span class="input-icon"><i class="fa fa-clock"></i></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>End Time</label>
+                <div class="input-group">
+                    <input type="time" @onchange="@((ChangeEventArgs e) => HandleEndTimeChange(e))" value="@searchCriteria.EndTimeString" class="form-control" />
+                    <span class="input-icon"><i class="fa fa-clock"></i></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-actions">
+            <button class="btn btn-search" @onclick="PerformSearch">
+                <i class="fa fa-search"></i> Search
+            </button>
+            <button class="btn btn-clear" @onclick="ClearSearch">
+                <i class="fa fa-times"></i> Clear
+            </button>
         </div>
     </div>
 </div>
 
-<DataGrid TItem="Employee" Items="results" Title="Search Results" IsLoading="isLoading" ShowSearch="false">
-    <HeaderTemplate><th>Name</th><th>Email</th><th>Phone</th><th>Skills</th><th>Certifications</th><th>Status</th></HeaderTemplate>
-    <RowTemplate Context="emp">
-        <td><strong>@emp.FirstName @emp.LastName</strong></td>
-        <td>@emp.Email</td>
-        <td>@emp.Phone</td>
-        <td>@emp.Skills</td>
-        <td>@emp.Certifications</td>
-        <td><span class="badge badge-success">@emp.Status</span></td>
-    </RowTemplate>
-</DataGrid>
+<div class="results-container">
+    <div class="results-header">
+        <div class="show-entries">
+            <label>Show <select @onchange="OnPageSizeChanged" class="entries-select">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select> entries</label>
+        </div>
+        <div class="search-box-header">
+            <input type="text" class="search-input" placeholder="Search..." @bind="searchTerm" @bind:event="oninput" @onkeyup="OnSearchTermChanged" />
+        </div>
+    </div>
 
-@code {
-    private string searchTerm = ""; private int? classificationFilter; private bool isLoading;
-    private List<Employee> results = new(); private List<Classification> classifications = new();
-    protected override async Task OnInitializedAsync() { classifications = await EmployeeService.GetClassificationsAsync(); }
-    private async Task Search() { isLoading = true; results = await EmployeeService.SearchNursesAsync(searchTerm, classificationFilter); isLoading = false; }
-}
+    @if (isLoading)
+    {
+        <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading nurses...</p>
+        </div>
+    }
+    else if (filteredResults == null || filteredResults.Count == 0)
+    {
+        <div class="empty-state">
+            <p>No nurses found. Please adjust your search criteria.</p>
+        </div>
+    }
+    else
+    {
+        <table class="nurses-table">
+            <thead>
+                <tr class="table-header">
+                    <th class="code-col">
+                        <i class="fa fa-list"></i>
+                        Code
+                    </th>
+                    <th class="name-col">
+                        <i class="fa fa-user"></i>
+                        First Name
+                    </th>
+                    <th class="name-col">
+                        Last Name
+                    </th>
+                    <th class="position-col">
+                        Position
+                    </th>
+                    <th class="date-col">
+                        Joining Date
+                    </th>
+                    <th class="date-col">
+                        Contract End Date
+                    </th>
+                    <th class="availability-col">
+                        Available (%)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var nurse in GetPaginatedResults())
+                {
+                    <tr class="table-row">
+                        <td class="code-col">@GetEmployeeCode(nurse.Id)</td>
+                        <td class="name-col">@nurse.FirstName</td>
+                        <td class="name-col">@nurse.LastName</td>
+                        <td class="position-col">@(nurse.Position ?? "Not Specified")</td>
+                        <td class="date-col">@(nurse.JoinDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                        <td class="date-col">@(nurse.HireDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                        <td class="availability-col">
+                            <span class="availability-badge">@CalculateAvailability(nurse)%</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="pagination-section">
+            <div class="pagination-info">
+                Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, filteredResults.Count) of @filteredResults.Count entries
+            </div>
+
+            <div class="pagination-controls">
+                <button class="pagination-btn" @onclick="() => GoToPage(currentPage - 1)" disabled="@(currentPage <= 1)">Previous</button>
+                
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    int pageNum = i;
+                    <button class="pagination-btn @(currentPage == pageNum ? "active" : "")" @onclick="() => GoToPage(pageNum)">
+                        @pageNum
+                    </button>
+                }
+                
+                <button class="pagination-btn" @onclick="() => GoToPage(currentPage + 1)" disabled="@(currentPage >= totalPages)">Next</button>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,631 @@
+﻿.leave-grid-container {
+    padding: 20px;
+    background-color: #f5f5f5;
+    min-height: 100vh;
+}
+
+.leave-grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.header-filters {
+    display: flex;
+    gap: 12px;
+}
+
+.btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: auto;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.btn-new {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-new:hover {
+    background-color: #45a049;
+}
+
+.btn-fullday {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-fullday:hover {
+    background-color: #45a049;
+}
+
+.btn-filter {
+    background-color: #ff9800;
+    color: white;
+}
+
+.btn-filter:hover {
+    background-color: #e68900;
+}
+
+.btn-clear {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-clear:hover {
+    background-color: #da190b;
+}
+
+.btn-save {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: #45a049;
+}
+
+.btn-cancel {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #da190b;
+}
+
+.btn-update {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-update:hover {
+    background-color: #45a049;
+}
+
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #da190b;
+}
+
+.btn-approve {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-reject {
+    background-color: #f44336;
+    color: white;
+}
+
+/* Filter Panel */
+.filter-panel {
+    background: white;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.filter-group.date-range {
+    grid-column: span 1;
+}
+
+.form-control {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    background-color: white;
+    color: #333;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #00bcd4;
+    box-shadow: 0 0 5px rgba(0, 188, 212, 0.3);
+}
+
+.form-control:hover {
+    border-color: #00bcd4;
+}
+
+.form-control[type="date"] {
+    cursor: pointer;
+}
+
+.form-control[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 2px;
+    opacity: 0.6;
+    filter: invert(0.8);
+}
+
+.form-control[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Data Table */
+.leave-grid-table {
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #00bcd4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: #999;
+}
+
+.leave-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.leave-table thead {
+    background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+    color: white;
+}
+
+.leave-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #00bcd4;
+}
+
+.leave-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.leave-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.employee-cell {
+    font-weight: 600;
+    color: #333;
+}
+
+.status-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge.approved {
+    background-color: #c8e6c9;
+    color: #2e7d32;
+}
+
+.status-badge.rejected {
+    background-color: #ffcdd2;
+    color: #c62828;
+}
+
+.status-badge.pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.default {
+    background-color: #e0e0e0;
+    color: #424242;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 4px;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.action-btn.approve:hover {
+    color: #4caf50;
+}
+
+.action-btn.reject:hover {
+    color: #f44336;
+}
+
+.action-btn.edit:hover {
+    color: #2196f3;
+}
+
+.action-btn.delete:hover {
+    color: #ff9800;
+}
+
+.action-btn i {
+    font-size: 16px;
+}
+
+/* Pagination */
+.pagination-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #fafafa;
+    border-top: 1px solid #eee;
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 14px;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.page-btn {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    background-color: #00bcd4;
+    color: white;
+    border-color: #00bcd4;
+}
+
+.page-btn.active {
+    background-color: #00bcd4;
+    color: white;
+    border-color: #00bcd4;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modal Styles */
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    pointer-events: auto;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    pointer-events: auto;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+}
+
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    pointer-events: auto;
+}
+
+.form-group label .required {
+    color: #f44336;
+    margin-left: 2px;
+}
+
+.form-group textarea,
+.form-control {
+    pointer-events: auto;
+    cursor: text;
+}
+
+.form-group textarea {
+    resize: vertical;
+    font-family: Arial, sans-serif;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    pointer-events: auto;
+}
+
+/* Full Day Off Modal */
+.fullday-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    pointer-events: auto;
+}
+
+.info-text {
+    padding: 12px;
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+    color: #1565c0;
+    margin: 0;
+    line-height: 1.5;
+    font-size: 13px;
+    pointer-events: auto;
+}
+
+.fullday-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    pointer-events: auto;
+}
+
+.days-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+}
+
+.days-selector label:first-child {
+    font-weight: 600;
+    color: #333;
+}
+
+.days-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    pointer-events: auto;
+}
+
+.day-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: #f9f9f9;
+    user-select: none;
+    pointer-events: auto;
+}
+
+.day-checkbox:hover {
+    background-color: #f0f0f0;
+    border-color: #00bcd4;
+}
+
+.day-checkbox input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: #00bcd4;
+    pointer-events: auto;
+}
+
+.day-checkbox input[type="checkbox"]:checked + ::after {
+    content: "✓";
+}
+
+.odd-days-checkbox,
+.even-days-checkbox {
+    margin-left: 10px;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #00bcd4;
+    pointer-events: auto;
+}
+
+/* Reject Form */
+.reject-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    pointer-events: auto;
+}
+
+.reject-form .form-group {
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+}
+
+.reject-form label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    pointer-events: auto;
+}
+
+.reject-form textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    resize: vertical;
+    pointer-events: auto;
+    cursor: text;
+}
+
+.reject-form textarea:focus {
+    outline: none;
+    border-color: #f44336;
+    box-shadow: 0 0 5px rgba(244, 67, 54, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .leave-grid-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-buttons,
+    .header-filters {
+        flex-direction: column;
+    }
+
+    .btn {
+        justify-content: center;
+    }
+
+    .filter-row {
+        grid-template-columns: 1fr;
+    }
+
+    .leave-table {
+        font-size: 12px;
+    }
+
+    .leave-table th,
+    .leave-table td {
+        padding: 10px 8px;
+    }
+
+    .action-buttons {
+        flex-wrap: wrap;
+    }
+
+    .pagination-footer {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .pagination-controls {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .days-checkboxes {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
