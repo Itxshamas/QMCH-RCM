@@ -1,101 +1,147 @@
 @page "/hr/aquisition/applicants/list/create"
+@using Microsoft.AspNetCore.Components.Forms
 @inject IHRService HRService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>@(isEdit ? "Edit" : "Add") Applicant - QHMCPro</PageTitle>
+<PageTitle>@(isEdit ? "Edit" : "Create") Applicant - QHMCPro</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>@(isEdit ? "Edit Applicant" : "Add New Applicant")</h1>
+<div class="create-container">
+    <div class="breadcrumb">
+        <span>Recruitment</span> / <span>Talent Acquisition</span> / <span>Candidate Management</span> / <span>New</span>
     </div>
-    <div class="page-header-actions"><button class="btn btn-outline"
-            @onclick='() => Navigation.NavigateTo("/hr/aquisition/applicants/list")'><i class="fa fa-arrow-left"></i>
-            Back</button></div>
+
+    <div class="create-header">
+        <h1>CANDIDATE MANAGEMENT - @(isEdit ? "EDIT" : "CREATE")</h1>
+    </div>
+
+    <div class="create-content">
+        <div class="left-panel">
+            <div class="photo-section">
+                <div class="add-photo-header">ADD CANDIDATE PHOTO</div>
+                <div class="photo-placeholder">
+                    <i class="fa fa-user"></i>
+                </div>
+                <InputFile OnChange="@HandlePhotoUpload" class="file-input" accept="image/*" />
+                <label class="upload-btn">
+                    <i class="fa fa-cloud-upload"></i> Click to Upload Photo
+                </label>
+            </div>
+
+            <div class="resume-section">
+                <div class="resume-buttons">
+                    <InputFile OnChange="@HandleResumeUpload" class="file-input" accept=".pdf,.doc,.docx" />
+                    <label class="upload-btn">
+                        <i class="fa fa-cloud-upload"></i> Click to Upload Resume
+                    </label>
+                </div>
+                <div class="resume-buttons">
+                    <button type="button" class="create-btn" @onclick='() => Navigation.NavigateTo("/hr/aquisition/applicants/list/create-resume?applicantId=" + model.Id)'>
+                        <i class="fa fa-file-alt"></i> Click to Create Resume
+                    </button>
+                </div>
+            </div>
+
+            <div class="navigation-buttons">
+                <button type="button" class="nav-btn prev-btn" disabled="@(currentApplicantIndex <= 0)" @onclick="PreviousApplicant">
+                    <i class="fa fa-arrow-left"></i>
+                </button>
+                <span class="nav-info">@(isEdit ? $"{currentApplicantIndex + 1} / {totalApplicants}" : "New")</span>
+                <button type="button" class="nav-btn next-btn" disabled="@(currentApplicantIndex >= totalApplicants - 1)" @onclick="NextApplicant">
+                    <i class="fa fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <EditForm Model="@model" OnValidSubmit="@Save">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="form-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Candidate First Name</label>
+                            <InputText @bind-Value="model.FirstName" class="form-control" placeholder="Candidate First Name" />
+                            <ValidationMessage For="@(() => model.FirstName)" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Job Order Code</label>
+                            <InputSelect @bind-Value="selectedJobOrderId" class="form-control">
+                                <option value="0">Select Job Order Code</option>
+                                @foreach (var jobOrder in jobOrders)
+                                {
+                                    <option value="@jobOrder.Id">@jobOrder.Code</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Candidate Status</label>
+                            <InputSelect @bind-Value="model.Status" class="form-control">
+                                <option>Not Scheduled</option>
+                                <option>New</option>
+                                <option>Screening</option>
+                                <option>Interview</option>
+                                <option>Offer</option>
+                                <option>Hired</option>
+                                <option>Rejected</option>
+                            </InputSelect>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Candidate Last Name</label>
+                            <InputText @bind-Value="model.LastName" class="form-control" placeholder="Candidate Last Name" />
+                            <ValidationMessage For="@(() => model.LastName)" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">E-Mail</label>
+                            <InputText @bind-Value="model.Email" class="form-control" type="email" placeholder="Email Address" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Mobile</label>
+                            <InputText @bind-Value="model.Phone" class="form-control" placeholder="Mobile Number" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Position Applying For</label>
+                            <InputText @bind-Value="model.PositionApplied" class="form-control" placeholder="Position Title" />
+                            <ValidationMessage For="@(() => model.PositionApplied)" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Registration Status</label>
+                            <InputSelect @bind-Value="model.Source" class="form-control">
+                                <option value="">Active</option>
+                                <option value="Job Board">Job Board</option>
+                                <option value="Referral">Referral</option>
+                                <option value="Agency">Agency</option>
+                                <option value="Website">Website</option>
+                                <option value="Walk-in">Walk-in</option>
+                            </InputSelect>
+                        </div>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="form-label">Notes</label>
+                        <InputTextArea @bind-Value="model.Notes" class="form-control" rows="4" placeholder="Add any notes about this candidate"></InputTextArea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" @onclick="Cancel">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn-save">
+                        <i class="fa fa-save"></i> Save
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
 </div>
-
-<div class="card">
-    <div class="card-header">
-        <h3><i class="fa fa-user-plus" style="margin-right: 8px;"></i> Applicant Information</h3>
-    </div>
-    <div class="card-body">
-        <EditForm Model="@model" OnValidSubmit="@Save">
-            <DataAnnotationsValidator />
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">First Name *</label>
-                    <InputText @bind-Value="model.FirstName" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Last Name *</label>
-                    <InputText @bind-Value="model.LastName" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Email</label>
-                    <InputText @bind-Value="model.Email" class="form-control" />
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Phone</label>
-                    <InputText @bind-Value="model.Phone" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Position Applied *</label>
-                    <InputText @bind-Value="model.PositionApplied" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Applied Date</label>
-                    <InputDate @bind-Value="model.AppliedDate" class="form-control" />
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Source</label>
-                    <InputSelect @bind-Value="model.Source" class="form-control">
-                        <option value="">Select</option>
-                        <option>Job Board</option>
-                        <option>Referral</option>
-                        <option>Agency</option>
-                        <option>Website</option>
-                        <option>Walk-in</option>
-                    </InputSelect>
-                </div>
-                <div class="form-group"><label class="form-label">Status</label>
-                    <InputSelect @bind-Value="model.Status" class="form-control">
-                        <option>New</option>
-                        <option>Screening</option>
-                        <option>Interview</option>
-                        <option>Offer</option>
-                        <option>Hired</option>
-                        <option>Rejected</option>
-                    </InputSelect>
-                </div>
-            </div>
-            <div class="form-group"><label class="form-label">Resume URL</label>
-                <InputText @bind-Value="model.ResumeUrl" class="form-control" />
-            </div>
-            <div class="form-group"><label class="form-label">Notes</label>
-                <InputTextArea @bind-Value="model.Notes" class="form-control" rows="3" />
-            </div>
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> @(isEdit ? "Update" :
-                    "Create")</button>
-                <button type="button" class="btn btn-outline"
-                    @onclick='() => Navigation.NavigateTo("/hr/aquisition/applicants/list")'>Cancel</button>
-            </div>
-        </EditForm>
-    </div>
-</div>
-
-@code {
-    [SupplyParameterFromQuery] public int? Id { get; set; }
-    private Applicant model = new() { AppliedDate = DateTime.Today, Status = "New" }; private bool isEdit;
-    protected override async Task OnInitializedAsync()
-    {
-        if (Id.HasValue)
-        {
-            var e = await
-            HRService.GetApplicantByIdAsync(Id.Value); if (e != null) { model = e; isEdit = true; }
-        }
-    }
-    private async Task Save()
-    {
-        if (isEdit) await HRService.UpdateApplicantAsync(model);
-        else await
-        HRService.CreateApplicantAsync(model); Navigation.NavigateTo("/hr/aquisition/applicants/list");
-    }
-}

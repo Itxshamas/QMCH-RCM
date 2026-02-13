@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QMCH.Data;
 
@@ -11,9 +12,11 @@ using QMCH.Data;
 namespace QMCH.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260213050104_QMCH0000001234")]
+    partial class QMCH0000001234
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1316,117 +1319,6 @@ namespace QMCH.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Reports");
-                });
-
-            modelBuilder.Entity("QMCH.Models.Resume", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ApplicantId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("AvailabilityForImmediateWork")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("AvailabilityForNightShift")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("AvailabilityForOtherLocations")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("AvailabilityForWeekendWork")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("AvailableFromDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ChallengesDuringWork")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ChallengingWorkTypes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Contact1")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Contact2")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Country")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CriminalConviction")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("CriminalConvictionDetails")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DateOfBirth")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("EducationJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmploymentHistoryJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Gender")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<bool>("IsAvailableToStartImmediately")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MiddleName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PostalCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("PreferredEmploymentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ReferencesJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SkillsJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SkillsMatrixJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("State")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Street")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Resumes");
                 });
 
             modelBuilder.Entity("QMCH.Models.ScheduleItem", b =>

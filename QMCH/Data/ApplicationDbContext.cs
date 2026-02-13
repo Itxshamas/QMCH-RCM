@@ -29,6 +29,7 @@ namespace QMCH.Data
         public DbSet<HRAgency> HRAgencies { get; set; }
         public DbSet<Applicant> Applicants { get; set; }
         public DbSet<Interview> Interviews { get; set; }
+        public DbSet<Resume> Resumes { get; set; }
 
         // Operations Module
         public DbSet<ScheduleItem> ScheduleItems { get; set; }

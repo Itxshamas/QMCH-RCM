@@ -30,5 +30,11 @@ namespace QMCH.Services
         public async Task<List<Interview>> GetInterviewsAsync() => await _db.Interviews.OrderByDescending(i => i.ScheduledDateTime).ToListAsync();
         public async Task CreateInterviewAsync(Interview item) { _db.Interviews.Add(item); await _db.SaveChangesAsync(); }
         public async Task DeleteInterviewAsync(int id) { var e = await _db.Interviews.FindAsync(id); if (e != null) { _db.Interviews.Remove(e); await _db.SaveChangesAsync(); } }
+
+        public async Task<Resume?> GetResumeByApplicantIdAsync(int applicantId) => await _db.Resumes.FirstOrDefaultAsync(r => r.ApplicantId == applicantId);
+        public async Task CreateResumeAsync(Resume item) { _db.Resumes.Add(item); await _db.SaveChangesAsync(); }
+        public async Task UpdateResumeAsync(Resume item) { _db.Resumes.Update(item); await _db.SaveChangesAsync(); }
+        public async Task DeleteResumeAsync(int id) { var e = await _db.Resumes.FindAsync(id); if (e != null) { _db.Resumes.Remove(e); await _db.SaveChangesAsync(); } }
     }
 }
+
