@@ -33,7 +33,9 @@ namespace QMCH.Services
 
         public async Task<List<MedicalSchedule>> GetMedicalSchedulesAsync() => await _db.MedicalSchedules.OrderByDescending(m => m.ScheduledDate).ToListAsync();
         public async Task CreateMedicalScheduleAsync(MedicalSchedule item) { _db.MedicalSchedules.Add(item); await _db.SaveChangesAsync(); }
+        public async Task UpdateMedicalScheduleAsync(MedicalSchedule item) { _db.MedicalSchedules.Update(item); await _db.SaveChangesAsync(); }
         public async Task DeleteMedicalScheduleAsync(int id) { var e = await _db.MedicalSchedules.FindAsync(id); if (e != null) { _db.MedicalSchedules.Remove(e); await _db.SaveChangesAsync(); } }
+
 
         public async Task<List<Attendance>> GetAttendanceAsync() => await _db.Attendances.OrderByDescending(a => a.Date).ToListAsync();
         public async Task CreateAttendanceAsync(Attendance item) { _db.Attendances.Add(item); await _db.SaveChangesAsync(); }

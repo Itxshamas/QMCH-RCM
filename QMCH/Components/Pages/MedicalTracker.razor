@@ -1,53 +1,126 @@
 @page "/caregiver/medical/schedule/list"
-@page "/caregiver/medical/schedule/list/create"
-@inject IEmployeeService EmployeeService
 @rendermode InteractiveServer
 
-<PageTitle>Medical Tracker - QHMCPro</PageTitle>
+<PageTitle>Medical Appointments - QHMCPro</PageTitle>
 
 <div class="page-header">
-    <div class="page-header-left"><h1>Medical Tracker</h1><p>Employee medical exams & compliance tracking</p></div>
-    <div class="page-header-actions"><button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Add Medical Schedule</button></div>
+    <div class="page-header-left">
+        <h1>MEDICAL APPOINTMENTS</h1>
+    </div>
+    <div class="page-header-breadcrumb">
+        <span>Home</span> / <span>Medical Appointments</span> / <span>View</span>
+    </div>
 </div>
 
-<DataGrid TItem="MedicalSchedule" Items="items" Title="Medical Schedules" IsLoading="isLoading">
-    <HeaderTemplate><th>Employee</th><th>Exam Type</th><th>Provider</th><th>Scheduled</th><th>Status</th><th>Expiry</th><th style="width: 100px;">Actions</th></HeaderTemplate>
-    <RowTemplate Context="item">
-        <td><strong>@item.EmployeeName</strong></td>
-        <td>@item.ExamType</td>
-        <td>@item.Provider</td>
-        <td>@(item.ScheduledDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
-        <td><span class="badge @GetStatusBadge(item.Status)">@item.Status</span></td>
-        <td>@(item.ExpirationDate?.ToString("MMM dd, yyyy") ?? "N/A")</td>
-        <td><button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i class="fa fa-trash"></i></button></td>
-    </RowTemplate>
-</DataGrid>
+<div class="medical-tracker-container">
+    <div class="toolbar-section">
+        <button class="btn-add" @onclick="NavigateToCreate">
+            <i class="fa fa-plus"></i> Add
+        </button>
 
-<ModalDialog @bind-IsVisible="showModal" Title="Add Medical Schedule" Size="lg">
-    <EditForm Model="newItem" OnValidSubmit="Save">
-        <DataAnnotationsValidator />
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Employee Name</label><InputText @bind-Value="newItem.EmployeeName" class="form-control" /></div>
-            <div class="form-group"><label class="form-label">Exam Type *</label><InputText @bind-Value="newItem.ExamType" class="form-control" /></div>
+        <div class="entries-control">
+            <label>Show</label>
+            <select class="entries-select" @bind="pageSize" @bind:after="ApplyFilters">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <span>entries</span>
         </div>
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Provider</label><InputText @bind-Value="newItem.Provider" class="form-control" /></div>
-            <div class="form-group"><label class="form-label">Location</label><InputText @bind-Value="newItem.Location" class="form-control" /></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Scheduled Date</label><InputDate @bind-Value="newItem.ScheduledDate" class="form-control" /></div>
-            <div class="form-group"><label class="form-label">Expiration Date</label><InputDate @bind-Value="newItem.ExpirationDate" class="form-control" /></div>
-        </div>
-        <div class="form-group"><label class="form-label">Notes</label><InputTextArea @bind-Value="newItem.Notes" class="form-control" rows="2" /></div>
-        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-    </EditForm>
-</ModalDialog>
 
-@code {
-    private List<MedicalSchedule> items = new(); private bool isLoading = true; private bool showModal; private MedicalSchedule newItem = new();
-    protected override async Task OnInitializedAsync() => await LoadData();
-    private async Task LoadData() { isLoading = true; items = await EmployeeService.GetMedicalSchedulesAsync(); isLoading = false; }
-    private async Task Save() { await EmployeeService.CreateMedicalScheduleAsync(newItem); newItem = new(); showModal = false; await LoadData(); }
-    private async Task Delete(int id) { await EmployeeService.DeleteMedicalScheduleAsync(id); await LoadData(); }
-    private string GetStatusBadge(string s) => s switch { "Completed" => "badge-success", "Expired" => "badge-danger", "Scheduled" => "badge-info", _ => "badge-secondary" };
-}
+        <div class="export-controls">
+            <button class="btn-export csv" @onclick="ExportToCSV" title="Export to CSV">
+                <i class="fa fa-file-csv"></i> CSV
+            </button>
+            <button class="btn-export pdf" @onclick="ExportToPDF" title="Export to PDF">
+                <i class="fa fa-file-pdf"></i> PDF
+            </button>
+            <button class="btn-export print" @onclick="PrintTable" title="Print">
+                <i class="fa fa-print"></i> Print
+            </button>
+        </div>
+
+        <div class="search-control">
+            <input type="text"
+                   placeholder="Search"
+                   class="search-input"
+                   @bind="searchTerm"
+                   @bind:event="oninput"
+                   @bind:after="HandleSearch" />
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <p>Loading medical appointments...</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table class="medical-table">
+                <thead>
+                    <tr>
+                        <th class="id-col">ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Email</th>
+                        <th>Join Date</th>
+                        <th>Module</th>
+                        <th>Status</th>
+                        <th style="width: 120px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (filteredItems.Any())
+                    {
+                        @foreach (var item in GetPagedItems())
+                        {
+                            <tr>
+                                <td class="id-col">@item.Id</td>
+                                <td>@GetFirstName(item.EmployeeName)</td>
+                                <td>@GetLastName(item.EmployeeName)</td>
+                                <td>@(item.Provider ?? "-")</td>
+                                <td>@(item.ScheduledDate?.ToString("MMM dd, yyyy") ?? "-")</td>
+                                <td>@item.ExamType</td>
+                                <td><span class="badge @GetStatusClass(item.Status)">@item.Status</span></td>
+                                <td>
+                                    <button class="btn-action edit" @onclick="() => EditItem(item.Id)" title="Edit">
+                                        <i class="fa fa-pencil"></i>
+                                    </button>
+                                    <button class="btn-action delete" @onclick="() => DeleteItem(item.Id)" title="Delete">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="no-data">No data available in table</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-section">
+            <div class="pagination-info">
+                Showing @(filteredItems.Count > 0 ? (currentPage - 1) * pageSize + 1 : 0) to @(Math.Min(currentPage * pageSize, filteredItems.Count)) of @filteredItems.Count entries
+            </div>
+            <div class="pagination-controls">
+                <button class="btn-pagination" @onclick="PreviousPage" disabled="@(currentPage == 1)">
+                    Previous
+                </button>
+                <span class="page-info">Page @currentPage of @totalPages</span>
+                <button class="btn-pagination" @onclick="NextPage" disabled="@(currentPage >= totalPages)">
+                    Next
+                </button>
+            </div>
+        </div>
+    }
+</div>
