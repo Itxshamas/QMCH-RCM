@@ -136,8 +136,9 @@
 /* Wrapper */
 .workforce-chart-wrapper {
     position: relative;
-
     margin: 0 auto;
+    width: 100%;
+    overflow: hidden;
 }
 
 /* Chart area */
@@ -147,33 +148,46 @@
     border-top: 1px solid #eee;
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
-    /* Vertical grid lines - align with x-axis columns (60px) */
-    background-image: repeating-linear-gradient( to right, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 60px );
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.workforce-chart svg {
+    display: block;
+    min-width: 100%;
 }
 
 /* X-axis dates */
 .workforce-x-axis {
-    display: grid; /* Change from flex to grid */
-    grid-auto-flow: column; /* Keep items in a row */
-    grid-auto-columns: 60px; /* Make each column fixed width to match rotated labels */
-    justify-content: space-between;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 60px;
+    justify-content: start;
     padding: 40px 6px;
-    overflow-x: auto;
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    width: 100%;
+    overflow-x: auto;
+    background: #fafafa;
 }
 
-    .workforce-x-axis span {
-        font-size: 10px;
-        color: #666;
-        white-space: nowrap;
-        transform: rotate(-60deg);
-        transform-origin: center;
-        text-align: center; /* Center the date text */
-        min-width: 60px;
-        display:inline-block;
-        color:#7b8794;
-    }
+.workforce-x-axis span {
+    font-size: 10px;
+    color: #666;
+    white-space: nowrap;
+    transform: rotate(-60deg);
+    transform-origin: center;
+    text-align: center;
+    min-width: 60px;
+    display: inline-block;
+    color: #7b8794;
+    height: 40px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
 
 /* ============================= */
 /* CARD HEADER (Generic) */

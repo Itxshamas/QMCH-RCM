@@ -24,6 +24,9 @@
 }
 
 @code {
+    [Inject]
+    protected IJSRuntime JSRuntime { get; set; } = null!;
+
     [Parameter] public bool IsVisible { get; set; }
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
     [Parameter] public string Title { get; set; } = "Dialog";
@@ -40,6 +43,36 @@
         _ => ""
     };
 
+    private bool previousIsVisible = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Only call JavaScript interop if visibility state changed
+        if (IsVisible != previousIsVisible)
+        {
+            try
+            {
+                if (IsVisible)
+                {
+                    // Add class to body to prevent scrolling when modal is open
+                    await JSRuntime.InvokeVoidAsync("document.body.classList.add", "modal-open");
+                }
+                else
+                {
+                    // Remove class from body to restore scrolling
+                    await JSRuntime.InvokeVoidAsync("document.body.classList.remove", "modal-open");
+                }
+                previousIsVisible = IsVisible;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error managing modal scroll: {ex.Message}");
+            }
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
     private async Task Close()
     {
         IsVisible = false;
@@ -53,3 +86,4 @@
             await Close();
     }
 }
+
