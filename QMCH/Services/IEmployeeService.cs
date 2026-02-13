@@ -18,7 +18,9 @@ namespace QMCH.Services
 
         Task<List<MedicalSchedule>> GetMedicalSchedulesAsync();
         Task CreateMedicalScheduleAsync(MedicalSchedule item);
+        Task UpdateMedicalScheduleAsync(MedicalSchedule item);
         Task DeleteMedicalScheduleAsync(int id);
+
 
         Task<List<Attendance>> GetAttendanceAsync();
         Task CreateAttendanceAsync(Attendance item);
