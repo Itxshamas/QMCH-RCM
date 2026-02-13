@@ -1,107 +1,442 @@
 @page "/schedule/calendar"
 @inject IScheduleService ScheduleService
+@inject IEmployeeService EmployeeService
+@inject IClientService ClientService
 @rendermode InteractiveServer
 
-<PageTitle>Schedule Calendar - QHMCPro</PageTitle>
+<PageTitle>Schedule Calendar - Quality Homecare System</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left"><h1>Schedule Calendar</h1><p>Manage caregiver-client assignments and shifts</p></div>
-    <div class="page-header-actions">
-        <button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Add Schedule</button>
-    </div>
-</div>
-
-<div class="calendar-container">
-    <div class="calendar-header">
-        <div class="calendar-nav">
-            <button @onclick="PrevMonth"><i class="fa fa-chevron-left"></i></button>
-            <h3>@currentDate.ToString("MMMM yyyy")</h3>
-            <button @onclick="NextMonth"><i class="fa fa-chevron-right"></i></button>
+<div class="calendar-page-container">
+    <!-- Header -->
+    <div class="calendar-page-header">
+        <div class="header-left">
+            <h1>SCHEDULE CALENDAR</h1>
         </div>
-        <div style="display: flex; gap: 8px;">
-            <button class="btn btn-outline btn-sm" @onclick="GoToToday">Today</button>
+        <div class="header-right">
+            <span class="schedule-link">Schedule / Calendar</span>
         </div>
     </div>
 
-    <div class="calendar-grid">
-        @foreach (var dayName in new[] { "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT" })
-        {
-            <div class="calendar-day-header">@dayName</div>
-        }
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-section">
+            <button class="btn btn-add-schedule" @onclick="OpenAddScheduleModal">
+                <i class="fa fa-plus"></i> Add Schedule
+            </button>
+            <button class="btn btn-mass-update" @onclick="OpenMassUpdateModal">
+                <i class="fa fa-edit"></i> Mass Update
+            </button>
+            <button class="btn btn-duty-interruption" @onclick="OpenDutyInterruptionModal">
+                <i class="fa fa-warning"></i> Duty Interruption
+            </button>
+            <button class="btn btn-confirm" @onclick="OpenConfirmModal">
+                <i class="fa fa-check"></i> Confirm
+            </button>
+            <button class="btn btn-filter" @onclick="RefreshCalendar">
+                <i class="fa fa-refresh"></i> Filter/Refresh
+            </button>
+        </div>
 
-        @foreach (var day in calendarDays)
-        {
-            <div class="calendar-day @(day.IsCurrentMonth ? "" : "other-month") @(day.Date == DateTime.Today ? "today" : "")"
-                 @onclick="() => SelectDay(day.Date)">
-                <div class="calendar-day-number">@day.Date.Day</div>
-                @foreach (var evt in GetEventsForDay(day.Date).Take(3))
+        <div class="filter-controls">
+            <select @bind="selectedClassification" @bind:event="onchange" class="form-control filter-select">
+                <option value="">Filter by Client</option>
+                @foreach (var c in allClients)
                 {
-                    <div class="calendar-event @evt.ColorClass">@evt.Title</div>
+                    <option value="@c.Id">@(c.FirstName + " " + c.LastName)</option>
                 }
-                @if (GetEventsForDay(day.Date).Count() > 3)
+            </select>
+            <select @bind="selectedServiceType" @bind:event="onchange" class="form-control filter-select">
+                <option value="">All Services</option>
+                <option value="Shift">Shift</option>
+                <option value="Visit">Visit</option>
+                <option value="Training">Training</option>
+            </select>
+            <select @bind="selectedNurse" @bind:event="onchange" class="form-control filter-select">
+                <option value="">All Nurses</option>
+                @foreach (var n in allNurses)
                 {
-                    <div style="font-size: 11px; color: var(--text-muted);">+@(GetEventsForDay(day.Date).Count() - 3) more</div>
+                    <option value="@n.Id">@(n.FirstName + " " + n.LastName)</option>
+                }
+            </select>
+            <button class="btn btn-clear-filters" @onclick="ClearFilters">
+                <i class="fa fa-times"></i> Clear Filters
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendar Navigation -->
+    <div class="calendar-nav-bar">
+        <div class="nav-left">
+            <button class="nav-btn" @onclick="PrevMonth"><i class="fa fa-chevron-left"></i></button>
+            <button class="nav-btn" @onclick="GoToToday">Today</button>
+            <button class="nav-btn" @onclick="NextMonth"><i class="fa fa-chevron-right"></i></button>
+        </div>
+        <h2 class="calendar-month-year">@currentDate.ToString("MMMM yyyy")</h2>
+        <div class="nav-right">
+            <span>Schedule / Calendar</span>
+        </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="calendar-wrapper">
+        <div class="calendar-container">
+            <!-- Day Headers -->
+            <div class="calendar-header-row">
+                <div class="calendar-day-header">Sun</div>
+                <div class="calendar-day-header">Mon</div>
+                <div class="calendar-day-header">Tue</div>
+                <div class="calendar-day-header">Wed</div>
+                <div class="calendar-day-header">Thu</div>
+                <div class="calendar-day-header">Fri</div>
+                <div class="calendar-day-header">Sat</div>
+            </div>
+
+            <!-- Calendar Days -->
+            <div class="calendar-grid">
+                @foreach (var day in calendarDays)
+                {
+                    var dayEvents = GetEventsForDay(day.Date);
+                    <div class="calendar-cell @(day.IsCurrentMonth ? "" : "other-month") @(day.Date == DateTime.Today ? "today" : "") @(day.Date.DayOfWeek == DayOfWeek.Saturday || day.Date.DayOfWeek == DayOfWeek.Sunday ? "weekend" : "")">
+                        <div class="cell-date">@day.Date.Day</div>
+                        <div class="cell-events">
+                            @foreach (var evt in dayEvents.Take(2))
+                            {
+                                <div class="event-badge @evt.ColorClass" title="@evt.Title">
+                                    <span>@evt.Title</span>
+                                </div>
+                            }
+                            @if (dayEvents.Count > 2)
+                            {
+                                <div class="event-more">+@(dayEvents.Count - 2) more</div>
+                            }
+                        </div>
+                    </div>
                 }
             </div>
-        }
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="calendar-legend">
+        <div class="legend-item">
+            <span class="legend-color planning-schedule"></span>
+            <span>Planning Schedule</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color actual-schedule"></span>
+            <span>Actual Schedule</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color daily-interruption"></span>
+            <span>Daily Interruption</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color device-interruption"></span>
+            <span>Device Interruption</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color leave"></span>
+            <span>Leave</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color appointment"></span>
+            <span>Appointment</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color change-occurred"></span>
+            <span>Change Occurred</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color reliever"></span>
+            <span>Reliever</span>
+        </div>
     </div>
 </div>
 
-<ModalDialog @bind-IsVisible="showModal" Title="Add Schedule" Size="lg">
-    <EditForm Model="newItem" OnValidSubmit="Save">
-        <DataAnnotationsValidator />
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Title *</label><InputText @bind-Value="newItem.Title" class="form-control" /></div>
-            <div class="form-group"><label class="form-label">Type</label><InputSelect @bind-Value="newItem.ScheduleType" class="form-control"><option>Shift</option><option>Visit</option><option>Meeting</option><option>Training</option></InputSelect></div>
+<!-- Add Schedule Modal -->
+<ModalDialog @bind-IsVisible="showAddScheduleModal" Title="Add Schedule" Size="lg" CloseOnOverlay="false">
+    <div class="modal-form">
+        <div class="form-section">
+            <h4>Client Information</h4>
+            <div class="form-group">
+                <label>Client <span class="required">*</span></label>
+                <select @bind="newSchedule.ClientName" class="form-control">
+                    <option value="">--Select--</option>
+                    @foreach (var c in allClients)
+                    {
+                        <option value="@(c.FirstName + " " + c.LastName)">@(c.FirstName + " " + c.LastName)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Service Order</label>
+                    <select class="form-control">
+                        <option>--Select--</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Street</label>
+                    <input type="text" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Area</label>
+                    <select class="form-control">
+                        <option>--Select--</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="button" class="btn btn-pin-location">?? Pin Location</button>
         </div>
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Employee</label><InputText @bind-Value="newItem.EmployeeName" class="form-control" /></div>
-            <div class="form-group"><label class="form-label">Client</label><InputText @bind-Value="newItem.ClientName" class="form-control" /></div>
+
+        <div class="form-section">
+            <h4>Booking Information</h4>
+            <div class="form-group">
+                <label>Nurse <span class="required">*</span></label>
+                <select @bind="newSchedule.EmployeeName" class="form-control">
+                    <option value="">--Select--</option>
+                    @foreach (var n in allNurses)
+                    {
+                        <option value="@(n.FirstName + " " + n.LastName)">@(n.FirstName + " " + n.LastName)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Day Frequency</label>
+                <div class="days-checkbox">
+                    <label><input type="checkbox" @bind="selectedDays[0]" /> Su</label>
+                    <label><input type="checkbox" @bind="selectedDays[1]" /> Mo</label>
+                    <label><input type="checkbox" @bind="selectedDays[2]" /> Tu</label>
+                    <label><input type="checkbox" @bind="selectedDays[3]" /> We</label>
+                    <label><input type="checkbox" @bind="selectedDays[4]" /> Th</label>
+                    <label><input type="checkbox" @bind="selectedDays[5]" /> Fr</label>
+                    <label><input type="checkbox" @bind="selectedDays[6]" /> Sa</label>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <InputDate @bind-Value="newSchedule.StartDate" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <InputDate @bind-Value="newSchedule.EndDate" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="time" @onchange="@((ChangeEventArgs e) => { scheduleStartTime = e.Value?.ToString() ?? scheduleStartTime; })" value="@scheduleStartTime" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>End Time</label>
+                    <input type="time" @onchange="@((ChangeEventArgs e) => { scheduleEndTime = e.Value?.ToString() ?? scheduleEndTime; })" value="@scheduleEndTime" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Odd Days <input type="checkbox" class="checkbox-inline" /></label>
+                </div>
+                <div class="form-group">
+                    <label>Even Days <input type="checkbox" class="checkbox-inline" /></label>
+                </div>
+            </div>
         </div>
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Start Date</label><InputDate @bind-Value="newItem.StartDate" class="form-control" /></div>
-            <div class="form-group"><label class="form-label">End Date</label><InputDate @bind-Value="newItem.EndDate" class="form-control" /></div>
+
+        <div class="form-section">
+            <h4>Office reason for adding extra hours (not Planning)</h4>
+            <textarea class="form-control" rows="3" @bind="newSchedule.Notes" placeholder="Enter reason..."></textarea>
         </div>
-        <div class="form-group"><label class="form-label">Location</label><InputText @bind-Value="newItem.Location" class="form-control" /></div>
-        <div class="form-group"><label class="form-label">Notes</label><InputTextArea @bind-Value="newItem.Notes" class="form-control" rows="2" /></div>
-        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-    </EditForm>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-save" @onclick="SaveAddSchedule">Save</button>
+            <button type="button" class="btn btn-cancel" @onclick="CloseAddScheduleModal">Cancel</button>
+        </div>
+    </div>
 </ModalDialog>
 
-@code {
-    private DateTime currentDate = DateTime.Today;
-    private List<CalendarDay> calendarDays = new();
-    private List<ScheduleItem> schedules = new();
-    private bool showModal;
-    private ScheduleItem newItem = new() { StartDate = DateTime.Today, EndDate = DateTime.Today, ScheduleType = "Shift", Status = "Scheduled" };
+<!-- Mass Update Modal -->
+<ModalDialog @bind-IsVisible="showMassUpdateModal" Title="Mass Update Actual (Schedule)" Size="lg" CloseOnOverlay="false">
+    <div class="modal-form">
+        <div class="form-section">
+            <h4>Mass Update Options</h4>
+            
+            <div class="form-group">
+                <label>Client <span class="required">*</span></label>
+                <select @bind="massUpdateClient" class="form-control">
+                    <option value="">--Select--</option>
+                    @foreach (var c in allClients)
+                    {
+                        <option value="@(c.FirstName + " " + c.LastName)">@(c.FirstName + " " + c.LastName)</option>
+                    }
+                </select>
+            </div>
 
-    protected override async Task OnInitializedAsync() { await LoadSchedules(); GenerateCalendar(); }
-    private async Task LoadSchedules() { schedules = await ScheduleService.GetAllAsync(); }
-    private void PrevMonth() { currentDate = currentDate.AddMonths(-1); GenerateCalendar(); }
-    private void NextMonth() { currentDate = currentDate.AddMonths(1); GenerateCalendar(); }
-    private void GoToToday() { currentDate = DateTime.Today; GenerateCalendar(); }
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Service Order / Medical Record #</label>
+                    <select @bind="massUpdateServiceOrder" class="form-control">
+                        <option value="">--Select--</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Period</label>
+                    <select @bind="massUpdatePeriod" class="form-control">
+                        <option value="">--Select--</option>
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Quarterly">Quarterly</option>
+                    </select>
+                </div>
+            </div>
 
-    private void GenerateCalendar()
-    {
-        calendarDays = new();
-        var firstDay = new DateTime(currentDate.Year, currentDate.Month, 1);
-        var startDate = firstDay.AddDays(-(int)firstDay.DayOfWeek);
-        for (int i = 0; i < 42; i++)
-        {
-            var d = startDate.AddDays(i);
-            calendarDays.Add(new CalendarDay { Date = d, IsCurrentMonth = d.Month == currentDate.Month });
-        }
-    }
+            <div class="form-group">
+                <label>Days</label>
+                <div class="days-checkbox">
+                    <label><input type="checkbox" @bind="massUpdateDays[0]" /> Su</label>
+                    <label><input type="checkbox" @bind="massUpdateDays[1]" /> Mo</label>
+                    <label><input type="checkbox" @bind="massUpdateDays[2]" /> Tu</label>
+                    <label><input type="checkbox" @bind="massUpdateDays[3]" /> We</label>
+                    <label><input type="checkbox" @bind="massUpdateDays[4]" /> Th</label>
+                    <label><input type="checkbox" @bind="massUpdateDays[5]" /> Fr</label>
+                    <label><input type="checkbox" @bind="massUpdateDays[6]" /> Sa</label>
+                </div>
+            </div>
 
-    private IEnumerable<(string Title, string ColorClass)> GetEventsForDay(DateTime date)
-    {
-        return schedules.Where(s => s.StartDate.Date <= date.Date && s.EndDate.Date >= date.Date)
-            .Select(s => (s.Title, ColorClass: s.ScheduleType switch { "Shift" => "blue", "Visit" => "green", "Meeting" => "orange", "Training" => "purple", _ => "blue" }));
-    }
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <InputDate @bind-Value="massUpdateStartDate" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <InputDate @bind-Value="massUpdateEndDate" class="form-control" />
+                </div>
+            </div>
 
-    private void SelectDay(DateTime date) { newItem.StartDate = date; newItem.EndDate = date; showModal = true; }
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Include Odd Days <input type="checkbox" @bind="massUpdateIncludeOddDays" class="checkbox-inline" /></label>
+                </div>
+                <div class="form-group">
+                    <label>Include Even Days <input type="checkbox" @bind="massUpdateIncludeEvenDays" class="checkbox-inline" /></label>
+                </div>
+            </div>
+        </div>
 
-    private async Task Save() { await ScheduleService.CreateAsync(newItem); newItem = new() { StartDate = DateTime.Today, EndDate = DateTime.Today, ScheduleType = "Shift", Status = "Scheduled" }; showModal = false; await LoadSchedules(); GenerateCalendar(); StateHasChanged(); }
+        <div class="modal-footer">
+            <button type="button" class="btn btn-update" @onclick="PerformMassUpdate">Calculate Dates/Times</button>
+            <button type="button" class="btn btn-cancel" @onclick="CloseMassUpdateModal">Cancel</button>
+        </div>
+    </div>
+</ModalDialog>
 
-    private class CalendarDay { public DateTime Date { get; set; } public bool IsCurrentMonth { get; set; } }
-}
+<!-- Duty Interruption Modal -->
+<ModalDialog @bind-IsVisible="showDutyInterruptionModal" Title="Duty Interruption" Size="lg" CloseOnOverlay="false">
+    <div class="modal-form">
+        <div class="form-section">
+            <p class="info-text">This field can be used to create a Duty Interruption for nurses, that means the nurse cannot be scheduled to any client on the selected day(s).</p>
+
+            <div class="form-group">
+                <label>Nurse <span class="required">*</span></label>
+                <select @bind="dutyInterruptionNurse" class="form-control">
+                    <option value="">--Select--</option>
+                    @foreach (var n in allNurses)
+                    {
+                        <option value="@(n.FirstName + " " + n.LastName)">@(n.FirstName + " " + n.LastName)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Days</label>
+                <div class="days-checkbox">
+                    <label><input type="checkbox" @bind="dutyInterruptionDays[0]" /> Su</label>
+                    <label><input type="checkbox" @bind="dutyInterruptionDays[1]" /> Mo</label>
+                    <label><input type="checkbox" @bind="dutyInterruptionDays[2]" /> Tu</label>
+                    <label><input type="checkbox" @bind="dutyInterruptionDays[3]" /> We</label>
+                    <label><input type="checkbox" @bind="dutyInterruptionDays[4]" /> Th</label>
+                    <label><input type="checkbox" @bind="dutyInterruptionDays[5]" /> Fr</label>
+                    <label><input type="checkbox" @bind="dutyInterruptionDays[6]" /> Sa</label>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    <InputDate @bind-Value="dutyInterruptionStartDate" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label>End Date</label>
+                    <InputDate @bind-Value="dutyInterruptionEndDate" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Include Odd Days <input type="checkbox" @bind="includeOddDays" class="checkbox-inline" /></label>
+                </div>
+                <div class="form-group">
+                    <label>Include Even Days <input type="checkbox" @bind="includeEvenDays" class="checkbox-inline" /></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-search" @onclick="SearchSchedule">?? Search Schedule</button>
+            <button type="button" class="btn btn-save" @onclick="SaveDutyInterruption">Save</button>
+            <button type="button" class="btn btn-cancel" @onclick="CloseDutyInterruptionModal">Cancel</button>
+        </div>
+    </div>
+</ModalDialog>
+
+<!-- Schedule Confirm Modal -->
+<ModalDialog @bind-IsVisible="showConfirmModal" Title="Schedule Confirm" Size="lg" CloseOnOverlay="false">
+    <div class="modal-form">
+        <div class="confirm-header">
+            <div class="confirm-nav">
+                <button class="nav-btn" @onclick="PrevConfirmMonth"><i class="fa fa-chevron-left"></i></button>
+                <button class="nav-btn" @onclick="GoToTodayConfirm">Today</button>
+                <button class="nav-btn" @onclick="NextConfirmMonth"><i class="fa fa-chevron-right"></i></button>
+            </div>
+            <h3 class="confirm-month-year">@confirmViewDate.ToString("MMMM yyyy")</h3>
+            <div class="confirm-info">Today</div>
+        </div>
+
+        <div class="confirm-table-wrapper">
+            <table class="confirm-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Confirmed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var schedule in GetConfirmableSchedules())
+                    {
+                        <tr>
+                            <td>@schedule.StartDate.ToString("HH:mm")<br />@schedule.StartDate.ToString("yyyy")</td>
+                            <td>
+                                <input type="checkbox" @bind="confirmedSchedules[schedule.Id]" class="confirm-checkbox" />
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-save" @onclick="SaveConfirmations">Save Confirmations</button>
+            <button type="button" class="btn btn-cancel" @onclick="CloseConfirmModal">Cancel</button>
+        </div>
+    </div>
+</ModalDialog>
