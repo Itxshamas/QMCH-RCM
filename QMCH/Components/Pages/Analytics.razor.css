@@ -2,9 +2,9 @@
 .analytics-container {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    padding: 36px; /* increased per design */
-    background: #F4F6F9; /* soft grey */
+    gap: 18px;
+    /*padding: 36px;*/ /* increased per design */
+    /*background: #F4F6F9;*/ /* soft grey */
     font-family: "Inter", "Poppins", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial;
 }
 
@@ -37,12 +37,12 @@
     display:flex; gap:8px; align-items:center; color:#6b7280; font-size:13px; margin-bottom:6px;
 }
 .breadcrumb a { color:#0EA5E9; text-decoration:none; }
-.section-sep { height:1px; background:#e6eef7; margin:18px 0; border-radius:4px; }
+.section-sep { height:1px; background:#ccc; border-radius:4px; }
 
 /* Improve the main chart area */
 .workforce-chart { min-height: 320px; border-radius:8px; }
 
-.workforce-chart svg { background: linear-gradient(180deg, #ffffff, #fafafa); border-radius:8px; }
+
 .workforce-chart .bar { fill: #17a2b8; }
 .workforce-chart .bar-dim { fill: #cfd8dc; opacity:0.6; }
 
@@ -136,6 +136,8 @@
 /* Wrapper */
 .workforce-chart-wrapper {
     position: relative;
+
+    margin: 0 auto;
 }
 
 /* Chart area */
@@ -155,7 +157,7 @@
     grid-auto-flow: column; /* Keep items in a row */
     grid-auto-columns: 60px; /* Make each column fixed width to match rotated labels */
     justify-content: space-between;
-    padding: 10px 6px 0;
+    padding: 40px 6px;
     overflow-x: auto;
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
@@ -355,6 +357,37 @@
 .status-reliever {
     color: #607d8b;
 }
+
+/* ============================= */
+/* ATTENDANCE TOP STATUS BAR */
+/* ============================= */
+
+.attendance-top-bar {
+    display: grid;
+    grid-template-columns: 120px repeat(8, 1fr);
+    border: 1px solid #dcdcdc;
+    background: #ffffff;
+}
+
+.attendance-top-item {
+    border-right: 1px solid #dcdcdc;
+    padding: 14px 6px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.attendance-top-item:last-child {
+    border-right: none;
+}
+
+.attendance-top-item i {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 6px;
+}
+
 
 /* Attendance Grid */
 .attendance-grid {
@@ -556,7 +589,9 @@
 /* CLIENT VISIT SUMMARY CARD */
 /* ============================= */
 .visit-card {
-    padding: 20px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.05);
 }
 
 .visit-summary {
@@ -667,8 +702,14 @@
     }
 
     .attendance-status-row {
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        display: grid;
+        grid-template-columns: 140px repeat(8, 1fr);
+        padding: 14px 16px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
     }
+
 
     .attendance-row {
         grid-template-columns: 1fr;
@@ -681,7 +722,10 @@
 }
 
 @media (max-width: 768px) {
+
     .analytics-container {
+        max-width: 1400px;
+        margin: 0 auto;
         padding: 12px;
         gap: 16px;
     }
