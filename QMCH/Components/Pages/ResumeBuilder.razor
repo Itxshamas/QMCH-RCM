@@ -1,0 +1,373 @@
+@page "/hr/aquisition/applicants/list/create-resume"
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Text.Json
+@inject IHRService HRService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Create Resume - QHMCPro</PageTitle>
+
+<div class="resume-builder-container">
+    <div class="breadcrumb">
+        <span>Recruitment</span> / <span>Talent Acquisition</span> / <span>Candidate Management</span> / <span>Resume</span>
+    </div>
+
+    <div class="resume-header">
+        <h1>CANDIDATE RESUME BUILDER</h1>
+        <button type="button" class="btn-back" @onclick='() => Navigation.NavigateTo("/hr/aquisition/applicants/list/create?id=" + ApplicantId)'>
+            <i class="fa fa-arrow-left"></i> Back
+        </button>
+    </div>
+
+    <EditForm Model="@resumeModel" OnValidSubmit="@SaveResume" class="resume-form">
+        <DataAnnotationsValidator />
+
+        <!-- Personal Information Section -->
+        <div class="resume-section-group">
+            <div class="section-header">
+                <h2><i class="fa fa-user"></i> Candidate Personal Information</h2>
+            </div>
+            <div class="section-content">
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Mobile Name</label>
+                        <InputText @bind-Value="resumeModel.MiddleName" class="form-control" placeholder="Mobile Name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gender</label>
+                        <InputSelect @bind-Value="resumeModel.Gender" class="form-control">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Date of Birth</label>
+                        <InputDate @bind-Value="resumeModel.DateOfBirth" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Criminal Conviction Section -->
+        <div class="resume-section-group">
+            <div class="section-header">
+                <h2><i class="fa fa-question-circle"></i> Questions</h2>
+            </div>
+            <div class="section-content">
+                <div class="form-group full-width">
+                    <label class="form-label">Have you ever been convicted of a crime?</label>
+                    <InputSelect @bind-Value="resumeModel.CriminalConviction" class="form-control">
+                        <option value="">Select...</option>
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </InputSelect>
+                </div>
+                @if (resumeModel.CriminalConviction == "Yes")
+                {
+                    <div class="form-group full-width">
+                        <label class="form-label">If yes, explain the nature and dates of the conviction(s)</label>
+                        <InputTextArea @bind-Value="resumeModel.CriminalConvictionDetails" class="form-control" rows="3" />
+                    </div>
+                }
+                <div class="form-group full-width">
+                    <label class="form-label">What do candidates fear most about working with the elderly, disabled, or convalescing client?</label>
+                    <InputTextArea @bind-Value="resumeModel.ChallengesDuringWork" class="form-control" rows="3" />
+                </div>
+                <div class="form-group full-width">
+                    <label class="form-label">What do candidates find most challenging in this type of work?</label>
+                    <InputTextArea @bind-Value="resumeModel.ChallengingWorkTypes" class="form-control" rows="3" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Education Section -->
+        <div class="resume-section-group">
+            <div class="section-header">
+                <h2><i class="fa fa-graduation-cap"></i> Candidate Education</h2>
+                <button type="button" class="btn-add-row" @onclick="AddEducation">
+                    <i class="fa fa-plus"></i> Add Education
+                </button>
+            </div>
+            <div class="section-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Degree</th>
+                            <th>Institution</th>
+                            <th>Major</th>
+                            <th>Completion Date</th>
+                            <th>Country</th>
+                            <th>City</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (edu, index) in educationList.Select((x, i) => (x, i)))
+                        {
+                            <tr key="@index">
+                                <td><input type="text" class="form-control-sm" @bind="edu.Degree" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="edu.Institution" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="edu.Major" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="edu.CompletionDate" placeholder="MM/DD/YYYY" /></td>
+                                <td>
+                                    <select class="form-control-sm">
+                                        <option value="">Select</option>
+                                        <option value="USA">USA</option>
+                                        <option value="Canada">Canada</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" class="form-control-sm" @bind="edu.City" /></td>
+                                <td>
+                                    <button type="button" class="btn-delete" @onclick="() => RemoveEducation(index)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Skills Section -->
+        <div class="resume-section-group">
+            <div class="section-header">
+                <h2><i class="fa fa-star"></i> Skills</h2>
+                <button type="button" class="btn-add-row" @onclick="AddSkill">
+                    <i class="fa fa-plus"></i> Add Skill
+                </button>
+            </div>
+            <div class="section-content">
+                <div class="skills-matrix">
+                    <div class="skill-items">
+                        @foreach (var (skill, index) in skillsList.Select((x, i) => (x, i)))
+                        {
+                            <div class="skill-item">
+                                <div class="skill-name">
+                                    <input type="text" class="form-control-sm" @bind="skill.SkillName" placeholder="Skill Name" />
+                                </div>
+                                <div class="skill-level">
+                                    <select class="form-control-sm" @bind="skill.Level">
+                                        <option value="">Select Level</option>
+                                        <option value="Expert">Expert</option>
+                                        <option value="Advanced">Advanced</option>
+                                        <option value="Intermediate">Intermediate</option>
+                                        <option value="Beginner">Beginner</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn-delete" @onclick="() => RemoveSkill(index)">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employment History Section -->
+        <div class="resume-section-group">
+            <div class="section-header">
+                <h2><i class="fa fa-briefcase"></i> Employment History (last recent first)</h2>
+                <button type="button" class="btn-add-row" @onclick="AddEmployment">
+                    <i class="fa fa-plus"></i> Add Employment
+                </button>
+            </div>
+            <div class="section-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Job Title</th>
+                            <th>Location</th>
+                            <th>Experience</th>
+                            <th>May we contact?</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (emp, index) in employmentList.Select((x, i) => (x, i)))
+                        {
+                            <tr key="@index">
+                                <td><input type="text" class="form-control-sm" @bind="emp.Company" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="emp.From" placeholder="MM/DD/YYYY" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="emp.To" placeholder="MM/DD/YYYY" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="emp.JobTitle" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="emp.Location" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="emp.Experience" /></td>
+                                <td>
+                                    <select class="form-control-sm">
+                                        <option value="">Select</option>
+                                        <option value="Yes" selected="@(emp.MayWeContact)">Yes</option>
+                                        <option value="No" selected="@(!emp.MayWeContact)">No</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn-delete" @onclick="() => RemoveEmployment(index)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="resume-section-group">
+            <div class="section-header">
+                <h2><i class="fa fa-phone"></i> Candidate Contact</h2>
+            </div>
+            <div class="section-content">
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Street</label>
+                        <InputText @bind-Value="resumeModel.Street" class="form-control" placeholder="Street Address" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Country</label>
+                        <InputSelect @bind-Value="resumeModel.Country" class="form-control">
+                            <option value="">Select Country</option>
+                            <option value="USA">USA</option>
+                            <option value="Canada">Canada</option>
+                            <option value="UK">UK</option>
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">State</label>
+                        <InputText @bind-Value="resumeModel.State" class="form-control" placeholder="State" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">City</label>
+                        <InputText @bind-Value="resumeModel.PostalCode" class="form-control" placeholder="Postal Code" />
+                    </div>
+                </div>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Contact 1</label>
+                        <InputText @bind-Value="resumeModel.Contact1" class="form-control" placeholder="Contact 1" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact 2</label>
+                        <InputText @bind-Value="resumeModel.Contact2" class="form-control" placeholder="Contact 2" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Availability Section -->
+        <div class="resume-section-group">
+            <div class="section-header">
+                <h2><i class="fa fa-calendar"></i> Candidate Availability</h2>
+            </div>
+            <div class="section-content">
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">How many hours per week?</label>
+                        <InputText @bind-Value="resumeModel.AvailabilityForImmediateWork" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Is candidate available to work nights?</label>
+                        <InputSelect @bind-Value="resumeModel.AvailabilityForNightShift" class="form-control">
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Is candidate available to work weekends?</label>
+                        <InputSelect @bind-Value="resumeModel.AvailabilityForWeekendWork" class="form-control">
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Are there any area candidates not available to work?</label>
+                        <InputSelect @bind-Value="resumeModel.AvailabilityForOtherLocations" class="form-control">
+                            <option value="">Select</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </InputSelect>
+                    </div>
+                </div>
+                <div class="form-row-2col">
+                    <div class="form-group">
+                        <label class="form-label">Employment Desired</label>
+                        <InputSelect @bind-Value="resumeModel.PreferredEmploymentType" class="form-control">
+                            <option value="">Full Time</option>
+                            <option value="Part Time">Part Time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Temporary">Temporary</option>
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Available to Start Date</label>
+                        <InputDate @bind-Value="resumeModel.AvailableFromDate" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- References Section -->
+        <div class="resume-section-group">
+            <div class="section-header">
+                <h2><i class="fa fa-users"></i> References</h2>
+                <button type="button" class="btn-add-row" @onclick="AddReference">
+                    <i class="fa fa-plus"></i> Add Reference
+                </button>
+            </div>
+            <div class="section-content">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Relationship</th>
+                            <th>Years Known</th>
+                            <th>Phone</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (reference, index) in referencesList.Select((x, i) => (x, i)))
+                        {
+                            <tr key="@index">
+                                <td><input type="text" class="form-control-sm" @bind="reference.Name" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="reference.Relationship" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="reference.YearsKnown" /></td>
+                                <td><input type="text" class="form-control-sm" @bind="reference.Phone" /></td>
+                                <td>
+                                    <button type="button" class="btn-delete" @onclick="() => RemoveReference(index)">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="button" class="btn-cancel" @onclick='() => Navigation.NavigateTo("/hr/aquisition/applicants/list/create?id=" + ApplicantId)'>
+                <i class="fa fa-times"></i> Cancel
+            </button>
+            <button type="submit" class="btn-save">
+                <i class="fa fa-save"></i> Save Resume
+            </button>
+        </div>
+    </EditForm>
+</div>

@@ -30,6 +30,9 @@ namespace QMCH.Models
         [StringLength(500)]
         public string? ResumeUrl { get; set; }
 
+        [StringLength(500)]
+        public string? PhotoUrl { get; set; }
+
         public string? Notes { get; set; }
 
         public DateTime AppliedDate { get; set; } = DateTime.Today;
