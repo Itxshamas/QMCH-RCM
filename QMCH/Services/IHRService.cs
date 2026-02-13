@@ -23,7 +23,9 @@ namespace QMCH.Services
         Task DeleteApplicantAsync(int id);
 
         Task<List<Interview>> GetInterviewsAsync();
+        Task<Interview?> GetInterviewByIdAsync(int id);
         Task CreateInterviewAsync(Interview item);
+        Task UpdateInterviewAsync(Interview item);
         Task DeleteInterviewAsync(int id);
 
         Task<Resume?> GetResumeByApplicantIdAsync(int applicantId);

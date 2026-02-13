@@ -1,54 +1,127 @@
 @page "/hr/aquisition/interview/schedule/list"
-@page "/hr/aquisition/interview/schedule/list/create"
 @inject IHRService HRService
+@inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>Interviews - QHMCPro</PageTitle>
+<PageTitle>Scheduled Interviews - QHMCPro</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left"><h1>Interview Schedule</h1><p>Manage interview appointments</p></div>
-    <div class="page-header-actions"><button class="btn btn-primary" @onclick="() => showModal = true"><i class="fa fa-plus"></i> Schedule Interview</button></div>
+<div class="interviews-container">
+    <div class="interviews-header">
+        <h2 class="interviews-title">SCHEDULED INTERVIEWS</h2>
+        <button class="btn btn-add" @onclick="NavigateToCreate">
+            <i class="fa fa-plus"></i> Add
+        </button>
+    </div>
+
+    <div class="interviews-controls">
+        <div class="controls-left">
+            <label class="show-label">Show 
+                <select class="form-control-sm" @onchange="OnPageSizeChanged" value="@pageSize">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                entries
+            </label>
+        </div>
+        <div class="controls-right">
+            <input type="text" class="form-control search-input" placeholder="Search" @bind-value="searchText" @bind-value:event="oninput" @onkeyup="OnSearchChanged" />
+        </div>
+    </div>
+
+    <div class="interviews-table-wrapper">
+        @if (isLoading)
+        {
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading interviews...</p>
+            </div>
+        }
+        else if (filteredItems.Count == 0)
+        {
+            <div class="no-data-message">
+                <p>No data available in table</p>
+            </div>
+        }
+        else
+        {
+            <table class="interviews-table">
+                <thead>
+                    <tr class="table-header">
+                        <th class="col-job-code">
+                            <i class="fa fa-bars"></i> Job Order Code
+                            <a href="#" @onclick:preventDefault @onclick="@ClickSort" class="sort-link">
+                                @if (sortColumn == "JobCode") { <i class="fa @(sortAscending ? "fa-sort-up" : "fa-sort-down")"></i> }
+                            </a>
+                        </th>
+                        <th class="col-job-title">Job Title</th>
+                        <th class="col-candidate-name">Candidate Name</th>
+                        <th class="col-email">Email</th>
+                        <th class="col-mobile">Mobile</th>
+                        <th class="col-status">Status</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in paginatedItems)
+                    {
+                        <tr class="table-row">
+                            <td class="col-job-code">@item.JobOrderId?.ToString()</td>
+                            <td class="col-job-title">@item.Position</td>
+                            <td class="col-candidate-name">
+                                <strong>@item.ApplicantName</strong>
+                            </td>
+                            <td class="col-email">@item.Email</td>
+                            <td class="col-mobile">@item.MobileNumber</td>
+                            <td class="col-status">
+                                <span class="status-badge @GetStatusClass(item.Status)">@item.Status</span>
+                            </td>
+                            <td class="col-actions">
+                                <button class="btn-action btn-edit" title="Edit" @onclick="@((MouseEventArgs e) => NavigateToEdit(item.Id))">
+                                    <i class="fa fa-pencil"></i>
+                                </button>
+                                <button class="btn-action btn-delete" title="Delete" @onclick="@((MouseEventArgs e) => ConfirmDelete(item.Id, item.ApplicantName))">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    @if (filteredItems.Count > 0 && pageSize > 0)
+    {
+        <div class="pagination-info">
+            <span>Showing @((currentPage - 1) * pageSize + 1) to @Math.Min(currentPage * pageSize, filteredItems.Count) of @filteredItems.Count entries</span>
+        </div>
+        <div class="pagination-controls">
+            <button class="btn btn-pagination @(currentPage == 1 ? "disabled" : "")" @onclick="PreviousPage" disabled="@(currentPage == 1)">
+                Previous
+            </button>
+            <button class="btn btn-pagination @(currentPage >= totalPages ? "disabled" : "")" @onclick="NextPage" disabled="@(currentPage >= totalPages)">
+                Next
+            </button>
+        </div>
+    }
 </div>
 
-<DataGrid TItem="Interview" Items="items" Title="Interviews" IsLoading="isLoading">
-    <HeaderTemplate><th>Applicant</th><th>Position</th><th>Interviewer</th><th>Date & Time</th><th>Type</th><th>Status</th><th style="width: 100px;">Actions</th></HeaderTemplate>
-    <RowTemplate Context="item">
-        <td><strong>@item.ApplicantName</strong></td>
-        <td>@item.Position</td>
-        <td>@item.InterviewerName</td>
-        <td>@item.ScheduledDateTime.ToString("MMM dd, yyyy hh:mm tt")</td>
-        <td><span class="badge badge-info">@item.InterviewType</span></td>
-        <td><span class="badge @GetBadge(item.Status)">@item.Status</span></td>
-        <td><button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i class="fa fa-trash"></i></button></td>
-    </RowTemplate>
-</DataGrid>
-
-<ModalDialog @bind-IsVisible="showModal" Title="Schedule Interview" Size="lg">
-    <EditForm Model="newItem" OnValidSubmit="Save">
-        <DataAnnotationsValidator />
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Applicant Name *</label><InputText @bind-Value="newItem.ApplicantName" class="form-control" /></div>
-            <div class="form-group"><label class="form-label">Position *</label><InputText @bind-Value="newItem.Position" class="form-control" /></div>
+@if (showDeleteConfirm)
+{
+    <div class="modal-overlay" @onclick="CancelDelete">
+        <div class="modal-content" @onclick:stopPropagation>
+            <div class="modal-header">
+                <h5>Confirm Delete</h5>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the interview for <strong>@deleteItemName</strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CancelDelete">Cancel</button>
+                <button class="btn btn-danger" @onclick="ConfirmDeleteAction">Delete</button>
+            </div>
         </div>
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Interviewer</label><InputText @bind-Value="newItem.InterviewerName" class="form-control" /></div>
-            <div class="form-group"><label class="form-label">Date & Time</label><InputDate @bind-Value="newItem.ScheduledDateTime" class="form-control" /></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label class="form-label">Type</label><InputSelect @bind-Value="newItem.InterviewType" class="form-control"><option>Phone Screen</option><option>In Person</option><option>Video</option><option>Panel</option></InputSelect></div>
-            <div class="form-group"><label class="form-label">Location</label><InputText @bind-Value="newItem.Location" class="form-control" /></div>
-        </div>
-        <div class="form-group"><label class="form-label">Notes</label><InputTextArea @bind-Value="newItem.Notes" class="form-control" rows="2" /></div>
-        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
-    </EditForm>
-</ModalDialog>
-
-@code {
-    private List<Interview> items = new(); private bool isLoading = true; private bool showModal;
-    private Interview newItem = new() { ScheduledDateTime = DateTime.Now.AddDays(1), InterviewType = "Phone Screen", Status = "Scheduled" };
-    protected override async Task OnInitializedAsync() => await LoadData();
-    private async Task LoadData() { isLoading = true; items = await HRService.GetInterviewsAsync(); isLoading = false; }
-    private async Task Save() { await HRService.CreateInterviewAsync(newItem); newItem = new() { ScheduledDateTime = DateTime.Now.AddDays(1), InterviewType = "Phone Screen", Status = "Scheduled" }; showModal = false; await LoadData(); }
-    private async Task Delete(int id) { await HRService.DeleteInterviewAsync(id); await LoadData(); }
-    private string GetBadge(string s) => s switch { "Completed" => "badge-success", "Cancelled" => "badge-danger", "Scheduled" => "badge-info", _ => "badge-secondary" };
+    </div>
 }
