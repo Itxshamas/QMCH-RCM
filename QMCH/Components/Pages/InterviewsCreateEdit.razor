@@ -1,0 +1,119 @@
+﻿@page "/hr/aquisition/interview/schedule/list/create"
+@page "/hr/aquisition/interview/schedule/list/edit/{id:int}"
+@inject IHRService HRService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>@(isEditMode ? "Edit Interview" : "Create Interview") - QHMCPro</PageTitle>
+
+<div class="interview-form-container">
+    <div class="form-header">
+        <h2 class="form-title">INTERVIEW DETAILS</h2>
+    </div>
+
+    <div class="form-content">
+        @if (isLoading)
+        {
+            <div class="loading-message">Loading...</div>
+        }
+        else
+        {
+            <EditForm Model="interview" OnValidSubmit="SaveInterview" class="interview-form">
+                <DataAnnotationsValidator />
+
+                <div class="form-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Job Order Code *</label>
+                            <InputNumber @bind-Value="interview.JobOrderId" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Candidate Name *</label>
+                            <InputText @bind-Value="interview.ApplicantName" class="form-control" placeholder="Select candidate" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Interview Status *</label>
+                            <InputSelect @bind-Value="interview.Status" class="form-control">
+                                <option value="">Select Interview Status</option>
+                                <option value="Scheduled">Scheduled</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Interviewer *</label>
+                            <InputText @bind-Value="interview.InterviewerName" class="form-control" placeholder="Select Interviewer" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Location *</label>
+                            <InputText @bind-Value="interview.Location" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Country *</label>
+                            <InputText @bind-Value="interview.Country" class="form-control" placeholder="Select country" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">State *</label>
+                            <InputText @bind-Value="interview.State" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">City *</label>
+                            <InputText @bind-Value="interview.City" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Interview Type *</label>
+                            <InputSelect @bind-Value="interview.InterviewType" class="form-control">
+                                <option value="">Select Interview Type</option>
+                                <option value="Phone Screen">Phone Screen</option>
+                                <option value="Video">Video</option>
+                                <option value="In Person">In Person</option>
+                                <option value="Panel">Panel</option>
+                                <option value="Technical">Technical</option>
+                                <option value="Final Round">Final Round</option>
+                            </InputSelect>
+                            <small class="form-hint"><i class="fa fa-calendar"></i></small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Interview Date *</label>
+                            <InputDate @bind-Value="interview.ScheduledDateTime" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Interview Time *</label>
+                            <InputText @bind-Value="timeInput" class="form-control" type="time" />
+                            <small class="form-hint"><i class="fa fa-clock-o"></i></small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Interview Name *</label>
+                            <InputText @bind-Value="interview.Position" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" @onclick="CancelForm">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button type="submit" class="btn btn-save">
+                        <i class="fa fa-save"></i> Save
+                    </button>
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
