@@ -7,3 +7,5 @@
 /.vs
 /.vscode
 /QMCH/obj
+/QMCH/Migrations
+/QMCH/appsettings.json
