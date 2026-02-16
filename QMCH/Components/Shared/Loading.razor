@@ -1,0 +1,33 @@
+@namespace QMCH.Components.Shared
+
+@if (IsVisible)
+{
+    <div class="loading-wrapper" role="status" aria-live="polite" aria-label="@LoadingMessage">
+        <div class="loading-spinner">
+            <div class="spinner-border text-@Color" role="presentation">
+                <span class="visually-hidden">@LoadingMessage</span>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(LoadingMessage))
+        {
+            <div class="loading-message">@LoadingMessage</div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsVisible { get; set; } = true;
+
+    [Parameter]
+    public string Color { get; set; } = "primary";
+
+    [Parameter]
+    public string LoadingMessage { get; set; } = "Loading...";
+
+    [Parameter]
+    public string Size { get; set; } = ""; // sm for small spinner
+
+    [Parameter]
+    public bool Overlay { get; set; } = false;
+}

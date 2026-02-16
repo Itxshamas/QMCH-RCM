@@ -1,0 +1,327 @@
+@page "/hmc/dashboard"
+@using QMCH.Models
+@using QMCH.Interfaces.Services
+@inject IPatientService PatientService
+@inject IStaffService StaffService
+@inject IVisitService VisitService
+@rendermode InteractiveServer
+
+<PageTitle>Dashboard - Quality Homecare</PageTitle>
+
+<div class="dashboard-page">
+    <div class="page-header">
+        <h1>DASHBOARD OVERVIEW</h1>
+        <div class="date-display">
+            <i class="far fa-calendar-alt"></i> @DateTime.Now.ToString("dddd, MMMM dd, yyyy")
+        </div>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card patient">
+            <div class="kpi-body">
+                <div class="kpi-info">
+                    <span class="kpi-label">Active Patients</span>
+                    <span class="kpi-value">@activePatientsCount</span>
+                </div>
+                <div class="kpi-icon">
+                    <i class="fas fa-user-injured"></i>
+                </div>
+            </div>
+            <div class="kpi-footer">
+                <span class="trend up"><i class="fas fa-arrow-up"></i> +2.5%</span> since last month
+            </div>
+        </div>
+
+        <div class="kpi-card staff">
+            <div class="kpi-body">
+                <div class="kpi-info">
+                    <span class="kpi-label">Staff on Duty</span>
+                    <span class="kpi-value">@staffOnDutyCount</span>
+                </div>
+                <div class="kpi-icon">
+                    <i class="fas fa-user-nurse"></i>
+                </div>
+            </div>
+            <div class="kpi-footer">
+                <span class="trend"><i class="fas fa-check"></i> All shifts filled</span>
+            </div>
+        </div>
+
+        <div class="kpi-card visits">
+            <div class="kpi-body">
+                <div class="kpi-info">
+                    <span class="kpi-label">Visits Today</span>
+                    <span class="kpi-value">@visitsTodayCount</span>
+                </div>
+                <div class="kpi-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+            </div>
+            <div class="kpi-footer">
+                <span class="trend">@visitsRemainingCount remaining</span>
+            </div>
+        </div>
+
+        <div class="kpi-card billing">
+            <div class="kpi-body">
+                <div class="kpi-info">
+                    <span class="kpi-label">Total Billings (MTD)</span>
+                    <span class="kpi-value">$@totalBillings.ToString("N0")</span>
+                </div>
+                <div class="kpi-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </div>
+            </div>
+            <div class="kpi-footer">
+                <span class="trend up"><i class="fas fa-arrow-up"></i> +12%</span> vs last month
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-content">
+        <div class="content-left">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Upcoming Visits</h5>
+                    <a href="/hmc/visits" class="btn btn-sm btn-link">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @if (upcomingVisits == null)
+                        {
+                            <div class="p-4 text-center">Loading...</div>
+                        }
+                        else if (!upcomingVisits.Any())
+                        {
+                            <div class="p-4 text-center text-muted">No upcoming visits scheduled for today.</div>
+                        }
+                        else
+                        {
+                            @foreach (var visit in upcomingVisits.Take(5))
+                            {
+                                <div class="list-group-item d-flex align-items-center gap-3">
+                                    <div class="visit-time">
+                                        <div class="fw-bold">@visit.ScheduledStartTime.ToString("HH:mm")</div>
+                                        <div class="text-muted small">60m</div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold">@visit.Patient.FullName</div>
+                                        <div class="text-muted small">@visit.Staff.FullName (@visit.Staff.Role)</div>
+                                    </div>
+                                    <span class="badge rounded-pill bg-light text-primary">@visit.Status</span>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-right">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Patient Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-placeholder">
+                        <div class="bar-container">
+                            <div class="bar active" style="height: 80%"><span>80% Active</span></div>
+                            <div class="bar inactive" style="height: 15%"><span>15% Inactive</span></div>
+                            <div class="bar discharged" style="height: 5%"><span>5% Discharged</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int activePatientsCount = 0;
+    private int staffOnDutyCount = 0;
+    private int visitsTodayCount = 0;
+    private int visitsRemainingCount = 0;
+    private decimal totalBillings = 45200; // Mock data
+    private IEnumerable<Visit>? upcomingVisits;
+
+    protected override async Task OnInitializedAsync()
+    {
+        activePatientsCount = await PatientService.GetTotalPatientsCountAsync();
+        var staff = await StaffService.GetAllStaffAsync();
+        staffOnDutyCount = staff.Count(s => s.Status == "Active");
+
+        var visits = await VisitService.GetAllVisitsAsync();
+        visitsTodayCount = visits.Count(v => v.ScheduledStartTime.Date == DateTime.Today);
+        visitsRemainingCount = visits.Count(v => v.ScheduledStartTime.Date == DateTime.Today && v.Status == "Scheduled");
+        upcomingVisits = visits.Where(v => v.ScheduledStartTime >= DateTime.Now).OrderBy(v => v.ScheduledStartTime);
+    }
+}
+
+<style>
+    .dashboard-page {
+        padding: 2rem;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 60px);
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1a237e;
+        margin: 0;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+        background: white;
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .kpi-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .kpi-label {
+        display: block;
+        font-size: 0.875rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .kpi-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #212529;
+    }
+
+    .kpi-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .patient .kpi-icon {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .staff .kpi-icon {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .visits .kpi-icon {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .billing .kpi-icon {
+        background: #fff8e1;
+        color: #fbc02d;
+    }
+
+    .kpi-footer {
+        font-size: 0.75rem;
+        color: #9e9e9e;
+    }
+
+    .trend {
+        font-weight: 600;
+    }
+
+    .trend.up {
+        color: #4caf50;
+    }
+
+    .dashboard-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .card {
+        border: none;
+        border-radius: 0.75rem;
+    }
+
+    .card-header {
+        background: transparent;
+        padding: 1.25rem;
+        border-bottom: 1px solid #f1f3f9;
+        font-weight: 600;
+        color: #1a237e;
+    }
+
+    .visit-time {
+        text-align: center;
+        min-width: 60px;
+    }
+
+    .chart-placeholder {
+        height: 300px;
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .bar-container {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        height: 100%;
+        width: 100%;
+        gap: 1rem;
+    }
+
+    .bar {
+        width: 100%;
+        border-radius: 0.5rem 0.5rem 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .bar span {
+        position: absolute;
+        bottom: -25px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .bar.active {
+        background-color: #3f51b5;
+    }
+
+    .bar.inactive {
+        background-color: #f44336;
+    }
+
+    .bar.discharged {
+        background-color: #9e9e9e;
+    }
+</style>

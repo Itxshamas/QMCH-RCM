@@ -1,98 +1,257 @@
 @page "/timesheet/billing/list/create"
+@using QMCH.Models
 @inject ITimesheetService TimesheetService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>@(isEdit ? "Edit" : "Create") Billing - QHMCPro</PageTitle>
+<PageTitle>@(isEdit ? "Edit" : "Create") Billing TimeSheet - QMCH</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>@(isEdit ? "Edit" : "Create") Billing Record</h1>
-    </div>
-    <div class="page-header-actions"><button class="btn btn-outline"
-            @onclick='() => Navigation.NavigateTo("/timesheet/billing/list")'><i class="fa fa-arrow-left"></i>
-            Back</button></div>
-</div>
+<div class="billing-create-container">
+    @if (hasError)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <strong>Error:</strong> @errorMessage
+            <button type="button" class="btn-close" @onclick="@(() => hasError = false)"></button>
+        </div>
+    }
 
-<div class="card">
-    <div class="card-header">
-        <h3><i class="fa fa-file-invoice-dollar" style="margin-right: 8px;"></i> Billing Details</h3>
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="header-buttons">
+            <button class="btn btn-success" @onclick='() => Navigation.NavigateTo("/timesheet/billing/list/create")'>
+                <i class="fa fa-plus"></i> Create Timesheet
+            </button>
+            <button class="btn btn-info" @onclick='() => Navigation.NavigateTo("/billing/list/servicesummary/create")'>
+                <i class="fa fa-list"></i> Service Summary
+            </button>
+            <button class="btn btn-warning" @onclick="PrintBilling">
+                <i class="fa fa-print"></i> Print Billing
+            </button>
+            <button class="btn btn-secondary" @onclick="ClearFilters">
+                <i class="fa fa-times"></i> Clear Filters
+            </button>
+        </div>
     </div>
-    <div class="card-body">
-        <EditForm Model="model" OnValidSubmit="Save">
-            <DataAnnotationsValidator />
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Client Name *</label>
-                    <InputText @bind-Value="model.ClientName" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Invoice Number</label>
-                    <InputText @bind-Value="model.InvoiceNumber" class="form-control" />
-                </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-row">
+            <div class="form-group">
+                <label class="form-label">Client</label>
+                <select class="form-control" @onchange="@((ChangeEventArgs e) => model.ClientName = e.Value?.ToString() ?? string.Empty)">
+                    <option value="">-- All Clients --</option>
+                    @foreach (var client in clients)
+                    {
+                        <option value="@client">@client</option>
+                    }
+                </select>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Service Type</label>
-                    <InputText @bind-Value="model.ServiceType" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Status</label>
-                    <InputSelect @bind-Value="model.Status" class="form-control">
-                        <option>Draft</option>
-                        <option>Submitted</option>
-                        <option>Pending</option>
-                        <option>Paid</option>
-                        <option>Overdue</option>
-                    </InputSelect>
-                </div>
+
+            <div class="form-group">
+                <label class="form-label">Medical Record #</label>
+                <select class="form-control" @onchange="@((ChangeEventArgs e) => medicalRecord = e.Value?.ToString() ?? string.Empty)">
+                    <option value="">-- All MRNs --</option>
+                    @foreach (var mrn in medicalRecords)
+                    {
+                        <option value="@mrn">@mrn</option>
+                    }
+                </select>
             </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Period Start</label>
-                    <InputDate @bind-Value="model.PeriodStart" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Period End</label>
-                    <InputDate @bind-Value="model.PeriodEnd" class="form-control" />
-                </div>
+
+            <div class="form-group">
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" @bind="model.PeriodStart" />
             </div>
-            <div class="form-row">
-                <div class="form-group"><label class="form-label">Total Hours</label>
-                    <InputNumber @bind-Value="model.TotalHours" class="form-control" />
-                </div>
-                <div class="form-group"><label class="form-label">Billing Rate ($)</label>
-                    <InputNumber @bind-Value="model.BillingRate" class="form-control" />
-                </div>
+
+            <div class="form-group">
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" @bind="model.PeriodEnd" />
             </div>
-            <div class="form-group"><label class="form-label">Notes</label>
-                <InputTextArea @bind-Value="model.Notes" class="form-control" rows="2" />
-            </div>
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> @(isEdit ? "Update" :
-                    "Create")</button>
-                <button type="button" class="btn btn-outline"
-                    @onclick='() => Navigation.NavigateTo("/timesheet/billing/list")'>Cancel</button>
-            </div>
-        </EditForm>
+        </div>
     </div>
+
+    <!-- Table Section -->
+    @if (isLoading)
+    {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary"></div>
+            <p>Loading billing records...</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="billing-table">
+                <thead>
+                    <tr>
+                        <th>Timesheet Code</th>
+                        <th>Client ID</th>
+                        <th>Name</th>
+                        <th>Bill Period From</th>
+                        <th>Bill Period To</th>
+                        <th>Disclosed</th>
+                        <th style="text-align: center; width: 200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (billingRecords.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No billing records found</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var item in billingRecords)
+                        {
+                            <tr>
+                                <td><strong>@item.InvoiceNumber</strong></td>
+                                <td>@item.ClientId</td>
+                                <td>@item.ClientName</td>
+                                <td>@item.PeriodStart.ToString("yyyy-MM-dd")</td>
+                                <td>@item.PeriodEnd.ToString("yyyy-MM-dd")</td>
+                                <td><i class="fa fa-check" style="color: green;"></i></td>
+                                <td style="text-align: center;">
+                                    <div class="action-buttons">
+                                        <button class="btn-icon" title="Edit" @onclick='() => EditBilling(item.Id)'>
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                        <button class="btn-icon" title="Print" @onclick='() => PrintRecord(item.Id)'>
+                                            <i class="fa fa-print"></i>
+                                        </button>
+                                        <button class="btn-icon" title="View" @onclick='() => ViewBilling(item.Id)'>
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                        <button class="btn-icon" title="Search" @onclick='() => SearchBilling(item.Id)'>
+                                            <i class="fa fa-search"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-section">
+            <div class="pagination-info">
+                Showing 1 to @billingRecords.Count of @billingRecords.Count entries
+            </div>
+            <div class="pagination-nav">
+                <button class="pagination-btn" disabled>Previous</button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">Next</button>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
-    [SupplyParameterFromQuery] public int? Id { get; set; }
-    private TimesheetBilling model = new()
-        {
-            PeriodStart = DateTime.Today.AddDays(-14),
-            PeriodEnd = DateTime.Today,
-            Status =
-        "Draft"
-        }; private bool isEdit;
+    [SupplyParameterFromQuery]
+    public int? Id { get; set; }
+
+    private TimesheetBilling model = new();
+    private List<TimesheetBilling> billingRecords = new();
+    private List<string> clients = new();
+    private List<string> medicalRecords = new();
+    private string medicalRecord = string.Empty;
+    private bool isEdit = false;
+    private bool isLoading = true;
+    private bool hasError = false;
+    private string errorMessage = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
-        if (Id.HasValue)
+        try
         {
-            var e = await
-    TimesheetService.GetBillingByIdAsync(Id.Value); if (e != null) { model = e; isEdit = true; }
+            await LoadData();
+
+            if (Id.HasValue && Id.Value > 0)
+            {
+                var existing = await TimesheetService.GetBillingByIdAsync(Id.Value);
+                if (existing != null)
+                {
+                    model = existing;
+                    isEdit = true;
+                }
+            }
+            else
+            {
+                model = new TimesheetBilling
+                {
+                    PeriodStart = DateTime.Today.AddMonths(-1),
+                    PeriodEnd = DateTime.Today,
+                    Status = "Draft"
+                };
+            }
+
+            isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            errorMessage = ex.Message;
+            isLoading = false;
         }
     }
-    private async Task Save()
+
+    private async Task LoadData()
     {
-        if (isEdit) await TimesheetService.UpdateBillingAsync(model);
-        else await
-    TimesheetService.CreateBillingAsync(model); Navigation.NavigateTo("/timesheet/billing/list");
+        try
+        {
+            billingRecords = await TimesheetService.GetBillingsAsync();
+            
+            // Extract unique clients
+            clients = billingRecords.Select(x => x.ClientName).Distinct().OrderBy(x => x).ToList();
+            
+            // Sample medical records - in real scenario, fetch from database
+            medicalRecords = new List<string> 
+            { 
+                "MR001", "MR002", "MR003", "MR004", "MR005",
+                "MR006", "MR007", "MR008", "MR009", "MR010"
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error loading billing data: {ex.Message}");
+        }
+    }
+
+    private void EditBilling(int id)
+    {
+        Navigation.NavigateTo($"/timesheet/billing/list/create?id={id}");
+    }
+
+    private void PrintRecord(int id)
+    {
+        Console.WriteLine($"Print record {id}");
+    }
+
+    private void ViewBilling(int id)
+    {
+        Console.WriteLine($"View billing {id}");
+    }
+
+    private void SearchBilling(int id)
+    {
+        Console.WriteLine($"Search billing {id}");
+    }
+
+    private void PrintBilling()
+    {
+        Console.WriteLine("Print all billing records");
+    }
+
+    private void ClearFilters()
+    {
+        model = new TimesheetBilling
+        {
+            PeriodStart = DateTime.Today.AddMonths(-1),
+            PeriodEnd = DateTime.Today
+        };
+        medicalRecord = string.Empty;
     }
 }
+

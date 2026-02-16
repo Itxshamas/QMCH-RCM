@@ -8,6 +8,9 @@ namespace QMCH.Components.Pages
         protected int clientCount;
         protected int employeeCount;
         protected bool IsModalOpen = false;
+        protected bool IsLoading = true;
+        protected bool LoadingError = false;
+        protected string ErrorMessage = "";
         protected ModalData CurrentModalData;
 
         protected string TodayDate =>
@@ -156,12 +159,43 @@ namespace QMCH.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            clientCount = await ClientService.GetCountAsync();
-            employeeCount = await EmployeeService.GetCountAsync();
+            try
+            {
+                IsLoading = true;
+                LoadingError = false;
+                
+                if (ClientService != null)
+                {
+                    clientCount = await ClientService.GetCountAsync();
+                }
+                if (EmployeeService != null)
+                {
+                    employeeCount = await EmployeeService.GetCountAsync();
+                }
+                
+                IsLoading = false;
+            }
+            catch (Exception ex)
+            {
+                LoadingError = true;
+                ErrorMessage = "Failed to load dashboard data. Please try again.";
+                IsLoading = false;
+                Console.Error.WriteLine($"Dashboard load error: {ex.Message}");
+            }
+        }
+
+        protected async Task RetryLoad()
+        {
+            await OnInitializedAsync();
         }
 
         protected void OpenModal(string serviceType)
         {
+            if (string.IsNullOrWhiteSpace(serviceType))
+            {
+                return;
+            }
+
             if (ModalDataMap.TryGetValue(serviceType, out var data))
             {
                 CurrentModalData = data;
@@ -177,7 +211,10 @@ namespace QMCH.Components.Pages
 
         public void Nav(string url)
         {
-            Navigation.NavigateTo(url);
+            if (!string.IsNullOrWhiteSpace(url) && Navigation != null)
+            {
+                Navigation.NavigateTo(url);
+            }
         }
     }
 }

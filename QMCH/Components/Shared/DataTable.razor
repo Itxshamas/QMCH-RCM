@@ -1,0 +1,162 @@
+@namespace QMCH.Components.Shared
+@typeparam T
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-light">
+            <tr>
+                @foreach (var column in Columns)
+                {
+                    <th style="cursor: pointer; @(SortColumn == column.PropertyName ? "background-color: #f0f0f0;" : "")"
+                        @onclick="@(() => OnSort(column.PropertyName))">
+                        @column.Title
+                        @if (SortColumn == column.PropertyName)
+                        {
+                            <span>@(SortAscending ? "?" : "?")</span>
+                        }
+                    </th>
+                }
+                @if (AllowActions)
+                {
+                    <th>Actions</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (Items?.Count > 0)
+            {
+                @foreach (var item in Items)
+                {
+                    <tr>
+                        @foreach (var column in Columns)
+                        {
+                            <td>@GetPropertyValue(item, column.PropertyName)</td>
+                        }
+                        @if (AllowActions)
+                        {
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    @if (AllowEdit)
+                                    {
+                                        <button class="btn btn-primary btn-sm" @onclick="@(() => OnEdit(item))" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    }
+                                    @if (AllowDelete)
+                                    {
+                                        <button class="btn btn-danger btn-sm" @onclick="@(() => OnDelete(item))" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    }
+                                    @if (AllowView)
+                                    {
+                                        <button class="btn btn-info btn-sm" @onclick="@(() => OnView(item))" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="@(Columns.Count + (AllowActions ? 1 : 0))" class="text-center text-muted py-4">
+                        No data available
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<T>? Items { get; set; }
+
+    [Parameter]
+    public List<DataColumn> Columns { get; set; } = new();
+
+    [Parameter]
+    public bool AllowActions { get; set; } = true;
+
+    [Parameter]
+    public bool AllowEdit { get; set; } = true;
+
+    [Parameter]
+    public bool AllowDelete { get; set; } = true;
+
+    [Parameter]
+    public bool AllowView { get; set; } = true;
+
+    [Parameter]
+    public EventCallback<T> OnEditCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<T> OnDeleteCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<T> OnViewCallback { get; set; }
+
+    public string SortColumn { get; set; } = "";
+    public bool SortAscending { get; set; } = true;
+
+    private void OnSort(string propertyName)
+    {
+        if (SortColumn == propertyName)
+        {
+            SortAscending = !SortAscending;
+        }
+        else
+        {
+            SortColumn = propertyName;
+            SortAscending = true;
+        }
+
+        SortData();
+    }
+
+    private void SortData()
+    {
+        if (Items == null || string.IsNullOrEmpty(SortColumn))
+            return;
+
+        var property = typeof(T).GetProperty(SortColumn);
+        if (property != null)
+        {
+            Items = SortAscending
+                ? Items.OrderBy(x => property.GetValue(x)).ToList()
+                : Items.OrderByDescending(x => property.GetValue(x)).ToList();
+        }
+    }
+
+    private string GetPropertyValue(T item, string propertyName)
+    {
+        var property = typeof(T).GetProperty(propertyName);
+        var value = property?.GetValue(item);
+        return value?.ToString() ?? "";
+    }
+
+    private async Task OnEdit(T item)
+    {
+        await OnEditCallback.InvokeAsync(item);
+    }
+
+    private async Task OnDelete(T item)
+    {
+        await OnDeleteCallback.InvokeAsync(item);
+    }
+
+    private async Task OnView(T item)
+    {
+        await OnViewCallback.InvokeAsync(item);
+    }
+
+    public class DataColumn
+    {
+        public string Title { get; set; } = "";
+        public string PropertyName { get; set; } = "";
+    }
+}

@@ -24,5 +24,13 @@ namespace QMCH.Models
         public DateTime? LastLoginDate { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Navigation Properties
+        public ICollection<Message> SentMessages { get; set; } = new List<Message>();
+        public ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public ICollection<DocumentRecord> DocumentRecords { get; set; } = new List<DocumentRecord>();
+        public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
     }
 }
+

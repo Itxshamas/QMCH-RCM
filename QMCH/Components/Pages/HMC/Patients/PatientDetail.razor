@@ -1,0 +1,231 @@
+@page "/hmc/patients/detail/{patientId:int}"
+@using QMCH.Models
+@using QMCH.Services
+@rendermode InteractiveServer
+
+<PageTitle>Patient Details - Quality Homecare System</PageTitle>
+
+<div class="page-header">
+    <div class="page-header-content">
+        <h1>@(patient?.FullName ?? "Loading...")</h1>
+        <p>Patient ID: @(patient?.PatientId ?? "-")</p>
+    </div>
+    <div class="page-header-actions">
+        <button class="action-btn edit-btn" @onclick="() => NavigateToEdit()">
+            <i class="fa fa-edit"></i> Edit
+        </button>
+        <button class="action-btn delete-btn" @onclick="() => ConfirmDelete()">
+            <i class="fa fa-trash"></i> Delete
+        </button>
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading patient details...</p>
+    </div>
+}
+else if (patient is not null)
+{
+    <div class="detail-container">
+        <!-- Personal Information Section -->
+        <div class="detail-section">
+            <div class="section-header">
+                <h2><i class="fa fa-user"></i> Personal Information</h2>
+            </div>
+            <div class="section-content">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>Full Name</label>
+                        <span>@patient.FullName</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Date of Birth</label>
+                        <span>@patient.DateOfBirth.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Gender</label>
+                        <span>@patient.Gender</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>SSN</label>
+                        <span>@(string.IsNullOrEmpty(patient.SSN) ? "-" : "***-**-" + patient.SSN.Substring(Math.Max(0, patient.SSN.Length - 4)))</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information Section -->
+        <div class="detail-section">
+            <div class="section-header">
+                <h2><i class="fa fa-phone"></i> Contact Information</h2>
+            </div>
+            <div class="section-content">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>Email</label>
+                        <span>
+                            @if (!string.IsNullOrEmpty(patient.Email))
+                            {
+                                <a href="mailto:@patient.Email">@patient.Email</a>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Phone</label>
+                        <span>
+                            @if (!string.IsNullOrEmpty(patient.Phone))
+                            {
+                                <a href="tel:@patient.Phone">@patient.Phone</a>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </span>
+                    </div>
+                    <div class="detail-item full-width">
+                        <label>Address</label>
+                        <span>@(patient.Address ?? "-")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Information Section -->
+        <div class="detail-section">
+            <div class="section-header">
+                <h2><i class="fa fa-heartbeat"></i> Medical Information</h2>
+            </div>
+            <div class="section-content">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>Primary Diagnosis</label>
+                        <span>@(patient.PrimaryDiagnosis ?? "-")</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Admission Date</label>
+                        <span>@patient.AdmissionDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Status</label>
+                        <span class="badge" style="background-color: @GetStatusColor(patient.Status)">@patient.Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contact Section -->
+        <div class="detail-section">
+            <div class="section-header">
+                <h2><i class="fa fa-exclamation-circle"></i> Emergency Contact</h2>
+            </div>
+            <div class="section-content">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>Name</label>
+                        <span>@(patient.EmergencyContactName ?? "-")</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>Phone</label>
+                        <span>
+                            @if (!string.IsNullOrEmpty(patient.EmergencyContactPhone))
+                            {
+                                <a href="tel:@patient.EmergencyContactPhone">@patient.EmergencyContactPhone</a>
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Tabs Section -->
+        <div class="action-tabs">
+            <div class="tabs-header">
+                <button class="tab-btn @(activeTab == "visits" ? "active" : "")" @onclick="@(() => activeTab = "visits")">
+                    <i class="fa fa-calendar"></i> Recent Visits
+                </button>
+                <button class="tab-btn @(activeTab == "insurance" ? "active" : "")" @onclick="@(() => activeTab = "insurance")">
+                    <i class="fa fa-shield"></i> Insurance
+                </button>
+                <button class="tab-btn @(activeTab == "medications" ? "active" : "")" @onclick="@(() => activeTab = "medications")">
+                    <i class="fa fa-pills"></i> Medications
+                </button>
+                <button class="tab-btn @(activeTab == "care-plan" ? "active" : "")" @onclick="@(() => activeTab = "care-plan")">
+                    <i class="fa fa-tasks"></i> Care Plan
+                </button>
+            </div>
+
+            <div class="tabs-content">
+                @if (activeTab == "visits")
+                {
+                    <div class="tab-pane">
+                        <p class="placeholder-text">No recent visits recorded.</p>
+                    </div>
+                }
+                @if (activeTab == "insurance")
+                {
+                    <div class="tab-pane">
+                        <p class="placeholder-text">No insurance policies recorded.</p>
+                    </div>
+                }
+                @if (activeTab == "medications")
+                {
+                    <div class="tab-pane">
+                        <p class="placeholder-text">No medications recorded.</p>
+                    </div>
+                }
+                @if (activeTab == "care-plan")
+                {
+                    <div class="tab-pane">
+                        <p class="placeholder-text">No active care plans.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Metadata Section -->
+        <div class="detail-section metadata-section">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <span class="label">Created</span>
+                    <span class="value">@patient.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="label">Last Updated</span>
+                    <span class="value">@patient.UpdatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="error-state">
+        <p>Patient not found.</p>
+    </div>
+}
+
+@if (showDeleteConfirm)
+{
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete this patient? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn cancel-btn" @onclick="() => showDeleteConfirm = false">Cancel</button>
+                <button class="btn confirm-btn" @onclick="ConfirmDeleteAction">Delete</button>
+            </div>
+        </div>
+    </div>
+}

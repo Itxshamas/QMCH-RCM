@@ -1,64 +1,220 @@
 @page "/timesheet/billing/list"
+@using QMCH.Models
 @inject ITimesheetService TimesheetService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<PageTitle>Billing - QHMCPro</PageTitle>
+<PageTitle>Billing TimeSheet - QMCH</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>Billing</h1>
-        <p>Client billing and invoices</p>
+<div class="billing-container">
+    <div class="page-header">
+        <div class="header-content">
+            <h1>BILLING TIMESHEET</h1>
+            <p>Select Client, Service Order and the Billing Period of your Choices</p>
+        </div>
     </div>
-    <div class="page-header-actions"><button class="btn btn-primary"
-            @onclick='() => Navigation.NavigateTo("/timesheet/billing/list/create")'><i class="fa fa-plus"></i> Create
-            Billing</button></div>
+
+    @if (hasError)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <strong>Error:</strong> @errorMessage
+            <button type="button" class="btn-close" @onclick="@(() => hasError = false)"></button>
+        </div>
+    }
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-row">
+            <div class="form-group">
+                <label class="form-label">Client</label>
+                <select class="form-control" @onchange="@((ChangeEventArgs e) => selectedClient = e.Value?.ToString())">
+                    <option value="">-- Select Client --</option>
+                    @foreach (var client in clients)
+                    {
+                        <option value="@client">@client</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Medical Record #</label>
+                <select class="form-control" @onchange="@((ChangeEventArgs e) => selectedMedicalRecord = e.Value?.ToString())">
+                    <option value="">-- Select --</option>
+                    @foreach (var record in medicalRecords)
+                    {
+                        <option value="@record">@record</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" @bind="fromDate" />
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" @bind="toDate" />
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn btn-success" @onclick="ShowRecords">
+                <i class="fa fa-search"></i> Show
+            </button>
+            <a href="/timesheet/billing/list/create" class="btn btn-primary">
+                <i class="fa fa-plus"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    @if (isLoading)
+    {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary"></div>
+            <p>Loading billing records...</p>
+        </div>
+    }
+    else if (filteredItems.Count == 0)
+    {
+        <div class="alert alert-info">
+            <i class="fa fa-info-circle"></i> No billing records found. Please adjust your filters.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="billing-table">
+                <thead>
+                    <tr>
+                        <th>Timesheet Code</th>
+                        <th>Client ID</th>
+                        <th>Name</th>
+                        <th>Billing Period From</th>
+                        <th>Billing Period To</th>
+                        <th>Disclosed</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in filteredItems)
+                    {
+                        <tr>
+                            <td><strong>@item.InvoiceNumber</strong></td>
+                            <td>@item.ClientId</td>
+                            <td>@item.ClientName</td>
+                            <td>@item.PeriodStart.ToString("yyyy-MM-dd")</td>
+                            <td>@item.PeriodEnd.ToString("yyyy-MM-dd")</td>
+                            <td><i class="fa fa-check" style="color: green;"></i></td>
+                            <td style="text-align: center;">
+                                <div class="action-buttons">
+                                    <button class="btn-icon" title="Edit" @onclick='() => EditBilling(item.Id)'>
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon" title="Print" @onclick='() => PrintBilling(item.Id)'>
+                                        <i class="fa fa-print"></i>
+                                    </button>
+                                    <button class="btn-icon" title="View" @onclick='() => ViewBilling(item.Id)'>
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                    <button class="btn-icon" title="Search" @onclick='() => SearchBilling(item.Id)'>
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination-section">
+            <div class="pagination-info">
+                Showing 1 to @filteredItems.Count of @filteredItems.Count entries
+            </div>
+        </div>
+    }
 </div>
 
-<DataGrid TItem="TimesheetBilling" Items="@items" Title="Billing Records" IsLoading="@isLoading">
-    <HeaderTemplate>
-        <th>Client</th>
-        <th>Invoice #</th>
-        <th>Period</th>
-        <th>Hours</th>
-        <th>Amount</th>
-        <th>Status</th>
-        <th style="width: 120px;">Actions</th>
-    </HeaderTemplate>
-    <RowTemplate Context="billingItem">
-        <td><strong>@billingItem.ClientName</strong></td>
-        <td>@billingItem.InvoiceNumber</td>
-        <td>@billingItem.PeriodStart.ToString("MMM dd") - @billingItem.PeriodEnd.ToString("MMM dd")</td>
-        <td>@billingItem.TotalHours.ToString("F1")</td>
-        <td><strong>@billingItem.TotalAmount.ToString("C")</strong></td>
-        <td><span class="badge @GetBadge(billingItem.Status)">@billingItem.Status</span></td>
-        <td>
-            <div style="display: flex; gap: 6px;">
-                <button class="btn btn-outline btn-sm"
-                    @onclick='() => Navigation.NavigateTo($"/timesheet/billing/list/create?id={billingItem.Id}")'><i
-                        class="fa fa-edit"></i></button>
-                <button class="btn btn-danger btn-sm" @onclick="() => Delete(billingItem.Id)"><i
-                        class="fa fa-trash"></i></button>
-            </div>
-        </td>
-    </RowTemplate>
-</DataGrid>
-
 @code {
-    private List<TimesheetBilling> items = new(); private bool isLoading = true;
-    protected override async Task OnInitializedAsync() => await LoadData();
+    private List<TimesheetBilling> items = new();
+    private List<TimesheetBilling> filteredItems = new();
+    private List<string> clients = new();
+    private List<string> medicalRecords = new();
+    private string selectedClient = string.Empty;
+    private string selectedMedicalRecord = string.Empty;
+    private DateTime fromDate = DateTime.Today.AddMonths(-1);
+    private DateTime toDate = DateTime.Today;
+    private bool isLoading = true;
+    private bool hasError = false;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            errorMessage = ex.Message;
+        }
+    }
+
     private async Task LoadData()
     {
-        isLoading = true; items = await TimesheetService.GetBillingsAsync(); isLoading = false;
+        isLoading = true;
+        try
+        {
+            items = await TimesheetService.GetBillingsAsync();
+            
+            // Extract unique clients and medical records
+            clients = items.Select(x => x.ClientName).Distinct().ToList();
+            medicalRecords = new List<string> { "MR001", "MR002", "MR003", "MR004", "MR005" };
+            
+            filteredItems = items;
+            isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            errorMessage = $"Error loading billing data: {ex.Message}";
+            isLoading = false;
+        }
     }
-    private async Task Delete(int id) { await TimesheetService.DeleteBillingAsync(id); await LoadData(); }
-    private string GetBadge(string s) => s switch
+
+    private void ShowRecords()
     {
-        "Paid" => "badge-success",
-        "Pending" => "badge-warning",
-        "Overdue" =>
-    "badge-danger",
-        "Submitted" => "badge-info",
-        _ => "badge-secondary"
-    };
+        filteredItems = items
+            .Where(x => string.IsNullOrEmpty(selectedClient) || x.ClientName == selectedClient)
+            .Where(x => x.PeriodStart >= fromDate && x.PeriodEnd <= toDate)
+            .ToList();
+    }
+
+    private void EditBilling(int id)
+    {
+        Navigation.NavigateTo($"/timesheet/billing/list/create?id={id}");
+    }
+
+    private void PrintBilling(int id)
+    {
+        // Implementation for print functionality
+        Console.WriteLine($"Print billing {id}");
+    }
+
+    private void ViewBilling(int id)
+    {
+        // Implementation for view functionality
+        Console.WriteLine($"View billing {id}");
+    }
+
+    private void SearchBilling(int id)
+    {
+        // Implementation for search functionality
+        Console.WriteLine($"Search billing {id}");
+    }
 }
+

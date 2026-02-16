@@ -1,0 +1,149 @@
+@namespace QMCH.Components.Shared
+
+<div class="file-upload-container">
+    <div class="form-group">
+        <label for="fileInput" class="form-label">@Label @(Required ? "<span class=\"text-danger\">*</span>" : "")</label>
+        <div class="input-group">
+            <InputFile id="fileInput" class="form-control" OnChange="@OnFileSelected" 
+                       multiple="@AllowMultiple" accept="@AcceptedFormats" />
+        </div>
+        @if (!string.IsNullOrEmpty(HelpText))
+        {
+            <small class="form-text text-muted">@HelpText</small>
+        }
+    </div>
+
+    @if (UploadedFiles?.Count > 0)
+    {
+        <div class="uploaded-files mt-3">
+            <h6>Uploaded Files:</h6>
+            <ul class="list-group">
+                @foreach (var file in UploadedFiles)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-file"></i> @file.Name
+                            <br />
+                            <small class="text-muted">@FormatFileSize(file.Size)</small>
+                        </div>
+                        <button class="btn btn-sm btn-danger" @onclick="@(() => RemoveFile(file))">Remove</button>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (IsUploading)
+    {
+        <div class="mt-3">
+            <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                <span class="visually-hidden">Uploading...</span>
+            </div>
+            Uploading files...
+        </div>
+    }
+
+    @if (Errors?.Count > 0)
+    {
+        <div class="alert alert-danger mt-3">
+            <strong>Upload Errors:</strong>
+            <ul>
+                @foreach (var error in Errors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = "Upload Files";
+
+    [Parameter]
+    public bool Required { get; set; }
+
+    [Parameter]
+    public bool AllowMultiple { get; set; } = false;
+
+    [Parameter]
+    public string AcceptedFormats { get; set; } = ".pdf,.doc,.docx,.jpg,.jpeg,.png";
+
+    [Parameter]
+    public long MaxFileSize { get; set; } = 5242880; // 5MB
+
+    [Parameter]
+    public string HelpText { get; set; } = "";
+
+    [Parameter]
+    public EventCallback<List<FileData>> OnFilesSelected { get; set; }
+
+    [Parameter]
+    public List<FileData>? UploadedFiles { get; set; } = new();
+
+    public List<string> Errors { get; set; } = new();
+    public bool IsUploading { get; set; }
+
+    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    {
+        Errors.Clear();
+        IsUploading = true;
+
+        var files = new List<FileData>();
+
+        foreach (var file in e.GetMultipleFiles())
+        {
+            if (file.Size > MaxFileSize)
+            {
+                Errors.Add($"{file.Name} exceeds maximum size of {FormatFileSize(MaxFileSize)}");
+                continue;
+            }
+
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream(maxAllowedSize: MaxFileSize).ReadAsync(buffer);
+
+            files.Add(new FileData
+            {
+                Name = file.Name,
+                Size = file.Size,
+                ContentType = file.ContentType,
+                Data = buffer
+            });
+        }
+
+        if (files.Count > 0)
+        {
+            UploadedFiles?.AddRange(files);
+            await OnFilesSelected.InvokeAsync(files);
+        }
+
+        IsUploading = false;
+    }
+
+    private void RemoveFile(FileData file)
+    {
+        UploadedFiles?.Remove(file);
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+
+    public class FileData
+    {
+        public string Name { get; set; } = "";
+        public long Size { get; set; }
+        public string ContentType { get; set; } = "";
+        public byte[] Data { get; set; } = Array.Empty<byte>();
+    }
+}

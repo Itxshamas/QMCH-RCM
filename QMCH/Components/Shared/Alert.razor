@@ -1,0 +1,81 @@
+@namespace QMCH.Components.Shared
+
+<div class="alert alert-@Type @(Dismissible ? "alert-dismissible" : "") fade show" role="alert" @attributes="AdditionalAttributes">
+    <div class="alert-content d-flex align-items-start gap-2">
+        <div class="alert-icon">
+            @if (Type == "success")
+            {
+                <i class="fa fa-check-circle" aria-hidden="true"></i>
+            }
+            else if (Type == "danger")
+            {
+                <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+            }
+            else if (Type == "warning")
+            {
+                <i class="fa fa-warning" aria-hidden="true"></i>
+            }
+            else if (Type == "info")
+            {
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+            }
+        </div>
+        <div class="alert-body">
+            @if (!string.IsNullOrEmpty(Title))
+            {
+                <strong class="alert-title">@Title</strong>
+            }
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <div class="alert-message">@Message</div>
+            }
+            @if (ChildContent != null)
+            {
+                <div class="alert-child-content mt-2">
+                    @ChildContent
+                </div>
+            }
+        </div>
+    </div>
+    @if (Dismissible)
+    {
+        <button type="button" class="btn-close" @onclick="Close" aria-label="Close alert"></button>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Type { get; set; } = "info"; // success, danger, warning, info
+
+    [Parameter]
+    public string Title { get; set; } = "";
+
+    [Parameter]
+    public string Message { get; set; } = "";
+
+    [Parameter]
+    public bool Dismissible { get; set; } = true;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+}
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+}
