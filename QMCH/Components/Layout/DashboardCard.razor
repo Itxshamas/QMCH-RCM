@@ -1,16 +1,20 @@
 
-<div class="dash-card" @onclick="OnClick">
+
+<div class="dash-card" @onclick="OnClick" role="button" tabindex="0" 
+     @onkeydown="@((KeyboardEventArgs e) => HandleKeyDown(e))"
+     aria-label="@Label"
+     title="Click to navigate to @Label">
 
     <div class="dash-card-icon @ColorClass">
 
         @* If Image is provided, show image *@
         @if (!string.IsNullOrEmpty(Image))
         {
-            <img src="@Image" alt="@Label" class="dash-card-img" />
+            <img src="@Image" alt="@Label" class="dash-card-img" loading="lazy" />
         }
         else
         {
-            <i class="@Icon"></i>
+            <i class="@Icon" aria-hidden="true"></i>
         }
 
     </div>
@@ -20,8 +24,8 @@
 
     @if (!string.IsNullOrEmpty(Trend))
     {
-        <div class="dash-card-trend @TrendClass">
-            <i class="fa @TrendIcon"></i>
+        <div class="dash-card-trend @TrendClass" aria-live="polite">
+            <i class="fa @TrendIcon" aria-hidden="true"></i>
             @Trend
         </div>
     }
@@ -39,4 +43,12 @@
 
     private string TrendClass => TrendUp ? "up" : "down";
     private string TrendIcon => TrendUp ? "fa-arrow-up" : "fa-arrow-down";
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            await OnClick.InvokeAsync();
+        }
+    }
 }

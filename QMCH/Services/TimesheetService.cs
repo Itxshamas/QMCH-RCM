@@ -20,5 +20,11 @@ namespace QMCH.Services
         public async Task CreateBillingAsync(TimesheetBilling item) { _db.TimesheetBillings.Add(item); await _db.SaveChangesAsync(); }
         public async Task UpdateBillingAsync(TimesheetBilling item) { _db.TimesheetBillings.Update(item); await _db.SaveChangesAsync(); }
         public async Task DeleteBillingAsync(int id) { var e = await _db.TimesheetBillings.FindAsync(id); if (e != null) { _db.TimesheetBillings.Remove(e); await _db.SaveChangesAsync(); } }
+
+        public async Task<List<ServiceOrderSummary>> GetServiceOrderSummariesAsync() => await _db.ServiceOrderSummaries.OrderByDescending(s => s.ToDate).ToListAsync();
+        public async Task<ServiceOrderSummary?> GetServiceOrderSummaryByIdAsync(int id) => await _db.ServiceOrderSummaries.FindAsync(id);
+        public async Task CreateServiceOrderSummaryAsync(ServiceOrderSummary item) { _db.ServiceOrderSummaries.Add(item); await _db.SaveChangesAsync(); }
+        public async Task UpdateServiceOrderSummaryAsync(ServiceOrderSummary item) { _db.ServiceOrderSummaries.Update(item); await _db.SaveChangesAsync(); }
+        public async Task DeleteServiceOrderSummaryAsync(int id) { var e = await _db.ServiceOrderSummaries.FindAsync(id); if (e != null) { _db.ServiceOrderSummaries.Remove(e); await _db.SaveChangesAsync(); } }
     }
 }

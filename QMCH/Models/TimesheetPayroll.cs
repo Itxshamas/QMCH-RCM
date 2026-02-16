@@ -36,6 +36,9 @@ namespace QMCH.Models
         [StringLength(50)]
         public string Status { get; set; } = "Pending";
 
+        [StringLength(100)]
+        public string? Category { get; set; }
+
         public string? Notes { get; set; }
 
         public string? ApprovedBy { get; set; }

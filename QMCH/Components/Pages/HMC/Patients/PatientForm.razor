@@ -1,0 +1,222 @@
+@page "/hmc/patients/create"
+@page "/hmc/patients/edit/{Id:int}"
+@using QMCH.Models
+@using QMCH.Interfaces.Services
+@inject IPatientService PatientService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>@(Id == 0 ? "New Patient" : "Edit Patient") - Quality Homecare</PageTitle>
+
+<div class="patient-form-page">
+    <div class="page-header">
+        <div class="header-left">
+            <h1>@(Id == 0 ? "NEW PATIENT" : "EDIT PATIENT")</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/hmc/patients">Patients</a></li>
+                    <li class="breadcrumb-item active">@(Id == 0 ? "Create" : "Edit")</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="form-container shadow-sm">
+        <EditForm Model="@patient" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-id-card"></i> Personal Information</h3>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Patient ID</label>
+                        <InputText @bind-Value="patient.PatientId" class="form-control" placeholder="e.g. PAT-001" />
+                        <ValidationMessage For="@(() => patient.PatientId)" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">First Name</label>
+                        <InputText @bind-Value="patient.FirstName" class="form-control" />
+                        <ValidationMessage For="@(() => patient.FirstName)" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Last Name</label>
+                        <InputText @bind-Value="patient.LastName" class="form-control" />
+                        <ValidationMessage For="@(() => patient.LastName)" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Date of Birth</label>
+                        <InputDate @bind-Value="patient.DateOfBirth" class="form-control" />
+                        <ValidationMessage For="@(() => patient.DateOfBirth)" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Gender</label>
+                        <InputSelect @bind-Value="patient.Gender" class="form-select">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">SSN (last 4 digits)</label>
+                        <InputText @bind-Value="patient.SSN" class="form-control" placeholder="Optional" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-phone"></i> Contact Details</h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <InputText @bind-Value="patient.Email" class="form-control" type="email" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Phone</label>
+                        <InputText @bind-Value="patient.Phone" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Full Address</label>
+                        <InputTextArea @bind-Value="patient.Address" class="form-control" rows="2" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title"><i class="fas fa-stethoscope"></i> Medical & Status</h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Primary Diagnosis</label>
+                        <InputTextArea @bind-Value="patient.PrimaryDiagnosis" class="form-control" rows="2" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Account Status</label>
+                        <InputSelect @bind-Value="patient.Status" class="form-select">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Discharged">Discharged</option>
+                        </InputSelect>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-light" @onclick="Cancel">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> @(Id == 0 ? "Create Patient" : "Save Changes")
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Patient patient = new Patient { DateOfBirth = DateTime.Today.AddYears(-50) };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != 0)
+        {
+            var existing = await PatientService.GetPatientByIdAsync(Id);
+            if (existing != null)
+            {
+                patient = existing;
+            }
+            else
+            {
+                Navigation.NavigateTo("/hmc/patients");
+            }
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (Id == 0)
+        {
+            await PatientService.CreatePatientAsync(patient);
+        }
+        else
+        {
+            await PatientService.UpdatePatientAsync(patient);
+        }
+        Navigation.NavigateTo("/hmc/patients");
+    }
+
+    private void Cancel() => Navigation.NavigateTo("/hmc/patients");
+}
+
+<style>
+    .patient-form-page {
+        padding: 2rem;
+        background-color: #f8f9fa;
+        min-height: calc(100vh - 60px);
+    }
+
+    .form-container {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 0.75rem;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #f1f3f9;
+    }
+
+    .section-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #1a237e;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title i {
+        color: #3f51b5;
+    }
+
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+        font-size: 0.875rem;
+    }
+
+    .form-control,
+    .form-select {
+        padding: 0.625rem 0.875rem;
+        border-color: #dee2e6;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #3f51b5;
+        box-shadow: 0 0 0 0.2rem rgba(63, 81, 181, 0.1);
+    }
+
+    .form-actions {
+        margin-top: 1rem;
+    }
+
+    .btn-primary {
+        background-color: #004a99;
+        border-color: #004a99;
+        padding: 0.625rem 1.5rem;
+    }
+
+    .btn-primary:hover {
+        background-color: #003366;
+    }
+
+    .btn-light {
+        background-color: #f1f3f9;
+        border-color: #dee2e6;
+        padding: 0.625rem 1.5rem;
+    }
+</style>

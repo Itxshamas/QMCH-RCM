@@ -1,64 +1,167 @@
 @page "/timesheet/payroll/list"
-@inject ITimesheetService TimesheetService
-@inject NavigationManager Navigation
 @rendermode InteractiveServer
+@using QMCH.Models
 
-<PageTitle>Payroll - QHMCPro</PageTitle>
+<PageTitle>Payroll Timesheet - Quality Homecare</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>Payroll Timesheets</h1>
-        <p>Employee payroll management</p>
-    </div>
-    <div class="page-header-actions"><button class="btn btn-primary"
-            @onclick='() => Navigation.NavigateTo("/timesheet/payroll/list/create")'><i class="fa fa-plus"></i> Create
-            Payroll</button></div>
-</div>
+<div class="payroll-list-page">
 
-<DataGrid TItem="TimesheetPayroll" Items="items" Title="Payroll Records" IsLoading="isLoading">
-    <HeaderTemplate>
-        <th>Employee</th>
-        <th>Period</th>
-        <th>Hours</th>
-        <th>Rate</th>
-        <th>Total</th>
-        <th>Status</th>
-        <th style="width: 120px;">Actions</th>
-    </HeaderTemplate>
-    <RowTemplate Context="item">
-        <td><strong>@item.EmployeeName</strong></td>
-        <td>@item.PeriodStart.ToString("MMM dd") - @item.PeriodEnd.ToString("MMM dd, yyyy")</td>
-        <td>@item.TotalHours.ToString("F1")</td>
-        <td>@item.PayRate.ToString("C")</td>
-        <td><strong>@item.TotalAmount.ToString("C")</strong></td>
-        <td><span class="badge @GetBadge(item.Status)">@item.Status</span></td>
-        <td>
-            <div style="display: flex; gap: 6px;">
-                <button class="btn btn-outline btn-sm"
-                    @onclick='() => Navigation.NavigateTo($"/timesheet/payroll/list/create?id={item.Id}")'><i
-                        class="fa fa-edit"></i></button>
-                <button class="btn btn-danger btn-sm" @onclick="() => Delete(item.Id)"><i
-                        class="fa fa-trash"></i></button>
-            </div>
-        </td>
-    </RowTemplate>
-</DataGrid>
-
-@code {
-    private List<TimesheetPayroll> items = new(); private bool isLoading = true;
-    protected override async Task OnInitializedAsync() => await LoadData();
-    private async Task LoadData()
+    @if (hasError)
     {
-        isLoading = true; items = await TimesheetService.GetPayrollsAsync(); isLoading = false;
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> @errorMessage
+            <button type="button" class="btn-close"
+                    @onclick="@(() => hasError = false)"
+                    aria-label="Close"></button>
+        </div>
     }
-    private async Task Delete(int id) { await TimesheetService.DeletePayrollAsync(id); await LoadData(); }
-    private string GetBadge(string s) => s switch
-    {
-        "Approved" => "badge-success",
-        "Pending" => "badge-warning",
-        "Rejected"
-    => "badge-danger",
-        "Paid" => "badge-primary",
-        _ => "badge-secondary"
-    };
-}
+
+    <div class="page-header">
+        <div class="header-left">
+            <h1>PAYROLL TIMESHEET</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active">Payroll Timesheet</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <button class="btn btn-primary"
+                    @onclick="CreateNew">
+                <i class="fas fa-plus"></i> Create Timesheet
+            </button>
+        </div>
+    </div>
+
+    <div class="content-container">
+
+        <!-- FILTER SECTION -->
+        <div class="filter-card">
+            <div class="filter-row">
+
+                <div class="filter-group">
+                    <label class="filter-label">Category</label>
+                    <select class="form-select"
+                            @bind="selectedCategory"
+                            @bind:after="ApplyFilters">
+                        <option value="">--Select--</option>
+                        @foreach (var category in categories)
+                        {
+                            <option value="@category">@category</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Nurse</label>
+                    <select class="form-select"
+                            @bind="selectedNurseId"
+                            @bind:after="ApplyFilters">
+                        <option value="0">(All Nurses)</option>
+                        @foreach (var nurse in nurses)
+                        {
+                            <option value="@nurse.Id">
+                                @nurse.FirstName @nurse.LastName
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">From Date</label>
+                    <input type="date"
+                           class="form-control"
+                           @bind="fromDate"
+                           @bind:after="ApplyFilters" />
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">To Date</label>
+                    <input type="date"
+                           class="form-control"
+                           @bind="toDate"
+                           @bind:after="ApplyFilters" />
+                </div>
+
+            </div>
+
+            <div class="filter-actions">
+                <button class="btn btn-outline"
+                        @onclick="ClearFilters">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-container">
+
+            @if (isLoading)
+            {
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="mt-2">Loading timesheets...</p>
+                </div>
+            }
+            else if (filteredPayrolls == null || !filteredPayrolls.Any())
+            {
+                <div class="text-center py-5">
+                    <p>No data available in table</p>
+                </div>
+            }
+            else
+            {
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>Timesheet Code</th>
+                            <th>Nurse ID</th>
+                            <th>Name</th>
+                            <th>Payperiod From</th>
+                            <th>Payperiod To</th>
+                            <th>Received</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in filteredPayrolls)
+                        {
+                            <tr>
+                                <td><strong>TS-@item.Id.ToString("D5")</strong></td>
+                                <td>@item.EmployeeId</td>
+                                <td>@item.EmployeeName</td>
+                                <td>@item.PeriodStart.ToString("yyyy-MM-dd")</td>
+                                <td>@item.PeriodEnd.ToString("yyyy-MM-dd")</td>
+                                <td>
+                                    <span class="badge @GetStatusBadge(item.Status)">
+                                        @item.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-primary"
+                                                @onclick='() => EditPayroll(item.Id)'>
+                                            Edit
+                                        </button>
+
+                                        <button class="btn btn-sm btn-danger"
+                                                @onclick='() => DeletePayroll(item.Id)'>
+                                            Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="pagination-info">
+                    Showing @filteredPayrolls.Count entries
+                </div>
+            }
+
+        </div>
+    </div>
+</div>

@@ -1,42 +1,42 @@
-<div class="erp-topbar">
+<div class="erp-topbar" role="navigation" aria-label="Top navigation">
     <div class="topbar-left">
-        <div class="topbar-breadcrumb">
+        <div class="topbar-breadcrumb" role="navigation" aria-label="Breadcrumb">
             <span>QHMCPro</span>
-            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-separator" aria-hidden="true">/</span>
             <span class="breadcrumb-current">Dashboard</span>
         </div>
     </div>
 
     <div class="topbar-right">
-        <button class="topbar-btn" title="Notifications">
-            <i class="fa fa-bell"></i>
-            <span class="badge-dot"></span>
+        <button class="topbar-btn" title="Notifications" aria-label="View notifications">
+            <i class="fa fa-bell" aria-hidden="true"></i>
+            <span class="badge-dot" aria-label="New notifications"></span>
         </button>
-        <button class="topbar-btn" title="Messages">
-            <i class="fa fa-envelope"></i>
+        <button class="topbar-btn" title="Messages" aria-label="View messages">
+            <i class="fa fa-envelope" aria-hidden="true"></i>
         </button>
-        <button class="topbar-btn" title="Settings">
-            <i class="fa fa-cog"></i>
+        <button class="topbar-btn" title="Settings" aria-label="Open settings">
+            <i class="fa fa-cog" aria-hidden="true"></i>
         </button>
 
         <AuthorizeView>
             <Authorized Context="authState">
                 <div class="topbar-user">
-                    <div class="topbar-avatar">
-                        <i class="fa fa-user"></i>
+                    <div class="topbar-avatar" aria-label="User profile">
+                        <i class="fa fa-user" aria-hidden="true"></i>
                     </div>
                     <div class="topbar-user-info">
                         <div class="topbar-user-name">@authState.User.Identity?.Name</div>
                         <div class="topbar-user-role">Administrator</div>
                     </div>
                 </div>
-                <a href="/logout" class="btn btn-outline btn-sm">
-                    <i class="fa fa-sign-out-alt"></i> Logout
+                <a href="/logout" class="btn btn-outline btn-sm" title="Sign out">
+                    <i class="fa fa-sign-out-alt" aria-hidden="true"></i> Logout
                 </a>
             </Authorized>
             <NotAuthorized>
-                <a href="/signin" class="btn btn-primary btn-sm">
-                    <i class="fa fa-sign-in-alt"></i> Sign In
+                <a href="/signin" class="btn btn-primary btn-sm" title="Sign in to your account">
+                    <i class="fa fa-sign-in-alt" aria-hidden="true"></i> Sign In
                 </a>
             </NotAuthorized>
         </AuthorizeView>
