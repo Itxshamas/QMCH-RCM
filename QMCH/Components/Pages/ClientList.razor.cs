@@ -35,17 +35,14 @@ namespace QMCH.Components.Pages
         private bool selectAll = false;
 
         // Filter options - These should ideally come from your database
-        private List<string> areas = new() { "alkhesa", "dafna", "Al Waab", "New Salata", "Doha", "Al Kharaitiyat", "The Pearl", "Other" };
-        private List<string> clientTypes = new() { "Home", "Business", "Corporate" };
-        private List<string> services = new() { "Service A", "Service B", "Service C" };
+        private List<string> areas = new() {  };
+        private List<string> clientTypes = new() { "Hammad Medical Corporation", "Home", "Clinic" , "School"  };
+        private List<string> services = new() { "Pediatric", "Geriatric", "Private Nurse" };
 
         protected override async Task OnInitializedAsync()
         {
             await LoadData();
         }
-
-        // Utility helper to map ClientTypeId to a human-readable string.
-        // Keep mapping in sync with Client.ClientType switch or your DB lookup.
         protected string GetClientTypeById(int clientTypeId)
         {
             return clientTypeId switch
