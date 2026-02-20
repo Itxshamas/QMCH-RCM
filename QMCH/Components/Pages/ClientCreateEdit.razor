@@ -13,115 +13,194 @@
 
 <div class="client-header">
     <h2>Client:</h2>
+    <div class="progress-bar">
+        <div class="progress-segment purple"></div>
+        <div class="progress-segment teal"></div>
+        <div class="progress-segment blue"></div>
+        <div class="progress-segment green"></div>
+        <div class="progress-segment yellow"></div>
+        <div class="progress-segment red"></div>
+    </div>
 </div>
 
-<div class="tab-navigation">
-    <button class="tab-btn">
-        <i class="fa fa-wrench"></i> Services Interruption
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-compass"></i> Direction/Misc
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-th"></i> Custom Fields
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-history"></i> Visit History
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-file-text"></i> Notes
-    </button>
-</div>
+<div class="tab-buttons-grid">
+    <div class="button-row">
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Services Interruption")'>
+            <i class="fa fa-wrench"></i>
+            <span>Services Interruption</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Direction/Misc")'>
+            <i class="fa fa-compass"></i>
+            <span>Direction/Misc</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Custom Fields")'>
+            <i class="fa fa-th"></i>
+            <span>Custom Fields</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Visit History")'>
+            <i class="fa fa-history"></i>
+            <span>Visit History</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Notes")'>
+            <i class="fa fa-file-text"></i>
+            <span>Notes</span>
+        </button>
+    </div>
 
-<div class="tab-navigation secondary">
-    <button class="tab-btn">
-        <i class="fa fa-ban"></i> Exclusions / Preferences
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-user-md"></i> Supervisory Visits
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-bell"></i> Reminders
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-medkit"></i> Skill Needs
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-file"></i> Documents
-    </button>
-</div>
+    <div class="button-row">
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Exclusions / Preferences")'>
+            <i class="fa fa-ban"></i>
+            <span>Exclusions / Preferences</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Supervisory Visits")'>
+            <i class="fa fa-user-md"></i>
+            <span>Supervisory Visits</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Reminders")'>
+            <i class="fa fa-bell"></i>
+            <span>Reminders</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Skill Needs")'>
+            <i class="fa fa-medkit"></i>
+            <span>Skill Needs</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Documents")'>
+            <i class="fa fa-file"></i>
+            <span>Documents</span>
+        </button>
+    </div>
 
-<div class="tab-navigation tertiary">
-    <button class="tab-btn active">
-        <i class="fa fa-user"></i> Personal Data
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-clipboard"></i> Service Order
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-calendar"></i> Calendar
-    </button>
-    <button class="tab-btn">
-        <i class="fa fa-phone"></i> Contacts
-    </button>
-    <button class="tab-btn orange-btn">
-        <i class="fa fa-arrow-left"></i> Back
-    </button>
+    <div class="button-row">
+        <button type="button" class="tab-icon-btn active">
+            <i class="fa fa-user"></i>
+            <span>Personal Data</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Service Order")'>
+            <i class="fa fa-clipboard"></i>
+            <span>Service Order</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Calendar")'>
+            <i class="fa fa-calendar"></i>
+            <span>Calendar</span>
+        </button>
+        <button type="button" class="tab-icon-btn" @onclick='() => ShowTabWarning("Contacts")'>
+            <i class="fa fa-phone"></i>
+            <span>Contacts</span>
+        </button>
+        <button type="button" class="tab-icon-btn orange-btn" @onclick="GoBack">
+            <i class="fa fa-arrow-left"></i>
+            <span>Back</span>
+        </button>
+    </div>
 </div>
 
 <EditForm Model="model" OnValidSubmit="HandleSubmit">
     <DataAnnotationsValidator />
 
     <div class="form-container">
-        <div class="form-section">
-            <div class="form-row-inline">
-                <div class="form-group-inline">
-                    <label class="form-label">Client ID</label>
-                    <InputText @bind-Value="model.ClientId" class="form-control" />
+        <div class="form-content-wrapper">
+            <div class="form-left-column">
+                <div class="form-row-grid-4col">
+                    <div class="form-group">
+                        <label class="form-label">Client ID</label>
+                        <InputText @bind-Value="model.ClientId" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Qatar ID</label>
+                        <InputText @bind-Value="model.QatarId" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Client Type</label>
+                        <InputSelect @bind-Value="model.ClientTypeId" class="form-control">
+                            <option value="">--Select--</option>
+                            <option value="1">Home Care</option>
+                            <option value="2">Medical Care</option>
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Service Type</label>
+                        <InputSelect @bind-Value="model.ServiceTypeId" class="form-control">
+                            <option value="">--Select--</option>
+                            <option value="1">Nursing</option>
+                            <option value="2">Therapy</option>
+                        </InputSelect>
+                    </div>
                 </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Qatar ID</label>
-                    <InputText @bind-Value="model.QatarId" class="form-control" />
+
+                <div class="form-row-grid-4col">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <InputText @bind-Value="model.FirstName" class="form-control" />
+                        <ValidationMessage For="() => model.FirstName" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <InputText @bind-Value="model.LastName" class="form-control" />
+                        <ValidationMessage For="() => model.LastName" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Middle Name</label>
+                        <InputText @bind-Value="model.MiddleName" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <InputSelect @bind-Value="model.Status" class="form-control">
+                            <option>Active</option>
+                            <option>Inactive</option>
+                            <option>Discharged</option>
+                            <option>On Hold</option>
+                        </InputSelect>
+                    </div>
                 </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Client Type</label>
-                    <InputSelect @bind-Value="model.ClientTypeId" class="form-control">
-                        <option value="">--Select--</option>
-                        <option value="1">Home Care</option>
-                        <option value="2">Medical Care</option>
-                    </InputSelect>
+
+                <div class="form-row-grid-4col">
+                    <div class="form-group">
+                        <label class="form-label">Reason</label>
+                        <InputSelect @bind-Value="model.Reason" class="form-control">
+                            <option value="">--Select--</option>
+                        </InputSelect>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone 1</label>
+                        <InputText @bind-Value="model.Phone" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone 2</label>
+                        <InputText @bind-Value="model.Phone2" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Service Start Date</label>
+                        <InputDate @bind-Value="model.ServiceStartDate" class="form-control" />
+                    </div>
                 </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Service Type</label>
-                    <InputSelect @bind-Value="model.ServiceTypeId" class="form-control">
-                        <option value="">--Select--</option>
-                        <option value="1">Nursing</option>
-                        <option value="2">Therapy</option>
-                    </InputSelect>
+
+                <div class="form-row-grid-4col">
+                    <div class="form-group">
+                        <label class="form-label">Service End Date</label>
+                        <InputDate @bind-Value="model.ServiceEndDate" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Inquiry Date</label>
+                        <InputDate @bind-Value="model.InquiryDate" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Assessment Date</label>
+                        <InputDate @bind-Value="model.AssessmentDate" class="form-control" />
+                    </div>
+                    <div class="form-group"></div>
+                </div>
+
+                <div class="form-row-grid-4col">
+                    <div class="form-group full-width-checkbox">
+                        <label class="checkbox-label">
+                            <InputCheckbox @bind-Value="model.IsBlacklisted" />
+                            <span>Click here to put client blacklist</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-row-inline">
-                <div class="form-group-inline">
-                    <label class="form-label">First Name</label>
-                    <InputText @bind-Value="model.FirstName" class="form-control" />
-                    <ValidationMessage For="() => model.FirstName" />
-                </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Status</label>
-                    <InputSelect @bind-Value="model.Status" class="form-control">
-                        <option>Active</option>
-                        <option>Inactive</option>
-                        <option>Discharged</option>
-                        <option>On Hold</option>
-                    </InputSelect>
-                </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Reason</label>
-                    <InputSelect @bind-Value="model.Reason" class="form-control">
-                        <option value="">--Select--</option>
-                    </InputSelect>
-                </div>
+            <div class="form-right-column">
                 <div class="profile-picture">
                     <div class="avatar-placeholder">
                         <i class="fa fa-user"></i>
@@ -131,138 +210,92 @@
                     <button type="button" class="btn-picture primary"><i class="fa fa-map-marker"></i> GEO Location</button>
                 </div>
             </div>
+        </div>
 
-            <div class="form-row-inline">
-                <div class="form-group-inline">
-                    <label class="form-label">Last Name</label>
-                    <InputText @bind-Value="model.LastName" class="form-control" />
-                    <ValidationMessage For="() => model.LastName" />
-                </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Middle Name</label>
-                    <InputText @bind-Value="model.MiddleName" class="form-control" />
-                </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Service Start Date</label>
-                    <InputDate @bind-Value="model.ServiceStartDate" class="form-control" />
-                </div>
-            </div>
-
-            <div class="form-row-inline">
-                <div class="form-group-inline">
-                    <label class="form-label">Phone 1</label>
-                    <InputText @bind-Value="model.Phone" class="form-control" />
-                </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Phone 2</label>
-                    <InputText @bind-Value="model.Phone2" class="form-control" />
-                </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Service End Date</label>
-                    <InputDate @bind-Value="model.ServiceEndDate" class="form-control" />
-                </div>
-            </div>
-
-            <div class="form-row-inline">
-                <div class="form-group-inline">
-                    <label class="form-label">Inquiry Date</label>
-                    <InputDate @bind-Value="model.InquiryDate" class="form-control" />
-                </div>
-                <div class="form-group-inline">
-                    <label class="form-label">Assessment Date</label>
-                    <InputDate @bind-Value="model.AssessmentDate" class="form-control" />
-                </div>
-                <div class="form-group-inline blacklist-section">
-                    <label class="checkbox-label">
-                        <InputCheckbox @bind-Value="model.IsBlacklisted" />
-                        Click here to put client blacklist
-                    </label>
-                </div>
-            </div>
-
-            <h3 class="section-title">Client Home Address</h3>
-            <div class="address-section">
-                <div class="form-row-inline">
-                    <div class="form-group-inline">
+        <h3 class="section-title">Client Home Address</h3>
+        <div class="address-wrapper">
+            <div class="address-left">
+                <div class="form-row-grid">
+                    <div class="form-group full-width">
                         <label class="form-label">Street</label>
                         <InputText @bind-Value="model.Street" class="form-control" />
                     </div>
                 </div>
-                <div class="form-row-inline">
-                    <div class="form-group-inline">
+                <div class="form-row-grid">
+                    <div class="form-group">
                         <label class="form-label">Area</label>
                         <InputSelect @bind-Value="model.Area" class="form-control">
                             <option value="">--Select--</option>
                         </InputSelect>
                     </div>
-                    <div class="form-group-inline">
+                    <div class="form-group">
                         <label class="form-label">State</label>
                         <InputText @bind-Value="model.State" class="form-control" />
                     </div>
                 </div>
-                <div class="form-row-inline">
-                    <div class="form-group-inline">
+                <div class="form-row-grid">
+                    <div class="form-group">
                         <label class="form-label">Building Number</label>
                         <InputText @bind-Value="model.BuildingNumber" class="form-control" />
                     </div>
-                    <div class="form-group-inline">
+                    <div class="form-group">
                         <label class="form-label">Street Number</label>
                         <InputText @bind-Value="model.StreetNumber" class="form-control" />
                     </div>
                 </div>
-                <div class="form-row-inline">
-                    <div class="form-group-inline">
+                <div class="form-row-grid">
+                    <div class="form-group">
                         <label class="form-label">Country</label>
                         <InputSelect @bind-Value="model.Country" class="form-control">
                             <option>Qatar</option>
                         </InputSelect>
                     </div>
-                    <div class="form-group-inline">
+                    <div class="form-group">
                         <label class="form-label">Zip#</label>
                         <InputText @bind-Value="model.ZipCode" class="form-control" />
                     </div>
                 </div>
             </div>
 
-            <h3 class="section-title">Client Billing Address</h3>
-            <p class="subtitle">(If different from home address)</p>
-            <div class="address-section">
-                <div class="form-row-inline">
-                    <div class="form-group-inline">
+            <div class="address-right">
+                <h4 class="billing-title">Client Billing Address</h4>
+                <p class="billing-subtitle">(If different from home address)</p>
+                <div class="form-row-grid">
+                    <div class="form-group full-width">
                         <label class="form-label">Street</label>
                         <InputText @bind-Value="model.BillingStreet" class="form-control" />
                     </div>
                 </div>
-                <div class="form-row-inline">
-                    <div class="form-group-inline">
+                <div class="form-row-grid">
+                    <div class="form-group">
                         <label class="form-label">Area</label>
                         <InputSelect @bind-Value="model.BillingArea" class="form-control">
                             <option value="">--Select--</option>
                         </InputSelect>
                     </div>
-                    <div class="form-group-inline">
+                    <div class="form-group">
                         <label class="form-label">State</label>
                         <InputText @bind-Value="model.BillingState" class="form-control" />
                     </div>
                 </div>
-                <div class="form-row-inline">
-                    <div class="form-group-inline">
+                <div class="form-row-grid">
+                    <div class="form-group">
                         <label class="form-label">Building Number</label>
                         <InputText @bind-Value="model.BillingBuildingNumber" class="form-control" />
                     </div>
-                    <div class="form-group-inline">
+                    <div class="form-group">
                         <label class="form-label">Street Number</label>
                         <InputText @bind-Value="model.BillingStreetNumber" class="form-control" />
                     </div>
                 </div>
-                <div class="form-row-inline">
-                    <div class="form-group-inline">
+                <div class="form-row-grid">
+                    <div class="form-group">
                         <label class="form-label">Country</label>
                         <InputSelect @bind-Value="model.BillingCountry" class="form-control">
                             <option>Qatar</option>
                         </InputSelect>
                     </div>
-                    <div class="form-group-inline">
+                    <div class="form-group">
                         <label class="form-label">Zip#</label>
                         <InputText @bind-Value="model.BillingZipCode" class="form-control" />
                     </div>
@@ -283,3 +316,17 @@
         </button>
     </div>
 </EditForm>
+
+@if (showWarningModal)
+{
+    <div class="modal-overlay">
+        <div class="warning-modal">
+            <div class="warning-icon">
+                <i class="fa fa-exclamation-circle"></i>
+            </div>
+            <h2 class="warning-title">Warning!</h2>
+            <p class="warning-message">@warningMessage</p>
+            <button class="btn-ok" @onclick="CloseWarningModal">OK</button>
+        </div>
+    </div>
+}

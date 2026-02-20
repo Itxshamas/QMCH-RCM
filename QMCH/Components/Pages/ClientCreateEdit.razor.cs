@@ -13,6 +13,8 @@ namespace QMCH.Components.Pages
 
         protected Client model = new();
         protected bool isEdit;
+        protected bool showWarningModal = false;
+        protected string warningMessage = "";
 
         protected override async Task OnInitializedAsync()
         {
@@ -32,6 +34,17 @@ namespace QMCH.Components.Pages
                 model.Country = "Qatar";
                 model.BillingCountry = "Qatar";
             }
+        }
+
+        protected void ShowTabWarning(string tabName)
+        {
+            warningMessage = $"You must save Client to View/Update {tabName} Details";
+            showWarningModal = true;
+        }
+
+        protected void CloseWarningModal()
+        {
+            showWarningModal = false;
         }
 
         protected async Task HandleSubmit()
