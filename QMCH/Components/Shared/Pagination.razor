@@ -1,0 +1,54 @@
+@namespace QMCH.Components.Shared
+
+@if (Items?.Any() == true)
+{
+    <nav aria-label="@AriaLabel">
+        <ul class="pagination">
+            <li class="page-item @(CurrentPage <= 1 ? "disabled" : "")">
+                <a class="page-link" href="#" @onclick="@((e) => OnPageChange(CurrentPage - 1))">Previous</a>
+            </li>
+
+            @for (int i = 1; i <= TotalPages; i++)
+            {
+                int pageNum = i;
+                <li class="page-item @(CurrentPage == pageNum ? "active" : "")">
+                    <a class="page-link" href="#" @onclick="@((e) => OnPageChange(pageNum))">@pageNum</a>
+                </li>
+            }
+
+            <li class="page-item @(CurrentPage >= TotalPages ? "disabled" : "")">
+                <a class="page-link" href="#" @onclick="@((e) => OnPageChange(CurrentPage + 1))">Next</a>
+            </li>
+        </ul>
+    </nav>
+}
+
+@code {
+    [Parameter]
+    public int CurrentPage { get; set; } = 1;
+
+    [Parameter]
+    public int PageSize { get; set; } = 10;
+
+    [Parameter]
+    public int TotalItems { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnPageChanged { get; set; }
+
+    [Parameter]
+    public List<object>? Items { get; set; }
+
+    [Parameter]
+    public string AriaLabel { get; set; } = "pagination";
+
+    public int TotalPages => (int)Math.Ceiling((double)TotalItems / PageSize);
+
+    private async Task OnPageChange(int pageNum)
+    {
+        if (pageNum >= 1 && pageNum <= TotalPages)
+        {
+            await OnPageChanged.InvokeAsync(pageNum);
+        }
+    }
+}

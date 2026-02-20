@@ -6,29 +6,48 @@
 
 <PageTitle>Dashboard - QHMC</PageTitle>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <h1>Dashboard</h1>
-        <p>Welcome back! Here's an overview of your healthcare operations.</p>
+@if (LoadingError)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error loading dashboard:</strong> @ErrorMessage
+        <button type="button" class="btn-close" @onclick="RetryLoad" aria-label="Close"></button>
     </div>
-    <div class="page-header-actions">
-        <span class="badge badge-info">@TodayDate</span>
+}
+
+@if (IsLoading)
+{
+    <div class="loading-container">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading dashboard...</span>
+        </div>
+        <p class="mt-2">Loading your dashboard...</p>
     </div>
-</div>
+}
+else
+{
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1>Dashboard</h1>
+            <p>Welcome back! Here's an overview of your healthcare operations.</p>
+        </div>
+        <div class="page-header-actions">
+            <span class="badge badge-info" role="status" aria-label="Current date">@TodayDate</span>
+        </div>
+    </div>
 
-<!-- Main Dashboard Cards Grid - 6 Columns -->
-<div class="dashboard-grid">
-    <DashboardCard Image="images/home/dashboard.jpg"
-                   Label="Dashboard"
-                   OnClick="@(() => Nav("/dashboard/analytic/view"))" />
+    <!-- Main Dashboard Cards Grid - 6 Columns -->
+    <div class="dashboard-grid">
+        <DashboardCard Image="images/home/dashboard.jpg"
+                       Label="Dashboard"
+                       OnClick="@(() => Nav("/dashboard/analytic/view"))" />
 
-    <DashboardCard Image="images/home/client-list.jpg"
-                   Label="Clients"
-                   OnClick="@(() => Nav("/client/list"))" />
+        <DashboardCard Image="images/home/client-list.jpg"
+                       Label="Clients"
+                       OnClick="@(() => Nav("/client/list"))" />
 
-    <DashboardCard Image="images/home/client-type.jpg"
-                   Label="Client Types"
-                   OnClick="@(() => Nav("client/clienttypes/list"))" />
+        <DashboardCard Image="images/home/client-type.jpg"
+                       Label="Client Types"
+                       OnClick="@(() => Nav("client/clienttypes/list"))" />
 
     <DashboardCard Image="images/home/nurse-list.jpg"
                    Label="Employees"
@@ -68,7 +87,7 @@
 
     <DashboardCard Image="images/home/nurse_search.jpg"
                    Label="Nurse Search"
-                   OnClick="@(() => Nav("/caregiver/search/list"))" />
+                       OnClick="@(() => Nav("/attendance/list"))" />
 
     <DashboardCard Image="images/home/schedule.jpg"
                    Label="Schedule"
@@ -94,6 +113,7 @@
                    Label="Oper. Reports"
                    OnClick="@(() => Nav("/reports/operations"))" />
 
+
     <DashboardCard Image="images/home/gps.jpg"
                    Label="GPS Location"
                    OnClick="@(() => Nav("/gps/location"))" />
@@ -109,11 +129,11 @@
     <DashboardCard Image="images/home/employee_role.jpg"
                    Label="Employee Roles"
                    OnClick="@(() => Nav("/admin/roles/list"))" />
-</div>
+    </div>
 
-<!-- Services Section - Interactive Grid with Modals -->
-<div class="services-section">
-    <!-- Services Container -->
+    <!-- Services Section - Interactive Grid with Modals -->
+    <div class="services-section">
+        <!-- Services Container -->
     <div class="services-container">
         <!-- ILS Service Card -->
         <div class="service-card" @onclick="@(() => OpenModal("ILS"))">
@@ -145,7 +165,7 @@
         <!-- Temporary LIC Service Card -->
         <div class="service-card" @onclick="@(() => OpenModal("Temporary Lic"))">
             <div class="service-card-image">
-                <img src="images/home/temporary-lic.png" alt="Temporary LIC" />
+                <img src="images/home/TEMP.png" alt="Temporary LIC" />
                 <span class="service-badge">4</span>
             </div>
             <span class="service-label">Temporary Lic</span>
@@ -154,7 +174,7 @@
         <!-- Permanent LIC Service Card -->
         <div class="service-card" @onclick="@(() => OpenModal("Permanent Lic"))">
             <div class="service-card-image">
-                <img src="images/home/permanent-lic.png" alt="Permanent LIC" />
+                <img src="images/home/LIC.png" alt="Permanent LIC" />
                 <span class="service-badge">5</span>
             </div>
             <span class="service-label">Permanent Lic</span>
@@ -178,28 +198,29 @@
             <span class="service-label">QID</span>
         </div>
 
+
         <!-- Service Order Card -->
         <div class="service-card" @onclick="@(() => OpenModal("Service Order"))">
             <div class="service-card-image">
-                <img src="images/home/service-order.png" alt="Service Order" />
+                <img src="images/home/Services-order.png" alt="Service Order" />
                 <span class="service-badge">8</span>
             </div>
-            <span class="service-label">Service Order</span>
+            <span class="service-label">Service Order</span> 
         </div>
     </div>
 
     <!-- Modal Overlay -->
     @if (IsModalOpen)
     {
-        <div class="modal-overlay" @onclick="CloseModal"></div>
+        <div class="modal-overlay" @onclick="CloseModal" role="presentation"></div>
 
         <!-- Modal Container -->
-        <div class="modal-container">
+        <div class="modal-container" role="dialog" aria-labelledby="modal-title" aria-modal="true">
             <!-- Modal Header -->
             <div class="modal-header">
-                <h2 class="modal-title">@CurrentModalData?.Title</h2>
-                <button class="modal-close" @onclick="CloseModal" aria-label="Close modal">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <h2 class="modal-title" id="modal-title">@CurrentModalData?.Title</h2>
+                <button class="modal-close" @onclick="CloseModal" aria-label="Close modal" type="button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
@@ -209,28 +230,34 @@
             <!-- Modal Body -->
             <div class="modal-body">
                 <!-- Data Table -->
-                <table class="modal-table">
-                    <thead>
-                        <tr>
-                            <th>EMPLOYEE#</th>
-                            <th>NAME</th>
-                            <th>DATE OF E...</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (CurrentModalData?.TableData != null)
-                        {
-                            @foreach (var row in CurrentModalData.TableData)
-                            {
+                @if (CurrentModalData?.TableData != null && CurrentModalData.TableData.Count > 0)
+                {
+                    <div class="table-responsive">
+                        <table class="modal-table" role="table">
+                            <thead>
                                 <tr>
-                                    <td>@row.EmployeeId</td>
-                                    <td>@row.Name</td>
-                                    <td>@row.Date</td>
+                                    <th scope="col">EMPLOYEE#</th>
+                                    <th scope="col">NAME</th>
+                                    <th scope="col">DATE OF E...</th>
                                 </tr>
-                            }
-                        }
-                    </tbody>
-                </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var row in CurrentModalData.TableData)
+                                {
+                                    <tr>
+                                        <td>@row.EmployeeId</td>
+                                        <td>@row.Name</td>
+                                        <td>@row.Date</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="status">No data available for this service.</div>
+                }
 
                 <!-- Footer Content -->
                 <div class="modal-footer-content">
@@ -240,12 +267,15 @@
                     }
                     else if (CurrentModalData?.ContentType == "PLS")
                     {
-                        <ol class="modal-list">
-                            @foreach (var item in CurrentModalData.ListItems ?? new List<string>())
-                            {
-                                <li>@item</li>
-                            }
-                        </ol>
+                        @if (CurrentModalData.ListItems != null && CurrentModalData.ListItems.Count > 0)
+                        {
+                            <ol class="modal-list">
+                                @foreach (var item in CurrentModalData.ListItems)
+                                {
+                                    <li>@item</li>
+                                }
+                            </ol>
+                        }
                     }
                     else if (CurrentModalData?.ContentType == "Table")
                     {
@@ -255,4 +285,5 @@
             </div>
         </div>
     }
-</div>
+    </div>
+}

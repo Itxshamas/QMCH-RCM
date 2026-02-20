@@ -1,0 +1,201 @@
+@page "/billing/list/servicesummary/create"
+@using QMCH.Models
+@inject ITimesheetService TimesheetService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Service Order Summary - QMCH</PageTitle>
+
+<div class="service-summary-container">
+    @if (hasError)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <strong>Error:</strong> @errorMessage
+            <button type="button" class="btn-close" @onclick="@(() => hasError = false)"></button>
+        </div>
+    }
+
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="header-title">
+            <h1>SERVICE ORDER SUMMARY (ALL CLIENT)</h1>
+            <p>Select the Patient, Then Click the 'Show Default' button. You are done.</p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-row">
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" @bind="fromDate" />
+            </div>
+
+            <div class="form-group" style="flex: 1;">
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" @bind="toDate" />
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn btn-success" @onclick="ShowDefault">
+                <i class="fa fa-search"></i> Show
+            </button>
+            <button class="btn btn-primary" @onclick="SaveAndPrint">
+                <i class="fa fa-print"></i> Save & Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Content Area -->
+    @if (isLoading)
+    {
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary"></div>
+            <p>Loading service summaries...</p>
+        </div>
+    }
+    else
+    {
+        <div class="summary-content">
+            @if (summaryRecords.Count == 0)
+            {
+                <div class="empty-state">
+                    <i class="fa fa-inbox" style="font-size: 48px; color: #ccc;"></i>
+                    <p style="color: #666; margin-top: 10px;">No service summaries available for the selected period.</p>
+                </div>
+            }
+            else
+            {
+                <div class="summary-grid">
+                    @foreach (var record in summaryRecords)
+                    {
+                        <div class="summary-card">
+                            <div class="card-header">
+                                <h3>@record.ClientName</h3>
+                                <span class="badge badge-info">@record.Status</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-row">
+                                    <label>Medical Record #:</label>
+                                    <span>@record.MedicalRecordNumber</span>
+                                </div>
+                                <div class="info-row">
+                                    <label>Period From:</label>
+                                    <span>@record.FromDate.ToString("MMM dd, yyyy")</span>
+                                </div>
+                                <div class="info-row">
+                                    <label>Period To:</label>
+                                    <span>@record.ToDate.ToString("MMM dd, yyyy")</span>
+                                </div>
+                                <div class="info-row highlight">
+                                    <label>Total Service Hours:</label>
+                                    <span>@record.TotalServiceHours.ToString("F2") hrs</span>
+                                </div>
+                                <div class="info-row highlight">
+                                    <label>Total Billed Amount:</label>
+                                    <span>@record.TotalBilledAmount.ToString("C")</span>
+                                </div>
+                                <div class="info-row">
+                                    <label>Avg Hourly Rate:</label>
+                                    <span>@record.AverageHourlyRate.ToString("C")</span>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button class="btn btn-sm btn-primary" @onclick='() => EditSummary(record.Id)'>
+                                    <i class="fa fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-secondary" @onclick='() => PrintSummary(record.Id)'>
+                                    <i class="fa fa-print"></i> Print
+                                </button>
+                                <button class="btn btn-sm btn-danger" @onclick='() => DeleteSummary(record.Id)'>
+                                    <i class="fa fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<ServiceOrderSummary> summaryRecords = new();
+    private DateTime fromDate = DateTime.Today.AddMonths(-1);
+    private DateTime toDate = DateTime.Today;
+    private bool isLoading = true;
+    private bool hasError = false;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task LoadData()
+    {
+        isLoading = true;
+        try
+        {
+            summaryRecords = await TimesheetService.GetServiceOrderSummariesAsync();
+            isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            hasError = true;
+            errorMessage = $"Error loading service summaries: {ex.Message}";
+            isLoading = false;
+        }
+    }
+
+    private void ShowDefault()
+    {
+        summaryRecords = summaryRecords
+            .Where(x => x.FromDate >= fromDate && x.ToDate <= toDate)
+            .ToList();
+    }
+
+    private void EditSummary(int id)
+    {
+        Navigation.NavigateTo($"/billing/list/servicesummary/create?id={id}");
+    }
+
+    private void PrintSummary(int id)
+    {
+        Console.WriteLine($"Print summary {id}");
+    }
+
+    private async Task DeleteSummary(int id)
+    {
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this record?"))
+        {
+            try
+            {
+                await TimesheetService.DeleteServiceOrderSummaryAsync(id);
+                await LoadData();
+            }
+            catch (Exception ex)
+            {
+                hasError = true;
+                errorMessage = ex.Message;
+            }
+        }
+    }
+
+    private void SaveAndPrint()
+    {
+        Console.WriteLine("Saving and printing service summaries");
+    }
+
+    [Inject]
+    private IJSRuntime JSRuntime { get; set; } = null!;
+}

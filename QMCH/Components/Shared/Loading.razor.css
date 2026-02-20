@@ -1,0 +1,99 @@
+/* Loading Component Styling */
+
+.loading-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    color: inherit;
+}
+
+.loading-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.loading-spinner .spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-width: 0.25em;
+    animation: spinner-rotate 0.75s linear infinite;
+}
+
+@keyframes spinner-rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-message {
+    font-size: 14px;
+    font-weight: 500;
+    color: currentColor;
+}
+
+/* Size Variants */
+.loading-spinner.sm .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.2em;
+}
+
+.loading-wrapper.sm .loading-message {
+    font-size: 12px;
+}
+
+/* Overlay Loading */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(2px);
+}
+
+.loading-overlay .loading-wrapper {
+    flex-direction: column;
+    padding: 40px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.loading-overlay .loading-spinner .spinner-border {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-width: 0.3em;
+}
+
+.loading-overlay .loading-message {
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+/* Text Colors for Spinner */
+.text-primary { color: #3B82F6; }
+.text-success { color: #10B981; }
+.text-danger { color: #EF4444; }
+.text-warning { color: #F59E0B; }
+.text-info { color: #06B6D4; }
+
+/* Responsive */
+@media (max-width: 576px) {
+    .loading-overlay {
+        backdrop-filter: none;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .loading-overlay .loading-wrapper {
+        padding: 24px;
+    }
+}

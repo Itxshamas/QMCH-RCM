@@ -39,9 +39,9 @@
     transition: all 0.3s ease;
 }
 
-.action-link:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-}
+    .action-link:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
 
 .search-container {
     padding: 20px;
@@ -77,12 +77,12 @@
     flex-direction: column;
 }
 
-.form-group label {
-    margin-bottom: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    color: #666;
-}
+    .form-group label {
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #666;
+    }
 
 .input-group {
     position: relative;
@@ -100,11 +100,11 @@
     transition: all 0.3s ease;
 }
 
-.form-control:focus {
-    outline: none;
-    border-color: #00bcd4;
-    box-shadow: 0 0 5px rgba(0, 188, 212, 0.3);
-}
+    .form-control:focus {
+        outline: none;
+        border-color: #00bcd4;
+        box-shadow: 0 0 5px rgba(0, 188, 212, 0.3);
+    }
 
 .input-icon {
     position: absolute;
@@ -139,9 +139,9 @@
     justify-content: center;
 }
 
-.btn-search:hover {
-    background-color: #f57c00;
-}
+    .btn-search:hover {
+        background-color: #f57c00;
+    }
 
 .btn-clear {
     background-color: #f0f0f0;
@@ -150,9 +150,9 @@
     justify-content: center;
 }
 
-.btn-clear:hover {
-    background-color: #e0e0e0;
-}
+    .btn-clear:hover {
+        background-color: #e0e0e0;
+    }
 
 .results-container {
     padding: 0 20px 20px 20px;
@@ -201,11 +201,11 @@
     font-size: 13px;
 }
 
-.search-input:focus {
-    outline: none;
-    border-color: #00bcd4;
-    box-shadow: 0 0 5px rgba(0, 188, 212, 0.3);
-}
+    .search-input:focus {
+        outline: none;
+        border-color: #00bcd4;
+        box-shadow: 0 0 5px rgba(0, 188, 212, 0.3);
+    }
 
 .loading-state {
     display: flex;
@@ -230,8 +230,13 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .empty-state {
@@ -258,32 +263,32 @@
     text-align: left;
 }
 
-.table-header th {
-    padding: 15px;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
+    .table-header th {
+        padding: 15px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-.table-header th:last-child {
-    border-right: none;
-}
+        .table-header th:last-child {
+            border-right: none;
+        }
 
 .table-row {
     border-bottom: 1px solid #eee;
     transition: background-color 0.2s;
 }
 
-.table-row:hover {
-    background-color: #f9f9f9;
-}
+    .table-row:hover {
+        background-color: #f9f9f9;
+    }
 
-.table-row td {
-    padding: 12px 15px;
-    font-size: 13px;
-    color: #333;
-}
+    .table-row td {
+        padding: 12px 15px;
+        font-size: 13px;
+        color: #333;
+    }
 
 .code-col {
     width: 80px;
@@ -320,13 +325,13 @@
     font-weight: 600;
 }
 
-.availability-badge.low {
-    background-color: #f44336;
-}
+    .availability-badge.low {
+        background-color: #f44336;
+    }
 
-.availability-badge.medium {
-    background-color: #ff9800;
-}
+    .availability-badge.medium {
+        background-color: #ff9800;
+    }
 
 .pagination-section {
     display: flex;
@@ -360,18 +365,18 @@
     transition: all 0.3s ease;
 }
 
-.pagination-btn:hover:not(:disabled) {
-    background-color: #f0f0f0;
-    border-color: #00bcd4;
-}
+    .pagination-btn:hover:not(:disabled) {
+        background-color: #f0f0f0;
+        border-color: #00bcd4;
+    }
 
-.pagination-btn.active {
-    background-color: #00bcd4;
-    color: white;
-    border-color: #00bcd4;
-}
+    .pagination-btn.active {
+        background-color: #00bcd4;
+        color: white;
+        border-color: #00bcd4;
+    }
 
-.pagination-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }

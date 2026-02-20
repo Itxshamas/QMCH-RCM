@@ -15,5 +15,11 @@ namespace QMCH.Services
         Task CreateBillingAsync(TimesheetBilling item);
         Task UpdateBillingAsync(TimesheetBilling item);
         Task DeleteBillingAsync(int id);
+
+        Task<List<ServiceOrderSummary>> GetServiceOrderSummariesAsync();
+        Task<ServiceOrderSummary?> GetServiceOrderSummaryByIdAsync(int id);
+        Task CreateServiceOrderSummaryAsync(ServiceOrderSummary item);
+        Task UpdateServiceOrderSummaryAsync(ServiceOrderSummary item);
+        Task DeleteServiceOrderSummaryAsync(int id);
     }
 }

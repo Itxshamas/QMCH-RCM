@@ -140,7 +140,7 @@ namespace QMCH.Components.Pages
 
         private void CalculatePagination()
         {
-            totalPages = filteredResults.Count > 0 
+            totalPages = filteredResults.Count > 0
                 ? (int)Math.Ceiling((double)filteredResults.Count / pageSize)
                 : 1;
         }
@@ -193,7 +193,7 @@ namespace QMCH.Components.Pages
             {
                 var daysUnavailable = (employee.JoinDate.Value - searchCriteria.StartDate).Days;
                 var totalSearchDays = (searchCriteria.EndDate - searchCriteria.StartDate).Days;
-                
+
                 if (totalSearchDays > 0)
                 {
                     return Math.Max(0, 100 - (int)((daysUnavailable * 100) / totalSearchDays));
